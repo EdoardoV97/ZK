@@ -83,6 +83,9 @@
         "0x1",
         "0x208b7fff7fff7ffe",
         "0x40780017fff7fff",
+        "0x1",
+        "0x208b7fff7fff7ffe",
+        "0x40780017fff7fff",
         "0x2",
         "0x480a7ffc7fff8000",
         "0x480680017fff8000",
@@ -90,7 +93,7 @@
         "0x480680017fff8000",
         "0x5",
         "0x1104800180018000",
-        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffcb",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffc8",
         "0x40137fff7fff8000",
         "0x48127ffe7fff8000",
         "0x480680017fff8000",
@@ -98,37 +101,85 @@
         "0x484680017ffd8000",
         "0x5",
         "0x1104800180018000",
-        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffc3",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffc0",
         "0x40137fff7fff8001",
         "0x48127ffe7fff8000",
         "0x480680017fff8000",
         "0x425d4",
         "0x480a7ffd7fff8000",
         "0x1104800180018000",
-        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffbc",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffb9",
         "0x48127ffe7fff8000",
         "0x484a800080018000",
         "0x48127ffd7fff8000",
         "0x1104800180018000",
-        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffa8",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffa5",
         "0x48127ffd7fff8000",
         "0x484a800080008000",
         "0x48327ffc80008000",
         "0x1104800180018000",
-        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffa3",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffa0",
         "0x48127ffd7fff8000",
         "0x48127ffd7fff8000",
         "0x208b7fff7fff7ffe",
+        "0x40780017fff7fff",
+        "0x1",
+        "0x20780017fff7ffc",
+        "0x5",
+        "0x480a7ffa7fff8000",
         "0x480a7ffd7fff8000",
-        "0x480680017fff8000",
+        "0x208b7fff7fff7ffe",
+        "0x400380007ffb8000",
+        "0x480a7ffa7fff8000",
+        "0x480a80007fff8000",
+        "0x1104800180018000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffd2",
+        "0x400280007ffd7fff",
+        "0x48127ffe7fff8000",
+        "0x482680017ffb8000",
+        "0x1",
+        "0x482680017ffc8000",
+        "0x800000000000011000000000000000000000000000000000000000000000000",
+        "0x482680017ffd8000",
+        "0x1",
+        "0x1104800180018000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffed",
+        "0x208b7fff7fff7ffe",
+        "0x40780017fff7fff",
         "0x2",
         "0x1104800180018000",
-        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffd9",
-        "0x480a7ffc7fff8000",
-        "0x48127ffe7fff8000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffc0",
+        "0x40137fff7fff8000",
         "0x1104800180018000",
-        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffd1",
-        "0x48127ff97fff8000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffbd",
+        "0x40137fff7fff8001",
+        "0x480680017fff8000",
+        "0x2",
+        "0x4002800080007fff",
+        "0x480680017fff8000",
+        "0x2",
+        "0x4002800180007fff",
+        "0x480680017fff8000",
+        "0x2",
+        "0x4002800280007fff",
+        "0x480a7ffd7fff8000",
+        "0x480a80007fff8000",
+        "0x480680017fff8000",
+        "0x3",
+        "0x480a80017fff8000",
+        "0x1104800180018000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffd4",
+        "0x480a7ffc7fff8000",
+        "0x4802800080018000",
+        "0x1104800180018000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffa4",
+        "0x4802800180018000",
+        "0x1104800180018000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffa1",
+        "0x4802800280018000",
+        "0x1104800180018000",
+        "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffff9e",
+        "0x48127ff17fff8000",
         "0x208b7fff7fff7ffe"
     ],
     "debug_info": {
@@ -2032,12 +2083,71 @@
             },
             "77": {
                 "accessible_scopes": [
+                    "starkware.cairo.common.alloc",
+                    "starkware.cairo.common.alloc.alloc"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 7,
+                        "offset": 0
+                    },
+                    "reference_ids": {}
+                },
+                "hints": [
+                    {
+                        "location": {
+                            "end_col": 38,
+                            "end_line": 3,
+                            "input_file": {
+                                "filename": "/home/leo/.local/lib/python3.8/site-packages/starkware/cairo/common/alloc.cairo"
+                            },
+                            "start_col": 5,
+                            "start_line": 3
+                        },
+                        "n_prefix_newlines": 0
+                    }
+                ],
+                "inst": {
+                    "end_col": 12,
+                    "end_line": 4,
+                    "input_file": {
+                        "filename": "/home/leo/.local/lib/python3.8/site-packages/starkware/cairo/common/alloc.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 4
+                }
+            },
+            "79": {
+                "accessible_scopes": [
+                    "starkware.cairo.common.alloc",
+                    "starkware.cairo.common.alloc.alloc"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 7,
+                        "offset": 1
+                    },
+                    "reference_ids": {}
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 39,
+                    "end_line": 5,
+                    "input_file": {
+                        "filename": "/home/leo/.local/lib/python3.8/site-packages/starkware/cairo/common/alloc.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 5
+                }
+            },
+            "80": {
+                "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 7,
+                        "group": 8,
                         "offset": 0
                     },
                     "reference_ids": {
@@ -2048,22 +2158,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 17,
-                    "end_line": 9,
+                    "end_line": 11,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 5,
-                    "start_line": 9
+                    "start_line": 11
                 }
             },
-            "79": {
+            "82": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 7,
+                        "group": 8,
                         "offset": 2
                     },
                     "reference_ids": {
@@ -2074,7 +2184,7 @@
                 "hints": [],
                 "inst": {
                     "end_col": 29,
-                    "end_line": 8,
+                    "end_line": 9,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
@@ -2088,12 +2198,12 @@
                             "parent_location": [
                                 {
                                     "end_col": 39,
-                                    "end_line": 11,
+                                    "end_line": 13,
                                     "input_file": {
                                         "filename": "test1.cairo"
                                     },
                                     "start_col": 29,
-                                    "start_line": 11
+                                    "start_line": 13
                                 },
                                 "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                             ],
@@ -2103,17 +2213,17 @@
                         "While expanding the reference 'range_check_ptr' in:"
                     ],
                     "start_col": 14,
-                    "start_line": 8
+                    "start_line": 9
                 }
             },
-            "80": {
+            "83": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 7,
+                        "group": 8,
                         "offset": 3
                     },
                     "reference_ids": {
@@ -2124,22 +2234,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 35,
-                    "end_line": 11,
+                    "end_line": 13,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 33,
-                    "start_line": 11
+                    "start_line": 13
                 }
             },
-            "82": {
+            "85": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 7,
+                        "group": 8,
                         "offset": 4
                     },
                     "reference_ids": {
@@ -2150,22 +2260,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 38,
-                    "end_line": 11,
+                    "end_line": 13,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 37,
-                    "start_line": 11
+                    "start_line": 13
                 }
             },
-            "84": {
+            "87": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 7,
+                        "group": 8,
                         "offset": 5
                     },
                     "reference_ids": {
@@ -2176,22 +2286,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 39,
-                    "end_line": 11,
+                    "end_line": 13,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 29,
-                    "start_line": 11
+                    "start_line": 13
                 }
             },
-            "86": {
+            "89": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 8,
+                        "group": 9,
                         "offset": 0
                     },
                     "reference_ids": {
@@ -2203,22 +2313,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 25,
-                    "end_line": 11,
+                    "end_line": 13,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 10,
-                    "start_line": 11
+                    "start_line": 13
                 }
             },
-            "87": {
+            "90": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 8,
+                        "group": 9,
                         "offset": 0
                     },
                     "reference_ids": {
@@ -2237,7 +2347,7 @@
                     "parent_location": [
                         {
                             "end_col": 39,
-                            "end_line": 11,
+                            "end_line": 13,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
@@ -2251,12 +2361,12 @@
                                     "parent_location": [
                                         {
                                             "end_col": 52,
-                                            "end_line": 12,
+                                            "end_line": 14,
                                             "input_file": {
                                                 "filename": "test1.cairo"
                                             },
                                             "start_col": 38,
-                                            "start_line": 12
+                                            "start_line": 14
                                         },
                                         "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                     ],
@@ -2266,7 +2376,7 @@
                                 "While expanding the reference 'range_check_ptr' in:"
                             ],
                             "start_col": 29,
-                            "start_line": 11
+                            "start_line": 13
                         },
                         "While trying to update the implicit return value 'range_check_ptr' in:"
                     ],
@@ -2274,14 +2384,14 @@
                     "start_line": 5
                 }
             },
-            "88": {
+            "91": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 8,
+                        "group": 9,
                         "offset": 1
                     },
                     "reference_ids": {
@@ -2293,22 +2403,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 44,
-                    "end_line": 12,
+                    "end_line": 14,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 42,
-                    "start_line": 12
+                    "start_line": 14
                 }
             },
-            "90": {
+            "93": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 8,
+                        "group": 9,
                         "offset": 2
                     },
                     "reference_ids": {
@@ -2320,22 +2430,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 51,
-                    "end_line": 12,
+                    "end_line": 14,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 46,
-                    "start_line": 12
+                    "start_line": 14
                 }
             },
-            "92": {
+            "95": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 8,
+                        "group": 9,
                         "offset": 3
                     },
                     "reference_ids": {
@@ -2347,22 +2457,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 52,
-                    "end_line": 12,
+                    "end_line": 14,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 38,
-                    "start_line": 12
+                    "start_line": 14
                 }
             },
-            "94": {
+            "97": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 9,
+                        "group": 10,
                         "offset": 0
                     },
                     "reference_ids": {
@@ -2375,22 +2485,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 34,
-                    "end_line": 12,
+                    "end_line": 14,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 10,
-                    "start_line": 12
+                    "start_line": 14
                 }
             },
-            "95": {
+            "98": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 9,
+                        "group": 10,
                         "offset": 0
                     },
                     "reference_ids": {
@@ -2410,7 +2520,7 @@
                     "parent_location": [
                         {
                             "end_col": 52,
-                            "end_line": 12,
+                            "end_line": 14,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
@@ -2424,12 +2534,12 @@
                                     "parent_location": [
                                         {
                                             "end_col": 39,
-                                            "end_line": 13,
+                                            "end_line": 15,
                                             "input_file": {
                                                 "filename": "test1.cairo"
                                             },
                                             "start_col": 21,
-                                            "start_line": 13
+                                            "start_line": 15
                                         },
                                         "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                     ],
@@ -2439,7 +2549,7 @@
                                 "While expanding the reference 'range_check_ptr' in:"
                             ],
                             "start_col": 38,
-                            "start_line": 12
+                            "start_line": 14
                         },
                         "While trying to update the implicit return value 'range_check_ptr' in:"
                     ],
@@ -2447,14 +2557,14 @@
                     "start_line": 5
                 }
             },
-            "96": {
+            "99": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 9,
+                        "group": 10,
                         "offset": 1
                     },
                     "reference_ids": {
@@ -2467,22 +2577,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 31,
-                    "end_line": 13,
+                    "end_line": 15,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 30,
-                    "start_line": 13
+                    "start_line": 15
                 }
             },
-            "98": {
+            "101": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 9,
+                        "group": 10,
                         "offset": 2
                     },
                     "reference_ids": {
@@ -2495,34 +2605,34 @@
                 "hints": [],
                 "inst": {
                     "end_col": 39,
-                    "end_line": 8,
+                    "end_line": 9,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "parent_location": [
                         {
                             "end_col": 38,
-                            "end_line": 13,
+                            "end_line": 15,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
                             "start_col": 37,
-                            "start_line": 13
+                            "start_line": 15
                         },
                         "While expanding the reference 'z' in:"
                     ],
                     "start_col": 31,
-                    "start_line": 8
+                    "start_line": 9
                 }
             },
-            "99": {
+            "102": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 9,
+                        "group": 10,
                         "offset": 3
                     },
                     "reference_ids": {
@@ -2535,22 +2645,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 39,
-                    "end_line": 13,
+                    "end_line": 15,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 21,
-                    "start_line": 13
+                    "start_line": 15
                 }
             },
-            "101": {
+            "104": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 0
                     },
                     "reference_ids": {
@@ -2571,7 +2681,7 @@
                     "parent_location": [
                         {
                             "end_col": 39,
-                            "end_line": 13,
+                            "end_line": 15,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
@@ -2585,12 +2695,12 @@
                                     "parent_location": [
                                         {
                                             "end_col": 95,
-                                            "end_line": 14,
+                                            "end_line": 16,
                                             "input_file": {
                                                 "filename": "test1.cairo"
                                             },
                                             "start_col": 34,
-                                            "start_line": 14
+                                            "start_line": 16
                                         },
                                         "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                     ],
@@ -2600,7 +2710,7 @@
                                 "While expanding the reference 'range_check_ptr' in:"
                             ],
                             "start_col": 21,
-                            "start_line": 13
+                            "start_line": 15
                         },
                         "While trying to update the implicit return value 'range_check_ptr' in:"
                     ],
@@ -2608,14 +2718,14 @@
                     "start_line": 5
                 }
             },
-            "102": {
+            "105": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 1
                     },
                     "reference_ids": {
@@ -2629,22 +2739,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 85,
-                    "end_line": 14,
+                    "end_line": 16,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 51,
-                    "start_line": 14
+                    "start_line": 16
                 }
             },
-            "103": {
+            "106": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 2
                     },
                     "reference_ids": {
@@ -2658,34 +2768,34 @@
                 "hints": [],
                 "inst": {
                     "end_col": 17,
-                    "end_line": 13,
+                    "end_line": 15,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "parent_location": [
                         {
                             "end_col": 94,
-                            "end_line": 14,
+                            "end_line": 16,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
                             "start_col": 87,
-                            "start_line": 14
+                            "start_line": 16
                         },
                         "While expanding the reference 'pow_res' in:"
                     ],
                     "start_col": 10,
-                    "start_line": 13
+                    "start_line": 15
                 }
             },
-            "104": {
+            "107": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 3
                     },
                     "reference_ids": {
@@ -2699,22 +2809,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 95,
-                    "end_line": 14,
+                    "end_line": 16,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 34,
-                    "start_line": 14
+                    "start_line": 16
                 }
             },
-            "106": {
+            "109": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 21
                     },
                     "reference_ids": {
@@ -2737,7 +2847,7 @@
                     "parent_location": [
                         {
                             "end_col": 95,
-                            "end_line": 14,
+                            "end_line": 16,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
@@ -2751,12 +2861,12 @@
                                     "parent_location": [
                                         {
                                             "end_col": 98,
-                                            "end_line": 15,
+                                            "end_line": 17,
                                             "input_file": {
                                                 "filename": "test1.cairo"
                                             },
                                             "start_col": 21,
-                                            "start_line": 15
+                                            "start_line": 17
                                         },
                                         "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                     ],
@@ -2766,7 +2876,7 @@
                                 "While expanding the reference 'range_check_ptr' in:"
                             ],
                             "start_col": 34,
-                            "start_line": 14
+                            "start_line": 16
                         },
                         "While trying to update the implicit return value 'range_check_ptr' in:"
                     ],
@@ -2774,14 +2884,14 @@
                     "start_line": 261
                 }
             },
-            "107": {
+            "110": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 22
                     },
                     "reference_ids": {
@@ -2797,22 +2907,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 63,
-                    "end_line": 15,
+                    "end_line": 17,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 38,
-                    "start_line": 15
+                    "start_line": 17
                 }
             },
-            "108": {
+            "111": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 23
                     },
                     "reference_ids": {
@@ -2828,22 +2938,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 97,
-                    "end_line": 15,
+                    "end_line": 17,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 65,
-                    "start_line": 15
+                    "start_line": 17
                 }
             },
-            "109": {
+            "112": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 24
                     },
                     "reference_ids": {
@@ -2859,22 +2969,22 @@
                 "hints": [],
                 "inst": {
                     "end_col": 98,
-                    "end_line": 15,
+                    "end_line": 17,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 21,
-                    "start_line": 15
+                    "start_line": 17
                 }
             },
-            "111": {
+            "114": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 42
                     },
                     "reference_ids": {
@@ -2899,36 +3009,36 @@
                     "parent_location": [
                         {
                             "end_col": 98,
-                            "end_line": 15,
+                            "end_line": 17,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
                             "parent_location": [
                                 {
                                     "end_col": 29,
-                                    "end_line": 8,
+                                    "end_line": 9,
                                     "input_file": {
                                         "filename": "test1.cairo"
                                     },
                                     "parent_location": [
                                         {
                                             "end_col": 21,
-                                            "end_line": 16,
+                                            "end_line": 18,
                                             "input_file": {
                                                 "filename": "test1.cairo"
                                             },
                                             "start_col": 5,
-                                            "start_line": 16
+                                            "start_line": 18
                                         },
                                         "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                     ],
                                     "start_col": 14,
-                                    "start_line": 8
+                                    "start_line": 9
                                 },
                                 "While expanding the reference 'range_check_ptr' in:"
                             ],
                             "start_col": 21,
-                            "start_line": 15
+                            "start_line": 17
                         },
                         "While trying to update the implicit return value 'range_check_ptr' in:"
                     ],
@@ -2936,14 +3046,14 @@
                     "start_line": 261
                 }
             },
-            "112": {
+            "115": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 43
                     },
                     "reference_ids": {
@@ -2961,34 +3071,34 @@
                 "hints": [],
                 "inst": {
                     "end_col": 13,
-                    "end_line": 15,
+                    "end_line": 17,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "parent_location": [
                         {
                             "end_col": 20,
-                            "end_line": 16,
+                            "end_line": 18,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
                             "start_col": 17,
-                            "start_line": 16
+                            "start_line": 18
                         },
                         "While expanding the reference 'res' in:"
                     ],
                     "start_col": 10,
-                    "start_line": 15
+                    "start_line": 17
                 }
             },
-            "113": {
+            "116": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 44
                     },
                     "reference_ids": {
@@ -3006,120 +3116,18 @@
                 "hints": [],
                 "inst": {
                     "end_col": 21,
-                    "end_line": 16,
+                    "end_line": 18,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 5,
-                    "start_line": 16
-                }
-            },
-            "114": {
-                "accessible_scopes": [
-                    "__main__",
-                    "__main__.main"
-                ],
-                "flow_tracking_data": {
-                    "ap_tracking": {
-                        "group": 11,
-                        "offset": 0
-                    },
-                    "reference_ids": {
-                        "__main__.main.output_ptr": 51,
-                        "__main__.main.range_check_ptr": 52
-                    }
-                },
-                "hints": [],
-                "inst": {
-                    "end_col": 46,
-                    "end_line": 19,
-                    "input_file": {
-                        "filename": "test1.cairo"
-                    },
-                    "parent_location": [
-                        {
-                            "end_col": 29,
-                            "end_line": 8,
-                            "input_file": {
-                                "filename": "test1.cairo"
-                            },
-                            "parent_location": [
-                                {
-                                    "end_col": 27,
-                                    "end_line": 20,
-                                    "input_file": {
-                                        "filename": "test1.cairo"
-                                    },
-                                    "start_col": 17,
-                                    "start_line": 20
-                                },
-                                "While trying to retrieve the implicit argument 'range_check_ptr' in:"
-                            ],
-                            "start_col": 14,
-                            "start_line": 8
-                        },
-                        "While expanding the reference 'range_check_ptr' in:"
-                    ],
-                    "start_col": 31,
-                    "start_line": 19
-                }
-            },
-            "115": {
-                "accessible_scopes": [
-                    "__main__",
-                    "__main__.main"
-                ],
-                "flow_tracking_data": {
-                    "ap_tracking": {
-                        "group": 11,
-                        "offset": 1
-                    },
-                    "reference_ids": {
-                        "__main__.main.output_ptr": 51,
-                        "__main__.main.range_check_ptr": 52
-                    }
-                },
-                "hints": [],
-                "inst": {
-                    "end_col": 26,
-                    "end_line": 20,
-                    "input_file": {
-                        "filename": "test1.cairo"
-                    },
-                    "start_col": 25,
-                    "start_line": 20
+                    "start_line": 18
                 }
             },
             "117": {
                 "accessible_scopes": [
                     "__main__",
-                    "__main__.main"
-                ],
-                "flow_tracking_data": {
-                    "ap_tracking": {
-                        "group": 11,
-                        "offset": 2
-                    },
-                    "reference_ids": {
-                        "__main__.main.output_ptr": 51,
-                        "__main__.main.range_check_ptr": 52
-                    }
-                },
-                "hints": [],
-                "inst": {
-                    "end_col": 27,
-                    "end_line": 20,
-                    "input_file": {
-                        "filename": "test1.cairo"
-                    },
-                    "start_col": 17,
-                    "start_line": 20
-                }
-            },
-            "119": {
-                "accessible_scopes": [
-                    "__main__",
-                    "__main__.main"
+                    "__main__.array_sigmoid"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
@@ -3127,15 +3135,1106 @@
                         "offset": 0
                     },
                     "reference_ids": {
-                        "__main__.main.output_ptr": 51,
-                        "__main__.main.range_check_ptr": 53,
-                        "__main__.main.res": 54
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 17,
+                    "end_line": 22,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 22
+                }
+            },
+            "119": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 1
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 7,
+                    "end_line": 23,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 23
+                }
+            },
+            "121": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 1
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 35,
+                    "end_line": 21,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 35,
+                            "end_line": 21,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "parent_location": [
+                                {
+                                    "end_col": 25,
+                                    "end_line": 24,
+                                    "input_file": {
+                                        "filename": "test1.cairo"
+                                    },
+                                    "start_col": 9,
+                                    "start_line": 24
+                                },
+                                "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                            ],
+                            "start_col": 20,
+                            "start_line": 21
+                        },
+                        "While expanding the reference 'range_check_ptr' in:"
+                    ],
+                    "start_col": 20,
+                    "start_line": 21
+                }
+            },
+            "122": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 2
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 72,
+                    "end_line": 21,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 24,
+                            "end_line": 24,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "start_col": 21,
+                            "start_line": 24
+                        },
+                        "While expanding the reference 'res' in:"
+                    ],
+                    "start_col": 61,
+                    "start_line": 21
+                }
+            },
+            "123": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 3
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 25,
+                    "end_line": 24,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 9,
+                    "start_line": 24
+                }
+            },
+            "124": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 1
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 24,
+                    "end_line": 27,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 27
+                }
+            },
+            "125": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 1
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 35,
+                    "end_line": 21,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 29,
+                            "end_line": 9,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "parent_location": [
+                                {
+                                    "end_col": 33,
+                                    "end_line": 28,
+                                    "input_file": {
+                                        "filename": "test1.cairo"
+                                    },
+                                    "start_col": 15,
+                                    "start_line": 28
+                                },
+                                "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                            ],
+                            "start_col": 14,
+                            "start_line": 9
+                        },
+                        "While expanding the reference 'range_check_ptr' in:"
+                    ],
+                    "start_col": 20,
+                    "start_line": 21
+                }
+            },
+            "126": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 2
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 18,
+                    "end_line": 27,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 32,
+                            "end_line": 28,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "start_col": 25,
+                            "start_line": 28
+                        },
+                        "While expanding the reference 'element' in:"
+                    ],
+                    "start_col": 11,
+                    "start_line": 27
+                }
+            },
+            "127": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 12,
+                        "offset": 3
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 54,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 33,
+                    "end_line": 28,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 15,
+                    "start_line": 28
+                }
+            },
+            "129": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 13,
+                        "offset": 0
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 56,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.s": 57,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 21,
+                    "end_line": 29,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 29
+                }
+            },
+            "130": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 13,
+                        "offset": 0
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 56,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.s": 57,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
                     }
                 },
                 "hints": [],
                 "inst": {
                     "end_col": 29,
-                    "end_line": 19,
+                    "end_line": 9,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 33,
+                            "end_line": 28,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "parent_location": [
+                                {
+                                    "end_col": 35,
+                                    "end_line": 21,
+                                    "input_file": {
+                                        "filename": "test1.cairo"
+                                    },
+                                    "parent_location": [
+                                        {
+                                            "end_col": 67,
+                                            "end_line": 30,
+                                            "input_file": {
+                                                "filename": "test1.cairo"
+                                            },
+                                            "start_col": 17,
+                                            "start_line": 30
+                                        },
+                                        "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                    ],
+                                    "start_col": 20,
+                                    "start_line": 21
+                                },
+                                "While expanding the reference 'range_check_ptr' in:"
+                            ],
+                            "start_col": 15,
+                            "start_line": 28
+                        },
+                        "While trying to update the implicit return value 'range_check_ptr' in:"
+                    ],
+                    "start_col": 14,
+                    "start_line": 9
+                }
+            },
+            "131": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 13,
+                        "offset": 1
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 56,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.s": 57,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 38,
+                    "end_line": 30,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 33,
+                    "start_line": 30
+                }
+            },
+            "133": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 13,
+                        "offset": 2
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 56,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.s": 57,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 53,
+                    "end_line": 30,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 45,
+                    "start_line": 30
+                }
+            },
+            "135": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 13,
+                        "offset": 3
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 56,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.s": 57,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 66,
+                    "end_line": 30,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 59,
+                    "start_line": 30
+                }
+            },
+            "137": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 13,
+                        "offset": 4
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 56,
+                        "__main__.array_sigmoid.res": 53,
+                        "__main__.array_sigmoid.s": 57,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 67,
+                    "end_line": 30,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 17,
+                    "start_line": 30
+                }
+            },
+            "139": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.array_sigmoid"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 14,
+                        "offset": 0
+                    },
+                    "reference_ids": {
+                        "__main__.array_sigmoid.element": 55,
+                        "__main__.array_sigmoid.range_check_ptr": 58,
+                        "__main__.array_sigmoid.res": 59,
+                        "__main__.array_sigmoid.s": 57,
+                        "__main__.array_sigmoid.size": 52,
+                        "__main__.array_sigmoid.z": 51
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 21,
+                    "end_line": 31,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 31
+                }
+            },
+            "140": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 0
+                    },
+                    "reference_ids": {
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 17,
+                    "end_line": 35,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 35
+                }
+            },
+            "142": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 2
+                    },
+                    "reference_ids": {
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 30,
+                    "end_line": 39,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 23,
+                    "start_line": 39
+                }
+            },
+            "144": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 5
+                    },
+                    "reference_ids": {
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 62,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 19,
+                    "end_line": 39,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 10,
+                    "start_line": 39
+                }
+            },
+            "145": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 5
+                    },
+                    "reference_ids": {
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 31,
+                    "end_line": 40,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 24,
+                    "start_line": 40
+                }
+            },
+            "147": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 8
+                    },
+                    "reference_ids": {
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 64,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 20,
+                    "end_line": 40,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 10,
+                    "start_line": 40
+                }
+            },
+            "148": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 8
+                    },
+                    "reference_ids": {
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 21,
+                    "end_line": 43,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 20,
+                    "start_line": 43
+                }
+            },
+            "150": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 9
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 21,
+                    "end_line": 43,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 43
+                }
+            },
+            "151": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 9
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 25,
+                    "end_line": 44,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 24,
+                    "start_line": 44
+                }
+            },
+            "153": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 10
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 25,
+                    "end_line": 44,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 44
+                }
+            },
+            "154": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 10
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 25,
+                    "end_line": 45,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 24,
+                    "start_line": 45
+                }
+            },
+            "156": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 11
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 25,
+                    "end_line": 45,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 45
+                }
+            },
+            "157": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 11
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 46,
+                    "end_line": 34,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 35,
+                            "end_line": 21,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "parent_location": [
+                                {
+                                    "end_col": 52,
+                                    "end_line": 47,
+                                    "input_file": {
+                                        "filename": "test1.cairo"
+                                    },
+                                    "start_col": 5,
+                                    "start_line": 47
+                                },
+                                "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                            ],
+                            "start_col": 20,
+                            "start_line": 21
+                        },
+                        "While expanding the reference 'range_check_ptr' in:"
+                    ],
+                    "start_col": 31,
+                    "start_line": 34
+                }
+            },
+            "158": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 12
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 19,
+                    "end_line": 39,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 24,
+                            "end_line": 47,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "start_col": 21,
+                            "start_line": 47
+                        },
+                        "While expanding the reference 'ptr' in:"
+                    ],
+                    "start_col": 16,
+                    "start_line": 39
+                }
+            },
+            "159": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 13
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 41,
+                    "end_line": 47,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 31,
+                    "start_line": 47
+                }
+            },
+            "161": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 14
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 20,
+                    "end_line": 40,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "parent_location": [
+                        {
+                            "end_col": 51,
+                            "end_line": 47,
+                            "input_file": {
+                                "filename": "test1.cairo"
+                            },
+                            "start_col": 47,
+                            "start_line": 47
+                        },
+                        "While expanding the reference 'ptr1' in:"
+                    ],
+                    "start_col": 16,
+                    "start_line": 40
+                }
+            },
+            "162": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 15,
+                        "offset": 15
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 61
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 52,
+                    "end_line": 47,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 47
+                }
+            },
+            "164": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 16,
+                        "offset": 0
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 29,
+                    "end_line": 34,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
@@ -3148,13 +4247,13 @@
                             },
                             "parent_location": [
                                 {
-                                    "end_col": 24,
-                                    "end_line": 22,
+                                    "end_col": 28,
+                                    "end_line": 51,
                                     "input_file": {
                                         "filename": "test1.cairo"
                                     },
                                     "start_col": 5,
-                                    "start_line": 22
+                                    "start_line": 51
                                 },
                                 "While trying to retrieve the implicit argument 'output_ptr' in:"
                             ],
@@ -3164,163 +4263,291 @@
                         "While expanding the reference 'output_ptr' in:"
                     ],
                     "start_col": 11,
-                    "start_line": 19
+                    "start_line": 34
                 }
             },
-            "120": {
+            "165": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.main"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 12,
+                        "group": 16,
                         "offset": 1
                     },
                     "reference_ids": {
-                        "__main__.main.output_ptr": 51,
-                        "__main__.main.range_check_ptr": 53,
-                        "__main__.main.res": 54
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
                     }
                 },
                 "hints": [],
                 "inst": {
-                    "end_col": 13,
-                    "end_line": 20,
+                    "end_col": 27,
+                    "end_line": 51,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
-                    "parent_location": [
-                        {
-                            "end_col": 23,
-                            "end_line": 22,
-                            "input_file": {
-                                "filename": "test1.cairo"
-                            },
-                            "start_col": 20,
-                            "start_line": 22
-                        },
-                        "While expanding the reference 'res' in:"
-                    ],
-                    "start_col": 10,
-                    "start_line": 20
+                    "start_col": 20,
+                    "start_line": 51
                 }
             },
-            "121": {
+            "166": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.main"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 12,
+                        "group": 16,
                         "offset": 2
                     },
                     "reference_ids": {
-                        "__main__.main.output_ptr": 51,
-                        "__main__.main.range_check_ptr": 53,
-                        "__main__.main.res": 54
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 60,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
                     }
                 },
                 "hints": [],
                 "inst": {
-                    "end_col": 24,
-                    "end_line": 22,
+                    "end_col": 28,
+                    "end_line": 51,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 5,
-                    "start_line": 22
+                    "start_line": 51
                 }
             },
-            "123": {
+            "168": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.main"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 12,
+                        "group": 16,
                         "offset": 5
                     },
                     "reference_ids": {
-                        "__main__.main.output_ptr": 55,
-                        "__main__.main.range_check_ptr": 53,
-                        "__main__.main.res": 54
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 70,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
                     }
                 },
                 "hints": [],
                 "inst": {
-                    "end_col": 29,
-                    "end_line": 8,
+                    "end_col": 30,
+                    "end_line": 52,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 20,
+                    "start_line": 52
+                }
+            },
+            "169": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 16,
+                        "offset": 6
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 70,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 31,
+                    "end_line": 52,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 52
+                }
+            },
+            "171": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 16,
+                        "offset": 9
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 71,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 30,
+                    "end_line": 53,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 20,
+                    "start_line": 53
+                }
+            },
+            "172": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 16,
+                        "offset": 10
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 71,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 31,
+                    "end_line": 53,
+                    "input_file": {
+                        "filename": "test1.cairo"
+                    },
+                    "start_col": 5,
+                    "start_line": 53
+                }
+            },
+            "174": {
+                "accessible_scopes": [
+                    "__main__",
+                    "__main__.main"
+                ],
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 16,
+                        "offset": 13
+                    },
+                    "reference_ids": {
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 72,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
+                    }
+                },
+                "hints": [],
+                "inst": {
+                    "end_col": 35,
+                    "end_line": 21,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "parent_location": [
                         {
-                            "end_col": 27,
-                            "end_line": 20,
+                            "end_col": 52,
+                            "end_line": 47,
                             "input_file": {
                                 "filename": "test1.cairo"
                             },
                             "parent_location": [
                                 {
                                     "end_col": 46,
-                                    "end_line": 19,
+                                    "end_line": 34,
                                     "input_file": {
                                         "filename": "test1.cairo"
                                     },
                                     "parent_location": [
                                         {
                                             "end_col": 14,
-                                            "end_line": 23,
+                                            "end_line": 54,
                                             "input_file": {
                                                 "filename": "test1.cairo"
                                             },
                                             "start_col": 5,
-                                            "start_line": 23
+                                            "start_line": 54
                                         },
                                         "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                     ],
                                     "start_col": 31,
-                                    "start_line": 19
+                                    "start_line": 34
                                 },
                                 "While expanding the reference 'range_check_ptr' in:"
                             ],
-                            "start_col": 17,
-                            "start_line": 20
+                            "start_col": 5,
+                            "start_line": 47
                         },
                         "While trying to update the implicit return value 'range_check_ptr' in:"
                     ],
-                    "start_col": 14,
-                    "start_line": 8
+                    "start_col": 20,
+                    "start_line": 21
                 }
             },
-            "124": {
+            "175": {
                 "accessible_scopes": [
                     "__main__",
                     "__main__.main"
                 ],
                 "flow_tracking_data": {
                     "ap_tracking": {
-                        "group": 12,
-                        "offset": 6
+                        "group": 16,
+                        "offset": 14
                     },
                     "reference_ids": {
-                        "__main__.main.output_ptr": 55,
-                        "__main__.main.range_check_ptr": 53,
-                        "__main__.main.res": 54
+                        "__main__.main.__temp6": 66,
+                        "__main__.main.__temp7": 67,
+                        "__main__.main.__temp8": 68,
+                        "__main__.main.output_ptr": 72,
+                        "__main__.main.ptr": 63,
+                        "__main__.main.ptr1": 65,
+                        "__main__.main.range_check_ptr": 69
                     }
                 },
                 "hints": [],
                 "inst": {
                     "end_col": 14,
-                    "end_line": 23,
+                    "end_line": 54,
                     "input_file": {
                         "filename": "test1.cairo"
                     },
                     "start_col": 5,
-                    "start_line": 23
+                    "start_line": 54
                 }
             }
         }
@@ -3389,13 +4616,194 @@
                     }
                 }
             }
+        ],
+        "77": [
+            {
+                "accessible_scopes": [
+                    "starkware.cairo.common.alloc",
+                    "starkware.cairo.common.alloc.alloc"
+                ],
+                "code": "memory[ap] = segments.add()",
+                "flow_tracking_data": {
+                    "ap_tracking": {
+                        "group": 7,
+                        "offset": 0
+                    },
+                    "reference_ids": {}
+                }
+            }
         ]
     },
     "identifiers": {
+        "__main__.alloc": {
+            "destination": "starkware.cairo.common.alloc.alloc",
+            "type": "alias"
+        },
+        "__main__.array_sigmoid": {
+            "decorators": [],
+            "pc": 117,
+            "type": "function"
+        },
+        "__main__.array_sigmoid.Args": {
+            "full_name": "__main__.array_sigmoid.Args",
+            "members": {
+                "res": {
+                    "cairo_type": "felt*",
+                    "offset": 2
+                },
+                "size": {
+                    "cairo_type": "felt",
+                    "offset": 1
+                },
+                "z": {
+                    "cairo_type": "felt*",
+                    "offset": 0
+                }
+            },
+            "size": 3,
+            "type": "struct"
+        },
+        "__main__.array_sigmoid.ImplicitArgs": {
+            "full_name": "__main__.array_sigmoid.ImplicitArgs",
+            "members": {
+                "range_check_ptr": {
+                    "cairo_type": "felt",
+                    "offset": 0
+                }
+            },
+            "size": 1,
+            "type": "struct"
+        },
+        "__main__.array_sigmoid.Return": {
+            "cairo_type": "(res : felt*)",
+            "type": "type_definition"
+        },
+        "__main__.array_sigmoid.SIZEOF_LOCALS": {
+            "type": "const",
+            "value": 1
+        },
+        "__main__.array_sigmoid.element": {
+            "cairo_type": "felt",
+            "full_name": "__main__.array_sigmoid.element",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 12,
+                        "offset": 1
+                    },
+                    "pc": 125,
+                    "value": "[cast(fp, felt*)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.array_sigmoid.range_check_ptr": {
+            "cairo_type": "felt",
+            "full_name": "__main__.array_sigmoid.range_check_ptr",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 12,
+                        "offset": 0
+                    },
+                    "pc": 117,
+                    "value": "[cast(fp + (-6), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 13,
+                        "offset": 0
+                    },
+                    "pc": 129,
+                    "value": "[cast(ap + (-2), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 14,
+                        "offset": 0
+                    },
+                    "pc": 139,
+                    "value": "[cast(ap + (-2), felt*)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.array_sigmoid.res": {
+            "cairo_type": "felt*",
+            "full_name": "__main__.array_sigmoid.res",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 12,
+                        "offset": 0
+                    },
+                    "pc": 117,
+                    "value": "[cast(fp + (-3), felt**)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 14,
+                        "offset": 0
+                    },
+                    "pc": 139,
+                    "value": "[cast(ap + (-1), felt**)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.array_sigmoid.s": {
+            "cairo_type": "felt",
+            "full_name": "__main__.array_sigmoid.s",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 13,
+                        "offset": 0
+                    },
+                    "pc": 129,
+                    "value": "[cast(ap + (-1), felt*)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.array_sigmoid.size": {
+            "cairo_type": "felt",
+            "full_name": "__main__.array_sigmoid.size",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 12,
+                        "offset": 0
+                    },
+                    "pc": 117,
+                    "value": "[cast(fp + (-4), felt*)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.array_sigmoid.z": {
+            "cairo_type": "felt*",
+            "full_name": "__main__.array_sigmoid.z",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 12,
+                        "offset": 0
+                    },
+                    "pc": 117,
+                    "value": "[cast(fp + (-5), felt**)]"
+                }
+            ],
+            "type": "reference"
+        },
         "__main__.main": {
             "decorators": [],
-            "pc": 114,
+            "pc": 140,
             "type": "function"
+        },
+        "__main__.main.ARRAY_SIZE": {
+            "type": "const",
+            "value": 3
         },
         "__main__.main.Args": {
             "full_name": "__main__.main.Args",
@@ -3424,7 +4832,52 @@
         },
         "__main__.main.SIZEOF_LOCALS": {
             "type": "const",
-            "value": 0
+            "value": 2
+        },
+        "__main__.main.__temp6": {
+            "cairo_type": "felt",
+            "full_name": "__main__.main.__temp6",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 15,
+                        "offset": 9
+                    },
+                    "pc": 150,
+                    "value": "[cast(ap + (-1), felt*)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.main.__temp7": {
+            "cairo_type": "felt",
+            "full_name": "__main__.main.__temp7",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 15,
+                        "offset": 10
+                    },
+                    "pc": 153,
+                    "value": "[cast(ap + (-1), felt*)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.main.__temp8": {
+            "cairo_type": "felt",
+            "full_name": "__main__.main.__temp8",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 15,
+                        "offset": 11
+                    },
+                    "pc": 156,
+                    "value": "[cast(ap + (-1), felt*)]"
+                }
+            ],
+            "type": "reference"
         },
         "__main__.main.output_ptr": {
             "cairo_type": "felt*",
@@ -3432,19 +4885,81 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 11,
+                        "group": 15,
                         "offset": 0
                     },
-                    "pc": 114,
+                    "pc": 140,
                     "value": "[cast(fp + (-4), felt**)]"
                 },
                 {
                     "ap_tracking_data": {
-                        "group": 12,
+                        "group": 16,
                         "offset": 5
                     },
-                    "pc": 123,
+                    "pc": 168,
                     "value": "[cast(ap + (-1), felt**)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 16,
+                        "offset": 9
+                    },
+                    "pc": 171,
+                    "value": "[cast(ap + (-1), felt**)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 16,
+                        "offset": 13
+                    },
+                    "pc": 174,
+                    "value": "[cast(ap + (-1), felt**)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.main.ptr": {
+            "cairo_type": "felt*",
+            "full_name": "__main__.main.ptr",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 15,
+                        "offset": 5
+                    },
+                    "pc": 144,
+                    "value": "[cast(ap + (-1), felt**)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 15,
+                        "offset": 5
+                    },
+                    "pc": 145,
+                    "value": "[cast(fp, felt**)]"
+                }
+            ],
+            "type": "reference"
+        },
+        "__main__.main.ptr1": {
+            "cairo_type": "felt*",
+            "full_name": "__main__.main.ptr1",
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 15,
+                        "offset": 8
+                    },
+                    "pc": 147,
+                    "value": "[cast(ap + (-1), felt**)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 15,
+                        "offset": 8
+                    },
+                    "pc": 148,
+                    "value": "[cast(fp + 1, felt**)]"
                 }
             ],
             "type": "reference"
@@ -3455,34 +4970,19 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 11,
+                        "group": 15,
                         "offset": 0
                     },
-                    "pc": 114,
+                    "pc": 140,
                     "value": "[cast(fp + (-3), felt*)]"
                 },
                 {
                     "ap_tracking_data": {
-                        "group": 12,
+                        "group": 16,
                         "offset": 0
                     },
-                    "pc": 119,
+                    "pc": 164,
                     "value": "[cast(ap + (-2), felt*)]"
-                }
-            ],
-            "type": "reference"
-        },
-        "__main__.main.res": {
-            "cairo_type": "felt",
-            "full_name": "__main__.main.res",
-            "references": [
-                {
-                    "ap_tracking_data": {
-                        "group": 12,
-                        "offset": 0
-                    },
-                    "pc": 119,
-                    "value": "[cast(ap + (-1), felt*)]"
                 }
             ],
             "type": "reference"
@@ -3497,7 +4997,7 @@
         },
         "__main__.sigmoid": {
             "decorators": [],
-            "pc": 77,
+            "pc": 80,
             "type": "function"
         },
         "__main__.sigmoid.Args": {
@@ -3540,18 +5040,18 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 9,
+                        "group": 10,
                         "offset": 0
                     },
-                    "pc": 94,
+                    "pc": 97,
                     "value": "[cast(ap + (-1), felt*)]"
                 },
                 {
                     "ap_tracking_data": {
-                        "group": 9,
+                        "group": 10,
                         "offset": 0
                     },
-                    "pc": 95,
+                    "pc": 98,
                     "value": "[cast(fp + 1, felt*)]"
                 }
             ],
@@ -3563,10 +5063,10 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 0
                     },
-                    "pc": 101,
+                    "pc": 104,
                     "value": "[cast(ap + (-1), felt*)]"
                 }
             ],
@@ -3578,10 +5078,10 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 21
                     },
-                    "pc": 106,
+                    "pc": 109,
                     "value": "[cast(ap + (-2), felt*)]"
                 }
             ],
@@ -3593,18 +5093,18 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 8,
+                        "group": 9,
                         "offset": 0
                     },
-                    "pc": 86,
+                    "pc": 89,
                     "value": "[cast(ap + (-1), felt*)]"
                 },
                 {
                     "ap_tracking_data": {
-                        "group": 8,
+                        "group": 9,
                         "offset": 0
                     },
-                    "pc": 87,
+                    "pc": 90,
                     "value": "[cast(fp, felt*)]"
                 }
             ],
@@ -3616,10 +5116,10 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 21
                     },
-                    "pc": 106,
+                    "pc": 109,
                     "value": "[cast(ap + (-1), felt*)]"
                 }
             ],
@@ -3631,10 +5131,10 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 42
                     },
-                    "pc": 111,
+                    "pc": 114,
                     "value": "[cast(ap + (-1), felt*)]"
                 }
             ],
@@ -3646,26 +5146,18 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 7,
-                        "offset": 0
-                    },
-                    "pc": 77,
-                    "value": "[cast(fp + (-4), felt*)]"
-                },
-                {
-                    "ap_tracking_data": {
                         "group": 8,
                         "offset": 0
                     },
-                    "pc": 86,
-                    "value": "[cast(ap + (-2), felt*)]"
+                    "pc": 80,
+                    "value": "[cast(fp + (-4), felt*)]"
                 },
                 {
                     "ap_tracking_data": {
                         "group": 9,
                         "offset": 0
                     },
-                    "pc": 94,
+                    "pc": 89,
                     "value": "[cast(ap + (-2), felt*)]"
                 },
                 {
@@ -3673,23 +5165,31 @@
                         "group": 10,
                         "offset": 0
                     },
-                    "pc": 101,
+                    "pc": 97,
                     "value": "[cast(ap + (-2), felt*)]"
                 },
                 {
                     "ap_tracking_data": {
-                        "group": 10,
+                        "group": 11,
+                        "offset": 0
+                    },
+                    "pc": 104,
+                    "value": "[cast(ap + (-2), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 11,
                         "offset": 21
                     },
-                    "pc": 106,
+                    "pc": 109,
                     "value": "[cast(ap + (-3), felt*)]"
                 },
                 {
                     "ap_tracking_data": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 42
                     },
-                    "pc": 111,
+                    "pc": 114,
                     "value": "[cast(ap + (-3), felt*)]"
                 }
             ],
@@ -3701,10 +5201,10 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 10,
+                        "group": 11,
                         "offset": 42
                     },
-                    "pc": 111,
+                    "pc": 114,
                     "value": "[cast(ap + (-2), felt*)]"
                 }
             ],
@@ -3716,10 +5216,10 @@
             "references": [
                 {
                     "ap_tracking_data": {
-                        "group": 7,
+                        "group": 8,
                         "offset": 0
                     },
-                    "pc": 77,
+                    "pc": 80,
                     "value": "[cast(fp + (-3), felt*)]"
                 }
             ],
@@ -3728,6 +5228,31 @@
         "__main__.unsigned_div_rem": {
             "destination": "starkware.cairo.common.math.unsigned_div_rem",
             "type": "alias"
+        },
+        "starkware.cairo.common.alloc.alloc": {
+            "decorators": [],
+            "pc": 77,
+            "type": "function"
+        },
+        "starkware.cairo.common.alloc.alloc.Args": {
+            "full_name": "starkware.cairo.common.alloc.alloc.Args",
+            "members": {},
+            "size": 0,
+            "type": "struct"
+        },
+        "starkware.cairo.common.alloc.alloc.ImplicitArgs": {
+            "full_name": "starkware.cairo.common.alloc.alloc.ImplicitArgs",
+            "members": {},
+            "size": 0,
+            "type": "struct"
+        },
+        "starkware.cairo.common.alloc.alloc.Return": {
+            "cairo_type": "(ptr : felt*)",
+            "type": "type_definition"
+        },
+        "starkware.cairo.common.alloc.alloc.SIZEOF_LOCALS": {
+            "type": "const",
+            "value": 0
         },
         "starkware.cairo.common.math.assert_le": {
             "decorators": [],
@@ -4797,170 +6322,306 @@
             },
             {
                 "ap_tracking_data": {
-                    "group": 7,
+                    "group": 8,
                     "offset": 0
                 },
-                "pc": 77,
+                "pc": 80,
                 "value": "[cast(fp + (-3), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 7,
+                    "group": 8,
                     "offset": 0
                 },
-                "pc": 77,
+                "pc": 80,
                 "value": "[cast(fp + (-4), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 8,
+                    "group": 9,
                     "offset": 0
                 },
-                "pc": 86,
+                "pc": 89,
                 "value": "[cast(ap + (-2), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 8,
+                    "group": 9,
                     "offset": 0
                 },
-                "pc": 86,
+                "pc": 89,
                 "value": "[cast(ap + (-1), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 8,
+                    "group": 9,
                     "offset": 0
                 },
-                "pc": 87,
+                "pc": 90,
                 "value": "[cast(fp, felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 9,
+                    "group": 10,
                     "offset": 0
                 },
-                "pc": 94,
+                "pc": 97,
                 "value": "[cast(ap + (-2), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 9,
+                    "group": 10,
                     "offset": 0
                 },
-                "pc": 94,
+                "pc": 97,
                 "value": "[cast(ap + (-1), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 9,
+                    "group": 10,
                     "offset": 0
                 },
-                "pc": 95,
+                "pc": 98,
                 "value": "[cast(fp + 1, felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 10,
+                    "group": 11,
                     "offset": 0
                 },
-                "pc": 101,
+                "pc": 104,
                 "value": "[cast(ap + (-2), felt*)]"
-            },
-            {
-                "ap_tracking_data": {
-                    "group": 10,
-                    "offset": 0
-                },
-                "pc": 101,
-                "value": "[cast(ap + (-1), felt*)]"
-            },
-            {
-                "ap_tracking_data": {
-                    "group": 10,
-                    "offset": 21
-                },
-                "pc": 106,
-                "value": "[cast(ap + (-3), felt*)]"
-            },
-            {
-                "ap_tracking_data": {
-                    "group": 10,
-                    "offset": 21
-                },
-                "pc": 106,
-                "value": "[cast(ap + (-2), felt*)]"
-            },
-            {
-                "ap_tracking_data": {
-                    "group": 10,
-                    "offset": 21
-                },
-                "pc": 106,
-                "value": "[cast(ap + (-1), felt*)]"
-            },
-            {
-                "ap_tracking_data": {
-                    "group": 10,
-                    "offset": 42
-                },
-                "pc": 111,
-                "value": "[cast(ap + (-3), felt*)]"
-            },
-            {
-                "ap_tracking_data": {
-                    "group": 10,
-                    "offset": 42
-                },
-                "pc": 111,
-                "value": "[cast(ap + (-2), felt*)]"
-            },
-            {
-                "ap_tracking_data": {
-                    "group": 10,
-                    "offset": 42
-                },
-                "pc": 111,
-                "value": "[cast(ap + (-1), felt*)]"
             },
             {
                 "ap_tracking_data": {
                     "group": 11,
                     "offset": 0
                 },
+                "pc": 104,
+                "value": "[cast(ap + (-1), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 11,
+                    "offset": 21
+                },
+                "pc": 109,
+                "value": "[cast(ap + (-3), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 11,
+                    "offset": 21
+                },
+                "pc": 109,
+                "value": "[cast(ap + (-2), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 11,
+                    "offset": 21
+                },
+                "pc": 109,
+                "value": "[cast(ap + (-1), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 11,
+                    "offset": 42
+                },
                 "pc": 114,
+                "value": "[cast(ap + (-3), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 11,
+                    "offset": 42
+                },
+                "pc": 114,
+                "value": "[cast(ap + (-2), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 11,
+                    "offset": 42
+                },
+                "pc": 114,
+                "value": "[cast(ap + (-1), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 12,
+                    "offset": 0
+                },
+                "pc": 117,
+                "value": "[cast(fp + (-5), felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 12,
+                    "offset": 0
+                },
+                "pc": 117,
+                "value": "[cast(fp + (-4), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 12,
+                    "offset": 0
+                },
+                "pc": 117,
+                "value": "[cast(fp + (-3), felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 12,
+                    "offset": 0
+                },
+                "pc": 117,
+                "value": "[cast(fp + (-6), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 12,
+                    "offset": 1
+                },
+                "pc": 125,
+                "value": "[cast(fp, felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 13,
+                    "offset": 0
+                },
+                "pc": 129,
+                "value": "[cast(ap + (-2), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 13,
+                    "offset": 0
+                },
+                "pc": 129,
+                "value": "[cast(ap + (-1), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 14,
+                    "offset": 0
+                },
+                "pc": 139,
+                "value": "[cast(ap + (-2), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 14,
+                    "offset": 0
+                },
+                "pc": 139,
+                "value": "[cast(ap + (-1), felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 15,
+                    "offset": 0
+                },
+                "pc": 140,
                 "value": "[cast(fp + (-4), felt**)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 11,
+                    "group": 15,
                     "offset": 0
                 },
-                "pc": 114,
+                "pc": 140,
                 "value": "[cast(fp + (-3), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 12,
-                    "offset": 0
+                    "group": 15,
+                    "offset": 5
                 },
-                "pc": 119,
-                "value": "[cast(ap + (-2), felt*)]"
+                "pc": 144,
+                "value": "[cast(ap + (-1), felt**)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 12,
-                    "offset": 0
+                    "group": 15,
+                    "offset": 5
                 },
-                "pc": 119,
+                "pc": 145,
+                "value": "[cast(fp, felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 15,
+                    "offset": 8
+                },
+                "pc": 147,
+                "value": "[cast(ap + (-1), felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 15,
+                    "offset": 8
+                },
+                "pc": 148,
+                "value": "[cast(fp + 1, felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 15,
+                    "offset": 9
+                },
+                "pc": 150,
                 "value": "[cast(ap + (-1), felt*)]"
             },
             {
                 "ap_tracking_data": {
-                    "group": 12,
+                    "group": 15,
+                    "offset": 10
+                },
+                "pc": 153,
+                "value": "[cast(ap + (-1), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 15,
+                    "offset": 11
+                },
+                "pc": 156,
+                "value": "[cast(ap + (-1), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 16,
+                    "offset": 0
+                },
+                "pc": 164,
+                "value": "[cast(ap + (-2), felt*)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 16,
                     "offset": 5
                 },
-                "pc": 123,
+                "pc": 168,
+                "value": "[cast(ap + (-1), felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 16,
+                    "offset": 9
+                },
+                "pc": 171,
+                "value": "[cast(ap + (-1), felt**)]"
+            },
+            {
+                "ap_tracking_data": {
+                    "group": 16,
+                    "offset": 13
+                },
+                "pc": 174,
                 "value": "[cast(ap + (-1), felt**)]"
             }
         ]
