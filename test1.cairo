@@ -175,6 +175,7 @@ func tanh{range_check_ptr}(x : felt) -> (res : felt):
     return (res=res)
 end
 
+# Matrix tanh function
 func matrix_tanh{range_check_ptr}(
     m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
 ) -> ():
@@ -198,6 +199,32 @@ func matrix_tanh{range_check_ptr}(
 
     matrix_tanh(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
+end
+
+# Matrix sign inversion function
+func matrix_sign_inversion{range_check_ptr}(
+    m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    local inverse
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+
+    assert inverse = -[[m + row] + col]
+    assert [[res + row] + col] = inverse
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.inverse}") %}
+
+    return matrix_sign_inversion(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
 end
 
 func main{output_ptr : felt*, range_check_ptr}():
@@ -350,12 +377,31 @@ func main{output_ptr : felt*, range_check_ptr}():
     # let (local r2) = alloc()
     # assert [res] = r1
     # assert [res + 1] = r2
-
     # matrix_tanh(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=res)
     # serialize_word([[res]])
     # serialize_word([[res] + 1])
     # serialize_word([[res + 1]])
     # serialize_word([[res + 1] + 1])
+
+    # let (local ptr : felt**) = alloc()
+    # let (local ptr1 : felt**) = alloc()
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # assert [ptr] = r1
+    # assert [ptr + 1] = r2
+    # assert [[ptr]] = 1
+    # assert [[ptr] + 1] = 1
+    # assert [[ptr + 1]] = 1
+    # assert [[ptr + 1] + 1] = 1
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # assert [ptr1] = r1
+    # assert [ptr1 + 1] = r2
+    # matrix_sign_inversion(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
+    # serialize_word([[ptr1]])
+    # serialize_word([[ptr1] + 1])
+    # serialize_word([[ptr1 + 1]])
+    # serialize_word([[ptr1 + 1] + 1])
 
     return ()
 end
