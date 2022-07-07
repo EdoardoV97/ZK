@@ -68,18 +68,7 @@ func get_column(m : felt**, rows : felt, index : felt, res : felt*) -> ():
     return ()
 end
 
-# func dot_product_array_matrix() -> (m_1 : felt**, array : felt*, step : felt, res : felt*):
-#     alloc_locals
-#     if step == 0:
-#         return ()
-#     end
-
-# let (arr_prod) = dot_product_array(array_1=[m_1], array_2=array, size=step)
-#     assert [res] = arr_prod
-#     return dot_product_array_matrix(m_1=m_1 + 1, array_2=array, size=step - 1)
-# end
-
-# Activation function
+# Scalar sigmoid function
 func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
     alloc_locals
     const e = 271828  # 2.71828 * 10^5
@@ -90,7 +79,7 @@ func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
     let (res, r2) = unsigned_div_rem(1 * precision * precision, 1 * precision + pow_res_inverted)
     return (res=res)
 end
-
+# Activation function
 func array_sigmoid{range_check_ptr}(z : felt*, size : felt, res : felt*) -> (res : felt*):
     # posso togliere il valore di ritorno, non serve, il chiamante ha il puntatore alla testa dell'array
     alloc_locals
