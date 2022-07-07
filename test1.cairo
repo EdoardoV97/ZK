@@ -381,6 +381,34 @@ func log{range_check_ptr}(x : felt) -> (res : felt):
     return (res=ln)
 end
 
+# Return a matrix with all elements with same value
+func init_matrix{range_check_ptr}(
+    value : felt, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    assert [[res + row] + col] = value
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.value}") %}
+
+    init_matrix(value=value, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
+# TODO Sum all elements of a matrix parametrically for axes (keepdims=False)
+
+# TODO??? Probably not! Sum all elements of a matrix parametrically for axes (keepdims=True)
+
 func main{output_ptr : felt*, range_check_ptr}():
     alloc_locals
     const ARRAY_SIZE = 3
@@ -470,50 +498,50 @@ func main{output_ptr : felt*, range_check_ptr}():
     # serialize_word([res + 1])
     # serialize_word([res + 2])
 
-    let (local ptr : felt**) = alloc()
-    let (local ptr1 : felt**) = alloc()
-    let (local res : felt**) = alloc()
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    let (local r3) = alloc()
-    assert [ptr] = r1
-    assert [ptr + 1] = r2
-    assert [ptr + 2] = r3
-    assert [[ptr]] = 1
-    assert [[ptr] + 1] = 1
-    assert [[ptr + 1]] = 1
-    assert [[ptr + 1] + 1] = 1
-    assert [[ptr + 2]] = 1
-    assert [[ptr + 2] + 1] = 1
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    let (local r3) = alloc()
-    assert [ptr1] = r1
-    assert [ptr1 + 1] = r2
-    assert [ptr1 + 2] = r3
-    assert [[ptr1]] = 2
-    assert [[ptr1] + 1] = 2
-    assert [[ptr1 + 1]] = 2
-    assert [[ptr1 + 1] + 1] = 2
-    assert [[ptr1 + 2]] = 2
-    assert [[ptr1 + 2] + 1] = 2
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    let (local r3) = alloc()
-    assert [res] = r1
-    assert [res + 1] = r2
-    assert [res + 2] = r3
+    # let (local ptr : felt**) = alloc()
+    # let (local ptr1 : felt**) = alloc()
+    # let (local res : felt**) = alloc()
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # let (local r3) = alloc()
+    # assert [ptr] = r1
+    # assert [ptr + 1] = r2
+    # assert [ptr + 2] = r3
+    # assert [[ptr]] = 1
+    # assert [[ptr] + 1] = 1
+    # assert [[ptr + 1]] = 1
+    # assert [[ptr + 1] + 1] = 1
+    # assert [[ptr + 2]] = 1
+    # assert [[ptr + 2] + 1] = 1
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # let (local r3) = alloc()
+    # assert [ptr1] = r1
+    # assert [ptr1 + 1] = r2
+    # assert [ptr1 + 2] = r3
+    # assert [[ptr1]] = 2
+    # assert [[ptr1] + 1] = 2
+    # assert [[ptr1 + 1]] = 2
+    # assert [[ptr1 + 1] + 1] = 2
+    # assert [[ptr1 + 2]] = 2
+    # assert [[ptr1 + 2] + 1] = 2
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # let (local r3) = alloc()
+    # assert [res] = r1
+    # assert [res + 1] = r2
+    # assert [res + 2] = r3
     # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
     # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
     # diff_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
     # div_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
     # div_matrix_by_scalar(m_1=ptr1, divider=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    serialize_word([[res]])
-    serialize_word([[res] + 1])
-    serialize_word([[res + 1]])
-    serialize_word([[res + 1] + 1])
-    serialize_word([[res + 2]])
-    serialize_word([[res + 2] + 1])
+    # serialize_word([[res]])
+    # serialize_word([[res] + 1])
+    # serialize_word([[res + 1]])
+    # serialize_word([[res + 1] + 1])
+    # serialize_word([[res + 2]])
+    # serialize_word([[res + 2] + 1])
 
     # let (res) = cosh(1)
     # serialize_word(res)
@@ -564,6 +592,17 @@ func main{output_ptr : felt*, range_check_ptr}():
 
     # let (result) = log(8)
     # serialize_word(result)
+
+    # let (local ptr1 : felt**) = alloc()
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # assert [ptr1] = r1
+    # assert [ptr1 + 1] = r2
+    # init_matrix(value=5, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
+    # serialize_word([[ptr1]])
+    # serialize_word([[ptr1] + 1])
+    # serialize_word([[ptr1 + 1]])
+    # serialize_word([[ptr1 + 1] + 1])
 
     return ()
 end
