@@ -44,17 +44,17 @@ func dot_product_matrix(
         assert i = row
         assert j = col + 1
     end
+
     let (local column_array) = alloc()
     get_column(m=m_2, rows=m_2_rows, index=col, res=column_array)
 
     let (arr_prod) = dot_product_array(array_1=[m_1 + row], array_2=column_array, size=m_1_cols)
-    %{ print(f"Writing in position: {ids.row}, {ids.col}") %}
     assert [[res + row] + col] = arr_prod
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.arr_prod}") %}
 
     dot_product_matrix(
         m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, m_1_cols=m_1_cols, m_2_rows=m_2_rows, res=res
     )
-
     return ()
 end
 
@@ -136,33 +136,41 @@ func main{output_ptr : felt*, range_check_ptr}():
 
     let (local r1) = alloc()
     let (local r2) = alloc()
+    let (local r3) = alloc()
     assert [ptr] = r1
     assert [ptr + 1] = r2
+    assert [ptr + 2] = r3
     assert [[ptr]] = 1
     assert [[ptr] + 1] = 1
     assert [[ptr + 1]] = 1
     assert [[ptr + 1] + 1] = 1
+    assert [[ptr + 2]] = 1
+    assert [[ptr + 2] + 1] = 1
 
     let (local r1) = alloc()
     let (local r2) = alloc()
     assert [ptr1] = r1
     assert [ptr1 + 1] = r2
-    assert [[ptr1]] = 2
+    assert [[ptr1]] = 1
     assert [[ptr1] + 1] = 2
-    assert [[ptr1 + 1]] = 2
-    assert [[ptr1 + 1] + 1] = 2
+    assert [[ptr1 + 1]] = 3
+    assert [[ptr1 + 1] + 1] = 4
 
     let (local r1) = alloc()
     let (local r2) = alloc()
+    let (local r3) = alloc()
     assert [res] = r1
     assert [res + 1] = r2
+    assert [res + 2] = r3
 
     dot_product_matrix(
-        m_1=ptr, m_2=ptr1, row=0, col=0, step=4, m_1_cols=ROWS, m_2_rows=COLS, res=res
+        m_1=ptr, m_2=ptr1, row=0, col=0, step=6, m_1_cols=ROWS, m_2_rows=COLS, res=res
     )
     serialize_word([[res]])
     serialize_word([[res] + 1])
     serialize_word([[res + 1]])
     serialize_word([[res + 1] + 1])
+    serialize_word([[res + 2]])
+    serialize_word([[res + 2] + 1])
     return ()
 end
