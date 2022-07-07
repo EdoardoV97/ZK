@@ -68,6 +68,49 @@ func get_column(m : felt**, rows : felt, index : felt, res : felt*) -> ():
     return ()
 end
 
+# Sum two arrays
+func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ():
+    alloc_locals
+    if size == 0:
+        return ()
+    end
+    assert [res] = [array_1] + [array_2]
+    return sum_array(array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1, res=res + 1)
+end
+
+# Sum a matrix and an array
+func sum_matrix(
+    m_1 : felt**,
+    m_2 : felt**,
+    row : felt,
+    col : felt,
+    step : felt,
+    rows : felt,
+    cols : felt,
+    res : felt**,
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    local sum
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    assert sum = [[m_1 + row] + col] + [[m_2 + row] + col]
+    assert [[res + row] + col] = sum
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.sum}") %}
+
+    sum_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
 # Scalar sigmoid function
 func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
     alloc_locals
@@ -124,9 +167,9 @@ func main{output_ptr : felt*, range_check_ptr}():
     # let (dot_prod) = dot_product_array(array_1=ptr, array_2=ptr1, size=ARRAY_SIZE)
     # serialize_word(dot_prod)
 
-    let (local ptr : felt**) = alloc()
-    let (local ptr1 : felt**) = alloc()
-    let (local res : felt**) = alloc()
+    # let (local ptr : felt**) = alloc()
+    # let (local ptr1 : felt**) = alloc()
+    # let (local res : felt**) = alloc()
     # assert [ptr] = alloc()
     # assert [ptr + 1] = alloc()
     # assert [res] = alloc()
@@ -134,43 +177,95 @@ func main{output_ptr : felt*, range_check_ptr}():
     # assert [ptr1] = alloc()
     # assert [ptr1 + 1] = alloc()
 
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    let (local r3) = alloc()
-    assert [ptr] = r1
-    assert [ptr + 1] = r2
-    assert [ptr + 2] = r3
-    assert [[ptr]] = 1
-    assert [[ptr] + 1] = 1
-    assert [[ptr + 1]] = 1
-    assert [[ptr + 1] + 1] = 1
-    assert [[ptr + 2]] = 1
-    assert [[ptr + 2] + 1] = 1
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # let (local r3) = alloc()
+    # assert [ptr] = r1
+    # assert [ptr + 1] = r2
+    # assert [ptr + 2] = r3
+    # assert [[ptr]] = 1
+    # assert [[ptr] + 1] = 1
+    # assert [[ptr + 1]] = 1
+    # assert [[ptr + 1] + 1] = 1
+    # assert [[ptr + 2]] = 1
+    # assert [[ptr + 2] + 1] = 1
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # assert [ptr1] = r1
+    # assert [ptr1 + 1] = r2
+    # assert [[ptr1]] = 1
+    # assert [[ptr1] + 1] = 2
+    # assert [[ptr1 + 1]] = 3
+    # assert [[ptr1 + 1] + 1] = 4
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # let (local r3) = alloc()
+    # assert [res] = r1
+    # assert [res + 1] = r2
+    # assert [res + 2] = r3
+    # dot_product_matrix(
+    #     m_1=ptr, m_2=ptr1, row=0, col=0, step=6, m_1_cols=ROWS, m_2_rows=COLS, res=res
+    # )
+    # serialize_word([[res]])
+    # serialize_word([[res] + 1])
+    # serialize_word([[res + 1]])
+    # serialize_word([[res + 1] + 1])
+    # serialize_word([[res + 2]])
+    # serialize_word([[res + 2] + 1])
 
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    assert [ptr1] = r1
-    assert [ptr1 + 1] = r2
-    assert [[ptr1]] = 1
-    assert [[ptr1] + 1] = 2
-    assert [[ptr1 + 1]] = 3
-    assert [[ptr1 + 1] + 1] = 4
+    # let (local ptr : felt*) = alloc()
+    # let (local ptr1 : felt*) = alloc()
+    # let (local res : felt*) = alloc()
+    # assert [ptr] = 1
+    # assert [ptr + 1] = 1
+    # assert [ptr + 2] = 1
+    # assert [ptr1] = 1
+    # assert [ptr1 + 1] = 2
+    # assert [ptr1 + 2] = 3
+    # sum_array(array_1=ptr, array_2=ptr1, size=3, res=res)
+    # serialize_word([res])
+    # serialize_word([res + 1])
+    # serialize_word([res + 2])
 
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    let (local r3) = alloc()
-    assert [res] = r1
-    assert [res + 1] = r2
-    assert [res + 2] = r3
+    # let (local ptr : felt**) = alloc()
+    # let (local ptr1 : felt**) = alloc()
+    # let (local res : felt**) = alloc()
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # let (local r3) = alloc()
+    # assert [ptr] = r1
+    # assert [ptr + 1] = r2
+    # assert [ptr + 2] = r3
+    # assert [[ptr]] = 1
+    # assert [[ptr] + 1] = 1
+    # assert [[ptr + 1]] = 1
+    # assert [[ptr + 1] + 1] = 1
+    # assert [[ptr + 2]] = 1
+    # assert [[ptr + 2] + 1] = 1
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # assert [ptr1] = r1
+    # assert [ptr1 + 1] = r2
+    # assert [ptr1 + 2] = r3
+    # assert [[ptr1]] = 1
+    # assert [[ptr1] + 1] = 1
+    # assert [[ptr1 + 1]] = 1
+    # assert [[ptr1 + 1] + 1] = 1
+    # assert [[ptr1 + 2]] = 1
+    # assert [[ptr1 + 2] + 1] = 1
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # let (local r3) = alloc()
+    # assert [res] = r1
+    # assert [res + 1] = r2
+    # assert [res + 2] = r3
+    # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+    # serialize_word([[res]])
+    # serialize_word([[res] + 1])
+    # serialize_word([[res + 1]])
+    # serialize_word([[res + 1] + 1])
+    # serialize_word([[res + 2]])
+    # serialize_word([[res + 2] + 1])
 
-    dot_product_matrix(
-        m_1=ptr, m_2=ptr1, row=0, col=0, step=6, m_1_cols=ROWS, m_2_rows=COLS, res=res
-    )
-    serialize_word([[res]])
-    serialize_word([[res] + 1])
-    serialize_word([[res + 1]])
-    serialize_word([[res + 1] + 1])
-    serialize_word([[res + 2]])
-    serialize_word([[res + 2] + 1])
     return ()
 end
