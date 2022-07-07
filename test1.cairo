@@ -106,6 +106,39 @@ func sum_matrix(
     return ()
 end
 
+# Multiply matrixes element wise
+func mul_matrix(
+    m_1 : felt**,
+    m_2 : felt**,
+    row : felt,
+    col : felt,
+    step : felt,
+    rows : felt,
+    cols : felt,
+    res : felt**,
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    local sum
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    assert sum = [[m_1 + row] + col] * [[m_2 + row] + col]
+    assert [[res + row] + col] = sum
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.sum}") %}
+
+    mul_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
 # Scalar sigmoid function
 func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
     alloc_locals
@@ -333,15 +366,16 @@ func main{output_ptr : felt*, range_check_ptr}():
     # assert [[ptr + 2] + 1] = 1
     # let (local r1) = alloc()
     # let (local r2) = alloc()
+    # let (local r3) = alloc()
     # assert [ptr1] = r1
     # assert [ptr1 + 1] = r2
     # assert [ptr1 + 2] = r3
-    # assert [[ptr1]] = 1
-    # assert [[ptr1] + 1] = 1
-    # assert [[ptr1 + 1]] = 1
-    # assert [[ptr1 + 1] + 1] = 1
-    # assert [[ptr1 + 2]] = 1
-    # assert [[ptr1 + 2] + 1] = 1
+    # assert [[ptr1]] = 2
+    # assert [[ptr1] + 1] = 2
+    # assert [[ptr1 + 1]] = 2
+    # assert [[ptr1 + 1] + 1] = 2
+    # assert [[ptr1 + 2]] = 2
+    # assert [[ptr1 + 2] + 1] = 2
     # let (local r1) = alloc()
     # let (local r2) = alloc()
     # let (local r3) = alloc()
@@ -349,6 +383,7 @@ func main{output_ptr : felt*, range_check_ptr}():
     # assert [res + 1] = r2
     # assert [res + 2] = r3
     # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+    # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
     # serialize_word([[res]])
     # serialize_word([[res] + 1])
     # serialize_word([[res + 1]])
