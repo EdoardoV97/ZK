@@ -2,7 +2,7 @@
 from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.alloc import alloc
 
 # Function that return dot product of two vector array.
@@ -73,7 +73,7 @@ func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ()
     return sum_array(array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1, res=res + 1)
 end
 
-# Sum a matrix and an array
+# Sum two matrixes element wise
 func sum_matrix(
     m_1 : felt**,
     m_2 : felt**,
@@ -103,6 +103,39 @@ func sum_matrix(
     %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.sum}") %}
 
     sum_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
+# Difference between two matrixes element wise
+func diff_matrix(
+    m_1 : felt**,
+    m_2 : felt**,
+    row : felt,
+    col : felt,
+    step : felt,
+    rows : felt,
+    cols : felt,
+    res : felt**,
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    local diff
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    assert diff = [[m_1 + row] + col] - [[m_2 + row] + col]
+    assert [[res + row] + col] = diff
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.diff}") %}
+
+    diff_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
 end
 
@@ -136,6 +169,76 @@ func mul_matrix(
     %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.sum}") %}
 
     mul_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
+# Divide two matrixes element wise
+func div_matrix{range_check_ptr}(
+    m_1 : felt**,
+    m_2 : felt**,
+    row : felt,
+    col : felt,
+    step : felt,
+    rows : felt,
+    cols : felt,
+    res : felt**,
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    local division
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    let (pow_res) = pow(10, 10)
+    let (division, r) = signed_div_rem([[m_1 + row] + col], [[m_2 + row] + col], pow_res)
+    assert [[res + row] + col] = division
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
+
+    div_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
+# Divide all matrixe element by a scalar
+func div_matrix_by_scalar{range_check_ptr}(
+    m_1 : felt**,
+    divider : felt,
+    row : felt,
+    col : felt,
+    step : felt,
+    rows : felt,
+    cols : felt,
+    res : felt**,
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    local division
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    let (pow_res) = pow(10, 10)
+    let (division, r) = signed_div_rem([[m_1 + row] + col], divider, pow_res)
+    assert [[res + row] + col] = division
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
+
+    div_matrix_by_scalar(
+        m_1=m_1, divider=divider, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
+    )
     return ()
 end
 
@@ -260,6 +363,24 @@ func matrix_sign_inversion{range_check_ptr}(
     return matrix_sign_inversion(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
 end
 
+# Scalar log function
+func log{range_check_ptr}(x : felt) -> (res : felt):
+    alloc_locals
+    const e = 27  # 2.71828 * 10^5
+    local ln
+    let (local precision) = pow(10, 5)
+
+    %{
+        import math
+        ids.ln = int(math.log(ids.x,   2.71828)*ids.precision)
+        print(f"Ln : {ids.ln}")
+    %}
+    # let (pow_res) = pow(e, ln)
+    # assert x * precision = pow_res
+
+    return (res=ln)
+end
+
 func main{output_ptr : felt*, range_check_ptr}():
     alloc_locals
     const ARRAY_SIZE = 3
@@ -349,47 +470,50 @@ func main{output_ptr : felt*, range_check_ptr}():
     # serialize_word([res + 1])
     # serialize_word([res + 2])
 
-    # let (local ptr : felt**) = alloc()
-    # let (local ptr1 : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [ptr + 2] = r3
-    # assert [[ptr]] = 1
-    # assert [[ptr] + 1] = 1
-    # assert [[ptr + 1]] = 1
-    # assert [[ptr + 1] + 1] = 1
-    # assert [[ptr + 2]] = 1
-    # assert [[ptr + 2] + 1] = 1
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # assert [ptr1 + 2] = r3
-    # assert [[ptr1]] = 2
-    # assert [[ptr1] + 1] = 2
-    # assert [[ptr1 + 1]] = 2
-    # assert [[ptr1 + 1] + 1] = 2
-    # assert [[ptr1 + 2]] = 2
-    # assert [[ptr1 + 2] + 1] = 2
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [res] = r1
-    # assert [res + 1] = r2
-    # assert [res + 2] = r3
+    let (local ptr : felt**) = alloc()
+    let (local ptr1 : felt**) = alloc()
+    let (local res : felt**) = alloc()
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    let (local r3) = alloc()
+    assert [ptr] = r1
+    assert [ptr + 1] = r2
+    assert [ptr + 2] = r3
+    assert [[ptr]] = 1
+    assert [[ptr] + 1] = 1
+    assert [[ptr + 1]] = 1
+    assert [[ptr + 1] + 1] = 1
+    assert [[ptr + 2]] = 1
+    assert [[ptr + 2] + 1] = 1
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    let (local r3) = alloc()
+    assert [ptr1] = r1
+    assert [ptr1 + 1] = r2
+    assert [ptr1 + 2] = r3
+    assert [[ptr1]] = 2
+    assert [[ptr1] + 1] = 2
+    assert [[ptr1 + 1]] = 2
+    assert [[ptr1 + 1] + 1] = 2
+    assert [[ptr1 + 2]] = 2
+    assert [[ptr1 + 2] + 1] = 2
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    let (local r3) = alloc()
+    assert [res] = r1
+    assert [res + 1] = r2
+    assert [res + 2] = r3
     # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
     # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
-    # serialize_word([[res + 2]])
-    # serialize_word([[res + 2] + 1])
+    # diff_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+    # div_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+    # div_matrix_by_scalar(m_1=ptr1, divider=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
+    serialize_word([[res]])
+    serialize_word([[res] + 1])
+    serialize_word([[res + 1]])
+    serialize_word([[res + 1] + 1])
+    serialize_word([[res + 2]])
+    serialize_word([[res + 2] + 1])
 
     # let (res) = cosh(1)
     # serialize_word(res)
@@ -437,6 +561,9 @@ func main{output_ptr : felt*, range_check_ptr}():
     # serialize_word([[ptr1] + 1])
     # serialize_word([[ptr1 + 1]])
     # serialize_word([[ptr1 + 1] + 1])
+
+    # let (result) = log(8)
+    # serialize_word(result)
 
     return ()
 end
