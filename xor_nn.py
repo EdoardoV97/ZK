@@ -45,7 +45,7 @@ def forward_prop(X, parameters):
 # Compute the loss function. We will use the Cross-Entropy Loss function
 def calculate_cost(A2, Y):
     cost = -np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2)))/m
-    cost = np.squeeze(cost)
+    # cost = np.squeeze(cost) # Not necessary in this case since cost is already a scalar
 
     return cost
 
