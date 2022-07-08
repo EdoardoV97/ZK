@@ -398,7 +398,7 @@ func matrix_tanh{range_check_ptr}(
     return ()
 end
 
-# Matrix pow function. Compute pow for all the elements of the matrix
+# Matrix pow function. Compute pow for all the elements of the matrix element-wise
 func matrix_pow{range_check_ptr}(
     m : felt**,
     exp : felt,
