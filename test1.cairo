@@ -131,6 +131,18 @@ func training{range_check_ptr}(
     forward_propagation(X=X, parameters=parameters, A1=A1, A2=A2)
 
     # TODO allocate  dW1, db1, dW2, db2
+    let (local dW1 : felt**) = alloc()  # 2x2 matrix
+    let (local r1) = alloc()
+    assert [dW1] = r1
+    let (local db1 : felt**) = alloc()  # 1x1 matrix
+    let (local r1) = alloc()
+    assert [db1] = r1
+    let (local dW2 : felt**) = alloc()  # 1x2 matrix
+    let (local r1) = alloc()
+    assert [dW2] = r1
+    let (local db2 : felt**) = alloc()  # 2x1 matrix
+    let (local r1) = alloc()
+    assert [db2] = r1
     backward_propagation(
         X=X, Y=Y, parameters=parameters, A1=A1, A2=A2, dW1=dW1, db1=db1, dW2=dW2, db2=db2
     )
