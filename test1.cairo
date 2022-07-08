@@ -1,608 +1,148 @@
 %builtins output range_check
-from starkware.cairo.common.pow import pow
-from starkware.cairo.common.serialize import serialize_word, serialize_array
-from starkware.cairo.common.registers import get_label_location
-from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
+from starkware.cairo.common.serialize import serialize_word
 from starkware.cairo.common.alloc import alloc
+from ml_library import dot_product_array, dot_product_matrix, sum_all_matrix_elements_by_axis, init_matrix, sum_matrix_and_vector, matrix_tanh, sum_matrix, array_sigmoid
 
-# Function that return dot product of two vector array.
-func dot_product_array(array_1 : felt*, array_2 : felt*, size : felt) -> (res : felt):
-    if size == 0:
-        return (res=0)
-    end
-    let (rest_of_product) = dot_product_array(
-        array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1
-    )
-    return (res=[array_1] * [array_2] + rest_of_product)
+# Initialize the constant hyperparameters
+const N_X = 2
+const N_H = 2
+const N_Y = 1
+const NUM_OF_ITERS = 1000
+const LEARNING_RATE = 3 # = 0.3 * 10
+const f = 2 # number of rows of X
+const m = 4 # number of cols of X
+
+struct Parameters:
+    member w1: felt**
+    member w2: felt**
+    member b1: felt**
+    member b2: felt**
 end
 
-func dot_product_matrix(
-    m_1 : felt**,
-    m_2 : felt**,
-    row : felt,
-    col : felt,
-    step : felt,
-    m_1_cols : felt,
-    m_2_rows : felt,
-    res : felt**,
-) -> ():
+func forward_propagation{range_check_ptr}(X : felt**, parameters : Parameters*, A1 : felt**, A2 : felt**):
     alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    if col == m_1_cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
+    let (local temp : felt**) = alloc() # 2x4 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [temp] = r1
+    assert [temp + 1] = r2
+    let (local temp2 : felt**) = alloc() # 1x4 matrix
+    let (local r1) = alloc()
+    assert [temp2] = r1
+    let (local Z1 : felt**) = alloc() # 2x4 matrix
+    let (local transpose : felt**) = alloc() # 4x2 matrix
+    let (local Z2 : felt**) = alloc() # 1x4 matrix
 
-    let (local column_array) = alloc()
-    get_column(m=m_2, rows=m_2_rows, index=col, res=column_array)
+    # 1) temp = np.dot(W1, X)
+    #    Z1 = temp + b1
+    dot_product_matrix(m_1 = [parameters].w1, m_2 = X, row = 0, col = 0, step = N_X * m, m_1_cols = N_H, m_2_rows = 2, res = temp)
+    sum_matrix_and_vector(m = temp, v = [parameters].b1, index=0, num_rows_m=f, num_cols_m=m, num_rows_v=N_H, num_cols_v=1, temp=transpose, res=Z1)
 
-    let (arr_prod) = dot_product_array(array_1=[m_1 + row], array_2=column_array, size=m_1_cols)
-    assert [[res + row] + col] = arr_prod
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.arr_prod}") %}
+    # 2) A1 = np.tanh(Z1)
+    matrix_tanh(m=Z1, row=0, col=0, step=f*m, rows=f, cols=m, res=A1)
 
-    dot_product_matrix(
-        m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, m_1_cols=m_1_cols, m_2_rows=m_2_rows, res=res
-    )
+    # 3) # temp2 = np.dot(W2, A1)
+         # Z2 = temp2 + b2
+    dot_product_matrix(m_1= [parameters].w2, m_2 = A1, row = 0, col=0, step = N_Y * m, m_1_cols=N_H, m_2_rows=N_X, res= temp2)
+    # Extra step to transform an 1x1 matrix(felt**) in a N_Y*m matrix(same as temp2)
+    let (local b1_expanded : felt**) = alloc()
+    init_matrix(value=[[[parameters].b1]], row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=b1_expanded)
+    sum_matrix(m_1=temp2,m_2=b1_expanded,row=0,col=0,step=N_Y*m,rows=N_Y,cols=m,res=Z2)
+
+    # 4) # A2 = sigmoid(Z2)
+    array_sigmoid(z=[Z2], size=m, res=[A2])
+
     return ()
 end
 
-func get_column(m : felt**, rows : felt, index : felt, res : felt*) -> ():
+# func backward_propagation():
+# end
+
+# # This is the GD 
+# func update_parameters():
+# end
+
+# X, Y, n_x, n_h, n_y, num_of_iters, learning_rate
+func training{range_check_ptr}(X : felt**, Y : felt**, parameters : Parameters*, num_of_iters : felt, learning_rate : felt):
     alloc_locals
-    if rows == 0:
-        return ()
-    end
-    assert [res] = [[m] + index]
-    get_column(m=m + 1, rows=rows - 1, index=index, res=res + 1)
+    let (local A1 : felt**) = alloc() # 2x4 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [A1] = r1
+    assert [A1 + 1] = r2 
+    let (local A2 : felt**) = alloc() # 1x4 matrix
+    # TODO check
+    # let (local r1) = alloc()
+    # assert [A2] = r1
+
+    forward_propagation(X = X, parameters = parameters, A1 = A1, A2 = A2)
     return ()
 end
-
-# Sum two arrays
-func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ():
-    alloc_locals
-    if size == 0:
-        return ()
-    end
-    assert [res] = [array_1] + [array_2]
-    return sum_array(array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1, res=res + 1)
-end
-
-# Sum two matrixes element wise
-func sum_matrix(
-    m_1 : felt**,
-    m_2 : felt**,
-    row : felt,
-    col : felt,
-    step : felt,
-    rows : felt,
-    cols : felt,
-    res : felt**,
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    local sum
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    assert sum = [[m_1 + row] + col] + [[m_2 + row] + col]
-    assert [[res + row] + col] = sum
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.sum}") %}
-
-    sum_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Difference between two matrixes element wise
-func diff_matrix(
-    m_1 : felt**,
-    m_2 : felt**,
-    row : felt,
-    col : felt,
-    step : felt,
-    rows : felt,
-    cols : felt,
-    res : felt**,
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    local diff
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    assert diff = [[m_1 + row] + col] - [[m_2 + row] + col]
-    assert [[res + row] + col] = diff
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.diff}") %}
-
-    diff_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Multiply matrixes element wise
-func mul_matrix(
-    m_1 : felt**,
-    m_2 : felt**,
-    row : felt,
-    col : felt,
-    step : felt,
-    rows : felt,
-    cols : felt,
-    res : felt**,
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    local sum
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    assert sum = [[m_1 + row] + col] * [[m_2 + row] + col]
-    assert [[res + row] + col] = sum
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.sum}") %}
-
-    mul_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Divide two matrixes element wise
-func div_matrix{range_check_ptr}(
-    m_1 : felt**,
-    m_2 : felt**,
-    row : felt,
-    col : felt,
-    step : felt,
-    rows : felt,
-    cols : felt,
-    res : felt**,
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    local division
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    let (pow_res) = pow(10, 10)
-    let (division, r) = signed_div_rem([[m_1 + row] + col], [[m_2 + row] + col], pow_res)
-    assert [[res + row] + col] = division
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
-
-    div_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Divide all matrixe element by a scalar
-func div_matrix_by_scalar{range_check_ptr}(
-    m_1 : felt**,
-    divider : felt,
-    row : felt,
-    col : felt,
-    step : felt,
-    rows : felt,
-    cols : felt,
-    res : felt**,
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    local division
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    let (pow_res) = pow(10, 10)
-    let (division, r) = signed_div_rem([[m_1 + row] + col], divider, pow_res)
-    assert [[res + row] + col] = division
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
-
-    div_matrix_by_scalar(
-        m_1=m_1, divider=divider, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
-    )
-    return ()
-end
-
-# Scalar sigmoid function
-func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
-    alloc_locals
-    const e = 271828  # 2.71828 * 10^5
-    let (local precision) = pow(10, 5)
-    let (local internal_precision) = pow(10, z * 5)
-    let (pow_res) = pow(base=e, exp=z)
-    let (pow_res_inverted, r1) = unsigned_div_rem(1 * internal_precision * precision, pow_res)
-    let (res, r2) = unsigned_div_rem(1 * precision * precision, 1 * precision + pow_res_inverted)
-    return (res=res)
-end
-# Activation function
-func array_sigmoid{range_check_ptr}(z : felt*, size : felt, res : felt*) -> ():
-    # posso togliere il valore di ritorno, non serve, il chiamante ha il puntatore alla testa dell'array
-    alloc_locals
-    if size == 0:
-        return ()
-    end
-
-    local element = [z]
-    let (s) = sigmoid(z=element)
-    assert [res] = s
-    return array_sigmoid(z=z + 1, size=size - 1, res=res + 1)
-end
-
-# Scalar sinh function
-func sinh{range_check_ptr}(x : felt) -> (res : felt):
-    alloc_locals
-    const e = 271828  # 2.71828 * 10^5
-    let (local precision) = pow(10, 5)
-    let (local internal_precision) = pow(10, x * 5)
-
-    let (local pow_res1) = pow(base=e, exp=x)
-
-    let (pow_res2) = pow(base=e, exp=x)
-    let (pow_res2_inverted, r1) = unsigned_div_rem(1 * internal_precision * precision, pow_res2)
-
-    let (res, r2) = unsigned_div_rem((pow_res1 - pow_res2_inverted), 2)
-    return (res=res)
-end
-
-# Scalar cosh function
-func cosh{range_check_ptr}(x : felt) -> (res : felt):
-    alloc_locals
-    const e = 271828  # 2.71828 * 10^5
-    let (local precision) = pow(10, 5)
-    let (local internal_precision) = pow(10, x * 5)
-
-    let (local pow_res1) = pow(base=e, exp=x)
-
-    let (pow_res2) = pow(base=e, exp=x)
-    let (pow_res2_inverted, r1) = unsigned_div_rem(1 * internal_precision * precision, pow_res2)
-
-    let (res, r2) = unsigned_div_rem((pow_res1 + pow_res2_inverted), 2)
-    return (res=res)
-end
-
-# Scalar tanh function
-func tanh{range_check_ptr}(x : felt) -> (res : felt):
-    alloc_locals
-    let (local precision) = pow(10, 5)
-
-    let (local sinh_r) = sinh(x=x)
-    let (local cosh_r) = cosh(x=x)
-
-    let (res, r2) = unsigned_div_rem(sinh_r * precision, cosh_r)
-    return (res=res)
-end
-
-# Matrix tanh function
-func matrix_tanh{range_check_ptr}(
-    m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-
-    let (local tanh_r) = tanh(x=[[m + row] + col])
-    assert [[res + row] + col] = tanh_r
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.tanh_r}") %}
-
-    matrix_tanh(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Matrix sign inversion function
-func matrix_sign_inversion{range_check_ptr}(
-    m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    local inverse
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-
-    assert inverse = -[[m + row] + col]
-    assert [[res + row] + col] = inverse
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.inverse}") %}
-
-    return matrix_sign_inversion(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-end
-
-# Scalar log function
-func log{range_check_ptr}(x : felt) -> (res : felt):
-    alloc_locals
-    const e = 27  # 2.71828 * 10^5
-    local ln
-    let (local precision) = pow(10, 5)
-
-    %{
-        import math
-        ids.ln = int(math.log(ids.x,   2.71828)*ids.precision)
-        print(f"Ln : {ids.ln}")
-    %}
-    # let (pow_res) = pow(e, ln)
-    # assert x * precision = pow_res
-
-    return (res=ln)
-end
-
-# Return a matrix with all elements with same value
-func init_matrix{range_check_ptr}(
-    value : felt, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    assert [[res + row] + col] = value
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.value}") %}
-
-    init_matrix(value=value, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# TODO Sum all elements of a matrix parametrically for axes (keepdims=False)
-
-# TODO??? Probably not! Sum all elements of a matrix parametrically for axes (keepdims=True)
 
 func main{output_ptr : felt*, range_check_ptr}():
     alloc_locals
-    const ARRAY_SIZE = 3
-    const ROWS = 2
-    const COLS = 2
+    # Initializing training samples
+    # Load with python hint the input data
+    let (local X : felt**) = alloc() # 2x4 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [X] = r1
+    assert [X + 1] = r2 
+    let (local Y : felt**) = alloc() # 1x4 matrix
+    let (local r3) = alloc()
+    assert [Y] = r3
+    %{ 
+        # Copy X
+        index = 0
+        for x in program_input['X'][0]:
+            memory[ids.r1 + index] = x
+            index += 1
+        index = 0
+        for x in program_input['X'][1]:
+            memory[ids.r2 + index] = x
+            index += 1
+        # Copy Y
+        index = 0
+        for y in program_input['Y'][0]:
+            memory[ids.r3 + index] = y
+            index += 1
+    %}
+    # TODO Compute merkle_tree root of input data and insert an assert to check if result equal to known harcoded value
 
-    # Allocate an array.
-    # let (local ptr) = alloc()
-    # let (local ptr1) = alloc()
-    # let (local res) = alloc()
+    # Initialize the weights parameters
+    let (local p_history : Parameters*) = alloc()
+    local parameters : Parameters
+    let (local alloc_w1 : felt**) = alloc() # 2x2 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_w1] = r1
+    assert [alloc_w1 + 1] = r2
+    let (local alloc_w2 : felt**) = alloc() # 1x2 matrix
+    let (local r1) = alloc()
+    assert [alloc_w2] = r1
+    let (local alloc_b1 : felt**) = alloc() # 2x1 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_b1] = r1
+    assert [alloc_b1 + 1] = r2
+    let (local alloc_b2 : felt**) = alloc() # 1x1 matrix 
+    let (local r1) = alloc()
+    assert [alloc_b2] = r1
+    assert parameters.w1 = alloc_w1
+    assert parameters.w2 = alloc_w2
+    assert parameters.b1 = alloc_b1
+    assert parameters.b2 = alloc_b2
+    assert [p_history] = parameters
 
-    # Populate some values in the array.
-    # assert [ptr] = 2
-    # assert [ptr + 1] = 2
-    # assert [ptr + 2] = 2
+    # Initialize all the matrix with all elements
+    init_matrix(value = 0, row = 0, col = 0, step = N_X * N_H, rows = N_X, cols = N_H, res = parameters.w1)
+    init_matrix(value = 0, row = 0, col = 0, step = N_Y * N_H, rows = N_Y, cols = N_H, res = parameters.w2)
+    init_matrix(value = 0, row = 0, col = 0, step = N_H, rows = N_H, cols = 1, res = parameters.b1)
+    init_matrix(value = 0, row = 0, col = 0, step = N_Y, rows = N_Y, cols = 1, res = parameters.b2)
 
-    # assert [ptr1] = 1
-    # assert [ptr1 + 1] = 2
-    # assert [ptr1 + 2] = 3
-
-    # array_sigmoid(z=ptr, size=ARRAY_SIZE, res=ptr1)
-    # Print the array of sigmoid values
-    # serialize_word(ptr1[0])  # Equivalente come accedo
-    # serialize_word([ptr1 + 1])
-    # serialize_word([ptr1 + 2])
-
-    # let (dot_prod) = dot_product_array(array_1=ptr, array_2=ptr1, size=ARRAY_SIZE)
-    # serialize_word(dot_prod)
-
-    # let (local ptr : felt**) = alloc()
-    # let (local ptr1 : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    # assert [ptr] = alloc()
-    # assert [ptr + 1] = alloc()
-    # assert [res] = alloc()
-
-    # assert [ptr1] = alloc()
-    # assert [ptr1 + 1] = alloc()
-
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [ptr + 2] = r3
-    # assert [[ptr]] = 1
-    # assert [[ptr] + 1] = 1
-    # assert [[ptr + 1]] = 1
-    # assert [[ptr + 1] + 1] = 1
-    # assert [[ptr + 2]] = 1
-    # assert [[ptr + 2] + 1] = 1
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # assert [[ptr1]] = 1
-    # assert [[ptr1] + 1] = 2
-    # assert [[ptr1 + 1]] = 3
-    # assert [[ptr1 + 1] + 1] = 4
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [res] = r1
-    # assert [res + 1] = r2
-    # assert [res + 2] = r3
-    # dot_product_matrix(
-    #     m_1=ptr, m_2=ptr1, row=0, col=0, step=6, m_1_cols=ROWS, m_2_rows=COLS, res=res
-    # )
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
-    # serialize_word([[res + 2]])
-    # serialize_word([[res + 2] + 1])
-
-    # let (local ptr : felt*) = alloc()
-    # let (local ptr1 : felt*) = alloc()
-    # let (local res : felt*) = alloc()
-    # assert [ptr] = 1
-    # assert [ptr + 1] = 1
-    # assert [ptr + 2] = 1
-    # assert [ptr1] = 1
-    # assert [ptr1 + 1] = 2
-    # assert [ptr1 + 2] = 3
-    # sum_array(array_1=ptr, array_2=ptr1, size=3, res=res)
-    # serialize_word([res])
-    # serialize_word([res + 1])
-    # serialize_word([res + 2])
-
-    # let (local ptr : felt**) = alloc()
-    # let (local ptr1 : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [ptr + 2] = r3
-    # assert [[ptr]] = 1
-    # assert [[ptr] + 1] = 1
-    # assert [[ptr + 1]] = 1
-    # assert [[ptr + 1] + 1] = 1
-    # assert [[ptr + 2]] = 1
-    # assert [[ptr + 2] + 1] = 1
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # assert [ptr1 + 2] = r3
-    # assert [[ptr1]] = 2
-    # assert [[ptr1] + 1] = 2
-    # assert [[ptr1 + 1]] = 2
-    # assert [[ptr1 + 1] + 1] = 2
-    # assert [[ptr1 + 2]] = 2
-    # assert [[ptr1 + 2] + 1] = 2
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # let (local r3) = alloc()
-    # assert [res] = r1
-    # assert [res + 1] = r2
-    # assert [res + 2] = r3
-    # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # diff_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # div_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # div_matrix_by_scalar(m_1=ptr1, divider=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
-    # serialize_word([[res + 2]])
-    # serialize_word([[res + 2] + 1])
-
-    # let (res) = cosh(1)
-    # serialize_word(res)
-    # let (res) = sinh(1)
-    # serialize_word(res)
-    # let (res) = tanh(1)
-    # serialize_word(res)
-
-    # let (local ptr : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [[ptr]] = 1
-    # assert [[ptr] + 1] = 1
-    # assert [[ptr + 1]] = 1
-    # assert [[ptr + 1] + 1] = 1
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [res] = r1
-    # assert [res + 1] = r2
-    # matrix_tanh(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=res)
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
-
-    # let (local ptr : felt**) = alloc()
-    # let (local ptr1 : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [[ptr]] = 1
-    # assert [[ptr] + 1] = 1
-    # assert [[ptr + 1]] = 1
-    # assert [[ptr + 1] + 1] = 1
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # matrix_sign_inversion(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
-    # serialize_word([[ptr1]])
-    # serialize_word([[ptr1] + 1])
-    # serialize_word([[ptr1 + 1]])
-    # serialize_word([[ptr1 + 1] + 1])
-
-    # let (result) = log(8)
-    # serialize_word(result)
-
-    # let (local ptr1 : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # init_matrix(value=5, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
-    # serialize_word([[ptr1]])
-    # serialize_word([[ptr1] + 1])
-    # serialize_word([[ptr1 + 1]])
-    # serialize_word([[ptr1 + 1] + 1])
-
+    # serialize_word([[[p_history].w1]])
+    # serialize_word([[[p_history].w1] + 1])
+    # serialize_word([[[p_history].w1 + 1]])
+    # serialize_word([[[p_history].w1 + 1] + 1])
     return ()
 end

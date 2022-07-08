@@ -118,7 +118,7 @@ def model(X, Y, n_x, n_h, n_y, num_of_iters, learning_rate):
 def predict(X, parameters):
     a2, _ = forward_prop(X, parameters)
     yhat = a2
-    yhat = np.squeeze(yhat)
+    # yhat = np.squeeze(yhat)
     if(yhat >= 0.5):
         y_predict = 1
     else:
