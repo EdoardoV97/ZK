@@ -269,7 +269,7 @@ end
 
 # Divide all matrix element by a scalar
 func div_matrix_by_scalar{range_check_ptr}(
-    m_1 : felt**,
+    m : felt**,
     divider : felt,
     row : felt,
     col : felt,
@@ -298,7 +298,7 @@ func div_matrix_by_scalar{range_check_ptr}(
     %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
 
     div_matrix_by_scalar(
-        m_1=m_1, divider=divider, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
+        m=m, divider=divider, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
     )
     return ()
 end
