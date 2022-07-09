@@ -18,6 +18,8 @@ from ml_library import (
     mul_matrix_by_scalar,
 )
 
+const PRECISION = 100
+
 # Initialize the constant hyperparameters
 const N_X = 2
 const N_H = 2
@@ -229,7 +231,7 @@ func backward_propagation{range_check_ptr}(
 end
 
 # # This is the GD
-func update_parameters(
+func update_parameters{range_check_ptr}(
     dW1 : felt**,
     db1 : felt**,
     dW2 : felt**,
@@ -293,10 +295,11 @@ func update_parameters(
     let (local r1) = alloc()
     assert [mul] = r1
     mul_matrix_by_scalar(m=db2, factor=LEARNING_RATE, row=0, col=0, step=N_Y*1, rows=N_Y, cols=1, res=mul)
-    diff_matrix(m_1=[p_history].b2, m_2=mul, row=0, col=0, step==N_Y*1, rows=N_Y, cols=1, res=new_parameters.b2)
+    diff_matrix(m_1=[p_history].b2, m_2=mul, row=0, col=0, step=N_Y*1, rows=N_Y, cols=1, res=new_parameters.b2)
 
 
     assert [p_history + 1] = new_parameters
+    return ()
 end
 
 # X, Y, n_x, n_h, n_y, num_of_iters, learning_rate
@@ -404,8 +407,12 @@ func main{output_ptr : felt*, range_check_ptr}():
     assert [p_history] = parameters
 
     # Initialize all the matrix with all elements
-    init_matrix(value=0, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=parameters.w1)
-    init_matrix(value=0, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=parameters.w2)
+    # init_matrix(value=0, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=parameters.w1)
+    assert [[parameters.w1]] = 3 * PRECISION
+    assert [[parameters.w1] + 1] = -3 * PRECISION
+    assert [[parameters.w1 + 1]] = -3 * PRECISION
+    assert [[parameters.w1 + 1] + 1] = 3 * PRECISION
+    init_matrix(value=-5*PRECISION, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=parameters.w2)
     init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
     init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
 

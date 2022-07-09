@@ -12,9 +12,11 @@ def sigmoid(z):
     return 1/(1 + np.exp(-z))
 
 def initialize_parameters(n_x, n_h, n_y):
-    W1 = np.random.randn(n_h, n_x)
+    # W1 = np.random.randn(n_h, n_x)
+    W1 = [[ 3, -3],[-3,  3]]
     b1 = np.zeros((n_h, 1))
-    W2 = np.random.randn(n_y, n_h)
+    W2 = np.array([[-5, -5]])
+    # W2 = np.random.randn(n_y, n_h)
     b2 = np.zeros((n_y, 1))
 
     parameters = {
@@ -147,6 +149,8 @@ num_of_iters = 1000
 learning_rate = 0.3
 
 trained_parameters = model(X, Y, n_x, n_h, n_y, num_of_iters, learning_rate)
+print("\nParameters value at the end of training:")
+print(trained_parameters)
 
 # Test 2X1 vector to calculate the XOR of its elements. 
 # Try (0, 0), (0, 1), (1, 0), (1, 1)
