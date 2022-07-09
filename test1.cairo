@@ -15,6 +15,7 @@ from ml_library import (
     diff_matrix,
     matrix_pow,
     mul_matrix,
+    mul_matrix_by_scalar,
 )
 
 # Initialize the constant hyperparameters
@@ -34,7 +35,7 @@ struct Parameters:
 end
 
 func forward_propagation{range_check_ptr}(
-    X : felt**, parameters : Parameters*, A1 : felt**, A2 : felt**
+    X : felt**, parameters : Parameters, A1 : felt**, A2 : felt**
 ):
     alloc_locals
     let (local temp : felt**) = alloc()  # 2x4 matrix
@@ -52,11 +53,11 @@ func forward_propagation{range_check_ptr}(
     # 1) temp = np.dot(W1, X)
     #    Z1 = temp + b1
     dot_product_matrix(
-        m_1=[parameters].w1, m_2=X, row=0, col=0, step=N_X * m, m_1_cols=N_H, m_2_rows=2, res=temp
+        m_1=parameters.w1, m_2=X, row=0, col=0, step=N_X * m, m_1_cols=N_H, m_2_rows=2, res=temp
     )
     sum_matrix_and_vector(
         m=temp,
-        v=[parameters].b1,
+        v=parameters.b1,
         index=0,
         num_rows_m=f,
         num_cols_m=m,
@@ -72,7 +73,7 @@ func forward_propagation{range_check_ptr}(
     # 3) # temp2 = np.dot(W2, A1)
     # Z2 = temp2 + b2
     dot_product_matrix(
-        m_1=[parameters].w2,
+        m_1=parameters.w2,
         m_2=A1,
         row=0,
         col=0,
@@ -84,7 +85,7 @@ func forward_propagation{range_check_ptr}(
     # Extra step to transform an 1x1 matrix(felt**) in a N_Y*m matrix(same as temp2)
     let (local b1_expanded : felt**) = alloc()
     init_matrix(
-        value=[[[parameters].b1]], row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=b1_expanded
+        value=[[parameters.b1]], row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=b1_expanded
     )
     sum_matrix(m_1=temp2, m_2=b1_expanded, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=Z2)
 
@@ -97,7 +98,7 @@ end
 func backward_propagation{range_check_ptr}(
     X : felt**,
     Y : felt**,
-    parameters : Parameters*,
+    parameters : Parameters,
     A1 : felt**,
     A2 : felt**,
     dW1 : felt**,
@@ -151,7 +152,7 @@ func backward_propagation{range_check_ptr}(
     # 3)   dZ1 = np.multiply(np.dot(W2.T, dZ2), 1-np.power(A1, 2))
     # 1st step: W2.T
     let (local transpose : felt**) = alloc()  # 2x1 matrix
-    matrix_transpose(m=[parameters].w2, index=0, rows=N_Y, cols=N_H, res=transpose)
+    matrix_transpose(m=parameters.w2, index=0, rows=N_Y, cols=N_H, res=transpose)
     # 2nd step: (np.dot(transpose, dZ2) = 2x4 matrix
     let (local dot_product : felt**) = alloc()
     let (local r1) = alloc()
@@ -228,14 +229,86 @@ func backward_propagation{range_check_ptr}(
 end
 
 # # This is the GD
-# func update_parameters():
-# end
+func update_parameters(
+    dW1 : felt**,
+    db1 : felt**,
+    dW2 : felt**,
+    db2 : felt**,
+    p_history : Parameters*
+):
+    alloc_locals
+    local new_parameters : Parameters
+    let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_w1] = r1
+    assert [alloc_w1 + 1] = r2
+    let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
+    let (local r1) = alloc()
+    assert [alloc_w2] = r1
+    let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_b1] = r1
+    assert [alloc_b1 + 1] = r2
+    let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
+    let (local r1) = alloc()
+    assert [alloc_b2] = r1
+    assert new_parameters.w1 = alloc_w1
+    assert new_parameters.w2 = alloc_w2
+    assert new_parameters.b1 = alloc_b1
+    assert new_parameters.b2 = alloc_b2
+
+
+    # W1 = W1 - learning_rate*dW1
+    let (local mul : felt**) = alloc()
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [mul] = r1
+    assert [mul + 1] = r2
+    mul_matrix_by_scalar(m=dW1, factor=LEARNING_RATE, row=0, col=0, step=N_X*N_H, rows=N_X, cols=N_H, res=mul)
+    diff_matrix(m_1=[p_history].w1, m_2=mul, row=0, col=0, step=N_X*N_H, rows=N_X, cols=N_H, res=new_parameters.w1)
+
+
+    # b1 = b1 - learning_rate*db1
+    let (local mul : felt**) = alloc()
+    let (local r1) = alloc()
+    assert [mul] = r1
+    mul_matrix_by_scalar(m=db1, factor=LEARNING_RATE, row=0, col=0, step=N_H*1, rows=N_H, cols=1, res=mul)
+    diff_matrix(m_1=[p_history].b1, m_2=mul, row=0, col=0, step=N_H*1, rows=N_H, cols=1, res=new_parameters.b1)
+
+
+    # W2 = W2 - learning_rate*dW2
+    let (local mul : felt**) = alloc()
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [mul] = r1
+    assert [mul + 1] = r2
+    mul_matrix_by_scalar(m=dW2, factor=LEARNING_RATE, row=0, col=0, step=N_Y*N_H, rows=N_Y, cols=N_H, res=mul)
+    diff_matrix(m_1=[p_history].w2, m_2=mul, row=0, col=0, step=N_Y*N_H, rows=N_Y, cols=N_H, res=new_parameters.w2)
+
+
+    # b2 = b2 - learning_rate*db2
+    let (local mul : felt**) = alloc()
+    let (local r1) = alloc()
+    assert [mul] = r1
+    mul_matrix_by_scalar(m=db2, factor=LEARNING_RATE, row=0, col=0, step=N_Y*1, rows=N_Y, cols=1, res=mul)
+    diff_matrix(m_1=[p_history].b2, m_2=mul, row=0, col=0, step==N_Y*1, rows=N_Y, cols=1, res=new_parameters.b2)
+
+
+    assert [p_history + 1] = new_parameters
+end
 
 # X, Y, n_x, n_h, n_y, num_of_iters, learning_rate
 func training{range_check_ptr}(
-    X : felt**, Y : felt**, parameters : Parameters*, num_of_iters : felt, learning_rate : felt
+    X : felt**, Y : felt**, p_history : Parameters*, num_of_iters : felt
 ):
     alloc_locals
+
+    if num_of_iters == 0:
+        return ()
+    end
+
     let (local A1 : felt**) = alloc()  # 2x4 matrix
     let (local r1) = alloc()
     let (local r2) = alloc()
@@ -246,9 +319,9 @@ func training{range_check_ptr}(
     # let (local r1) = alloc()
     # assert [A2] = r1
 
-    forward_propagation(X=X, parameters=parameters, A1=A1, A2=A2)
+    forward_propagation(X=X, parameters=[p_history], A1=A1, A2=A2)
 
-    # TODO allocate  dW1, db1, dW2, db2
+    # Allocate  dW1, db1, dW2, db2
     let (local dW1 : felt**) = alloc()  # 2x2 matrix
     let (local r1) = alloc()
     let (local r2) = alloc()
@@ -267,9 +340,12 @@ func training{range_check_ptr}(
     assert [db2 + 1] = r2
 
     backward_propagation(
-        X=X, Y=Y, parameters=parameters, A1=A1, A2=A2, dW1=dW1, db1=db1, dW2=dW2, db2=db2
+        X=X, Y=Y, parameters=[p_history], A1=A1, A2=A2, dW1=dW1, db1=db1, dW2=dW2, db2=db2
     )
-    return ()
+
+    update_parameters(dW1=dW1, db1=db1, dW2=dW2, db2=db2, p_history=p_history)
+
+    return training(X=X, Y=Y, p_history=p_history+1, num_of_iters=num_of_iters-1)
 end
 
 func main{output_ptr : felt*, range_check_ptr}():
@@ -332,6 +408,8 @@ func main{output_ptr : felt*, range_check_ptr}():
     init_matrix(value=0, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=parameters.w2)
     init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
     init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
+
+    training(X=X, Y=Y, p_history=p_history, num_of_iters=2)
 
     # serialize_word([[[p_history].w1]])
     # serialize_word([[[p_history].w1] + 1])
