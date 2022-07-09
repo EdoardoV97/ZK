@@ -184,7 +184,7 @@ func backward_propagation{range_check_ptr}(
     let (local r2) = alloc()
     assert [ones_matrix] = r1
     assert [ones_matrix + 1] = r2
-    init_matrix(value=1, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=ones_matrix)
+    init_matrix(value=1*PRECISION, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=ones_matrix)
     let (local diff_m : felt**) = alloc()  # Matrix N_X * m
     let (local r1) = alloc()
     let (local r2) = alloc()

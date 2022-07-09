@@ -5,6 +5,9 @@ from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.alloc import alloc
 
+const PRECISION = 100
+const DIV_BOUND = 10000000000
+
 # Function that return dot product of two vector array.
 func dot_product_array(array_1 : felt*, array_2 : felt*, size : felt) -> (res : felt):
     if size == 0:
@@ -16,7 +19,7 @@ func dot_product_array(array_1 : felt*, array_2 : felt*, size : felt) -> (res : 
     return (res=[array_1] * [array_2] + rest_of_product)
 end
 
-func dot_product_matrix(
+func dot_product_matrix{range_check_ptr}(
     m_1 : felt**,
     m_2 : felt**,
     row : felt,
@@ -44,8 +47,9 @@ func dot_product_matrix(
     get_column(m=m_2, rows=m_2_rows, index=col, res=column_array)
 
     let (arr_prod) = dot_product_array(array_1=[m_1 + row], array_2=column_array, size=m_1_cols)
-    assert [[res + row] + col] = arr_prod
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.arr_prod}") %}
+    let (result, reminder) = signed_div_rem(arr_prod, PRECISION, DIV_BOUND)
+    assert [[res + row] + col] = result
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
 
     dot_product_matrix(
         m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, m_1_cols=m_1_cols, m_2_rows=m_2_rows, res=res
@@ -201,7 +205,7 @@ func diff_matrix(
 end
 
 # Multiply matrixes element wise
-func mul_matrix(
+func mul_matrix{range_check_ptr}(
     m_1 : felt**,
     m_2 : felt**,
     row : felt,
@@ -226,8 +230,9 @@ func mul_matrix(
         assert j = col + 1
     end
     assert sum = [[m_1 + row] + col] * [[m_2 + row] + col]
-    assert [[res + row] + col] = sum
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.sum}") %}
+    let (result, reminder) = signed_div_rem(sum, PRECISION, DIV_BOUND)
+    assert [[res + row] + col] = result
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
 
     mul_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
@@ -292,8 +297,7 @@ func div_matrix_by_scalar{range_check_ptr}(
         assert i = row
         assert j = col + 1
     end
-    let (bound) = pow(10, 10)
-    let (division, r) = signed_div_rem([[m + row] + col], divider, bound)
+    let (division, r) = signed_div_rem([[m + row] + col], divider, DIV_BOUND)
     assert [[res + row] + col] = division
     %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
 
@@ -339,11 +343,10 @@ end
 func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
     alloc_locals
     const e = 271828  # 2.71828 * 10^5
-    let (local precision) = pow(10, 5)
     let (local internal_precision) = pow(10, z * 5)
     let (pow_res) = pow(base=e, exp=z)
-    let (pow_res_inverted, r1) = unsigned_div_rem(1 * internal_precision * precision, pow_res)
-    let (res, r2) = unsigned_div_rem(1 * precision * precision, 1 * precision + pow_res_inverted)
+    let (pow_res_inverted, r1) = unsigned_div_rem(1 * internal_precision * PRECISION, pow_res)
+    let (res, r2) = unsigned_div_rem(1 * PRECISION * PRECISION, 1 * PRECISION + pow_res_inverted) # Unsigned because operands are always positive
     return (res=res)
 end
 # Activation function
@@ -364,15 +367,14 @@ end
 func sinh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
     const e = 271828  # 2.71828 * 10^5
-    let (local precision) = pow(10, 5)
     let (local internal_precision) = pow(10, x * 5)
 
     let (local pow_res1) = pow(base=e, exp=x)
 
     let (pow_res2) = pow(base=e, exp=x)
-    let (pow_res2_inverted, r1) = unsigned_div_rem(1 * internal_precision * precision, pow_res2)
+    let (pow_res2_inverted, r1) = signed_div_rem(1 * internal_precision * PRECISION, pow_res2, DIV_BOUND)
 
-    let (res, r2) = unsigned_div_rem((pow_res1 - pow_res2_inverted), 2)
+    let (res, r2) = signed_div_rem((pow_res1 - pow_res2_inverted), 2, DIV_BOUND)
     return (res=res)
 end
 
@@ -380,27 +382,24 @@ end
 func cosh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
     const e = 271828  # 2.71828 * 10^5
-    let (local precision) = pow(10, 5)
     let (local internal_precision) = pow(10, x * 5)
 
     let (local pow_res1) = pow(base=e, exp=x)
 
     let (pow_res2) = pow(base=e, exp=x)
-    let (pow_res2_inverted, r1) = unsigned_div_rem(1 * internal_precision * precision, pow_res2)
+    let (pow_res2_inverted, r1) = signed_div_rem(1 * internal_precision * PRECISION, pow_res2, DIV_BOUND)
 
-    let (res, r2) = unsigned_div_rem((pow_res1 + pow_res2_inverted), 2)
+    let (res, r2) = signed_div_rem((pow_res1 + pow_res2_inverted), 2, DIV_BOUND)
     return (res=res)
 end
 
 # Scalar tanh function
 func tanh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
-    let (local precision) = pow(10, 5)
-
     let (local sinh_r) = sinh(x=x)
     let (local cosh_r) = cosh(x=x)
 
-    let (res, r2) = unsigned_div_rem(sinh_r * precision, cosh_r)
+    let (res, r2) = signed_div_rem(sinh_r*PRECISION, cosh_r, DIV_BOUND)
     return (res=res)
 end
 
@@ -442,6 +441,7 @@ func matrix_pow{range_check_ptr}(
     res : felt**,
 ) -> ():
     alloc_locals
+    let (local pow_precision) = pow(PRECISION, exp-1)
     if step == 0:
         return ()
     end
@@ -456,8 +456,9 @@ func matrix_pow{range_check_ptr}(
     end
 
     let (local pow_r) = pow([[m + row] + col], exp)
-    assert [[res + row] + col] = pow_r
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.pow_r}") %}
+    let (result, reminder) = signed_div_rem(pow_r, pow_precision, DIV_BOUND)
+    assert [[res + row] + col] = result
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
     matrix_pow(m=m, exp=exp, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
 end
