@@ -269,7 +269,7 @@ end
 
 # Divide all matrix element by a scalar
 func div_matrix_by_scalar{range_check_ptr}(
-    m_1 : felt**,
+    m : felt**,
     divider : felt,
     row : felt,
     col : felt,
@@ -293,12 +293,12 @@ func div_matrix_by_scalar{range_check_ptr}(
         assert j = col + 1
     end
     let (pow_res) = pow(10, 10)
-    let (division, r) = signed_div_rem([[m_1 + row] + col], divider, pow_res)
+    let (division, r) = signed_div_rem([[m + row] + col], divider, pow_res)
     assert [[res + row] + col] = division
     %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
 
     div_matrix_by_scalar(
-        m_1=m_1, divider=divider, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
+        m=m, divider=divider, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
     )
     return ()
 end
