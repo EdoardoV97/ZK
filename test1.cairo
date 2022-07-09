@@ -367,16 +367,16 @@ func main{output_ptr : felt*, range_check_ptr}():
         # Copy X
         index = 0
         for x in program_input['X'][0]:
-            memory[ids.r1 + index] = x
+            memory[ids.r1 + index] = x*ids.PRECISION
             index += 1
         index = 0
         for x in program_input['X'][1]:
-            memory[ids.r2 + index] = x
+            memory[ids.r2 + index] = x*ids.PRECISION
             index += 1
         # Copy Y
         index = 0
         for y in program_input['Y'][0]:
-            memory[ids.r3 + index] = y
+            memory[ids.r3 + index] = y*ids.PRECISION
             index += 1
     %}
     # TODO Compute merkle_tree root of input data and insert an assert to check if result equal to known harcoded value
