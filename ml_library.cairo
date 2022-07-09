@@ -303,6 +303,38 @@ func div_matrix_by_scalar{range_check_ptr}(
     return ()
 end
 
+# Multiply all matrix element by a scalar
+func mul_matrix_by_scalar{range_check_ptr}(
+    m : felt**,
+    factor : felt,
+    row : felt,
+    col : felt,
+    step : felt,
+    rows : felt,
+    cols : felt,
+    res : felt**,
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    assert [[res + row] + col] = [[m + row] + col] * factor
+
+    mul_matrix_by_scalar(
+        m=m, factor=factor, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
+    )
+    return ()
+end
+
 # Scalar sigmoid function
 func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
     alloc_locals
@@ -668,6 +700,12 @@ end
 # let (local r1) = alloc()
 # let (local r2) = alloc()
 # let (local r3) = alloc()
+# assert [res] = r1
+# assert [res + 1] = r2
+# assert [res + 2] = r3
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# let (local r3) = alloc()
 # assert [ptr] = r1
 # assert [ptr + 1] = r2
 # assert [ptr + 2] = r3
@@ -691,7 +729,8 @@ end
 #     # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
 #     # diff_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
 #     # div_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-#     # div_matrix_by_scalar(m_1=ptr1, divider=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
+#     # div_matrix_by_scalar(m=ptr1, divider=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
+# mul_matrix_by_scalar(m=ptr, factor=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
 # serialize_word([[res]])
 # serialize_word([[res] + 1])
 # serialize_word([[res + 1]])
