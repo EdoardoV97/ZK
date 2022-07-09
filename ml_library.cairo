@@ -292,8 +292,8 @@ func div_matrix_by_scalar{range_check_ptr}(
         assert i = row
         assert j = col + 1
     end
-    let (pow_res) = pow(10, 10)
-    let (division, r) = signed_div_rem([[m_1 + row] + col], divider, pow_res)
+    let (bound) = pow(10, 10)
+    let (division, r) = signed_div_rem([[m_1 + row] + col], divider, bound)
     assert [[res + row] + col] = division
     %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
 
