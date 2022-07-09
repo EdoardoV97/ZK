@@ -14,7 +14,7 @@ from ml_library import (
     div_matrix_by_scalar,
     diff_matrix,
     matrix_pow,
-    mul_matrix
+    mul_matrix,
 )
 
 # Initialize the constant hyperparameters
@@ -117,30 +117,25 @@ func backward_propagation{range_check_ptr}(
     assert [dZ2] = r1
 
     # dZ2 = A2 - Y
-    diff_matrix(
-    m_1=A2,
-    m_2=Y,
-    row=0,
-    col=0,
-    step=N_Y*m,
-    rows=N_Y,
-    cols=m,
-    res=dZ2)
+    diff_matrix(m_1=A2, m_2=Y, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=dZ2)
 
     # 1)   dW2 = np.dot(dZ2, A1.T)/m
     # 1st step: A1.T
     let (local transpose : felt**) = alloc()  # 4x2 matrix
     matrix_transpose(m=A1, index=0, rows=N_X, cols=m, res=transpose)
-    # 2nd step 
+    # 2nd step
     # dot_product = np.dot(dZ2, A1.T)
     let (local dot_product : felt**) = alloc()  # 1x2 matrix
     let (local r1) = alloc()
     assert [dot_product] = r1
-    dot_product_matrix(m_1=dZ2, m_2=transpose, row=0, col=0, step=m*m, m_1_cols=m, m_2_rows=m, res=dot_product)
-    # 3rd step 
+    dot_product_matrix(
+        m_1=dZ2, m_2=transpose, row=0, col=0, step=m * m, m_1_cols=m, m_2_rows=m, res=dot_product
+    )
+    # 3rd step
     # dW2 = dot_product/m
-    div_matrix_by_scalar(m=dot_product, divider=m, row=0, col=0, step=N_Y*N_X, rows=N_Y, cols=N_X, res=dW2)
-
+    div_matrix_by_scalar(
+        m=dot_product, divider=m, row=0, col=0, step=N_Y * N_X, rows=N_Y, cols=N_X, res=dW2
+    )
 
     # 2)   db2 = np.sum(dZ2, axis=1, keepdims=True)/m
     # 1st step: np.sum(dZ2, axis=1, keepdims=True)
@@ -148,62 +143,75 @@ func backward_propagation{range_check_ptr}(
     sum_all_matrix_elements_by_axis(m=dZ2, axis=1, index=0, rows=N_Y, cols=m, res=sum)
     # 2nd step: sum/m
     let (local sum_matrix : felt**) = alloc()
-    assert [sum_matrix] = sum # To transform felt* in felt**
-    div_matrix_by_scalar(m=sum_matrix, divider=m, row=0, col=0, step=N_Y*1, rows=N_Y, cols=1, res=db2)
-    
+    assert [sum_matrix] = sum  # To transform felt* in felt**
+    div_matrix_by_scalar(
+        m=sum_matrix, divider=m, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=db2
+    )
 
     # 3)   dZ1 = np.multiply(np.dot(W2.T, dZ2), 1-np.power(A1, 2))
-    # 1st step: W2.T 
+    # 1st step: W2.T
     let (local transpose : felt**) = alloc()  # 2x1 matrix
     matrix_transpose(m=[parameters].w2, index=0, rows=N_Y, cols=N_H, res=transpose)
     # 2nd step: (np.dot(transpose, dZ2) = 2x4 matrix
-    let(local dot_product : felt**) = alloc()
+    let (local dot_product : felt**) = alloc()
     let (local r1) = alloc()
     let (local r2) = alloc()
     assert [dot_product] = r1
     assert [dot_product + 1] = r2
-    dot_product_matrix(m_1=transpose, m_2=dZ2, row=0, col=0, step=m*m, m_1_cols=N_Y, m_2_rows=N_Y, res=dot_product)
+    dot_product_matrix(
+        m_1=transpose,
+        m_2=dZ2,
+        row=0,
+        col=0,
+        step=m * m,
+        m_1_cols=N_Y,
+        m_2_rows=N_Y,
+        res=dot_product,
+    )
     # 3rd step: np.power(A1, 2)
     let (local A1_power : felt**) = alloc()  # 1x2 matrix
     let (local r1) = alloc()
     let (local r2) = alloc()
     assert [A1_power] = r1
     assert [A1_power + 1] = r2
-    matrix_pow(m=A1, exp=2, row=0, col=0, step=, rows=N_X, cols=m, res=A1_power)
+    matrix_pow(m=A1, exp=2, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=A1_power)
     # 4th step: 1-A1_power
-    let (local 1_matrix : felt**) = alloc()  # Matrix N_X * m of all 1
+    let (local ones_matrix : felt**) = alloc()  # Matrix N_X * m of all 1
     let (local r1) = alloc()
     let (local r2) = alloc()
-    assert [1_matrix] = r1
-    assert [1_matrix + 1] = r2
-    init_matrix(value=1, row=0, col=0, step=N_X*m, rows=N_X, cols=m, res=1_matrix)
-    let (local diff_matrix : felt**) = alloc()  # Matrix N_X * m
+    assert [ones_matrix] = r1
+    assert [ones_matrix + 1] = r2
+    init_matrix(value=1, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=ones_matrix)
+    let (local diff_m : felt**) = alloc()  # Matrix N_X * m
     let (local r1) = alloc()
     let (local r2) = alloc()
-    assert [diff_matrix] = r1
-    assert [diff_matrix + 1] = r2
-    diff_matrix(m_1=1_matrix,m_2=A1_power,row=0,col=0,step=N_X*m,rows=N_X,cols=m,res=diff_matrix)
+    assert [diff_m] = r1
+    assert [diff_m + 1] = r2
+    diff_matrix(
+        m_1=ones_matrix, m_2=A1_power, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=diff_m
+    )
     # 5th step: np.multiply(dot_product, diff_matrix)
-    mul_matrix(m_1=dot_product, m_2=diff_matrix, row=0, col=0, step=N_X*m, rows=N_X, cols=m, res=dZ1)
-
+    mul_matrix(m_1=dot_product, m_2=diff_m, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=dZ1)
 
     # 4)   dW1 = np.dot(dZ1, X.T)/m
     # 1st step: X.T
     let (local transpose : felt**) = alloc()  # 4x2 matrix
     matrix_transpose(m=X, index=0, rows=N_X, cols=m, res=transpose)
-    # 2nd step 
+    # 2nd step
     # dot_product = np.dot(dZ1, X.T)
     let (local dot_product : felt**) = alloc()  # 2x2 matrix
     let (local r1) = alloc()
     let (local r2) = alloc()
     assert [dot_product] = r1
     assert [dot_product + 1] = r2
-    dot_product_matrix(m_1=dZ1, m_2=transpose, row=0, col=0, step=m*m, m_1_cols=m, m_2_rows=m, res=dot_product)
-    # 3rd step 
+    dot_product_matrix(
+        m_1=dZ1, m_2=transpose, row=0, col=0, step=m * m, m_1_cols=m, m_2_rows=m, res=dot_product
+    )
+    # 3rd step
     # dW1 = dot_product/m
-    div_matrix_by_scalar(m=dot_product, divider=m, row=0, col=0, step=N_X*N_X, rows=N_X, cols=N_X, res=dW1)
-
-
+    div_matrix_by_scalar(
+        m=dot_product, divider=m, row=0, col=0, step=N_X * N_X, rows=N_X, cols=N_X, res=dW1
+    )
 
     # 5)   db1 = np.sum(dZ1, axis=1, keepdims=True)/m
     # 1st step: np.sum(dZ1, axis=1, keepdims=True)
@@ -211,9 +219,10 @@ func backward_propagation{range_check_ptr}(
     sum_all_matrix_elements_by_axis(m=dZ1, axis=1, index=0, rows=N_X, cols=m, res=sum)
     # 2nd step: sum/m
     let (local sum_matrix : felt**) = alloc()
-    assert [sum_matrix] = sum # To transform felt* in felt**
-    div_matrix_by_scalar(m=sum_matrix, divider=m, row=0, col=0, step=N_H*1, rows=N_H, cols=1, res=db1)
-
+    assert [sum_matrix] = sum  # To transform felt* in felt**
+    div_matrix_by_scalar(
+        m=sum_matrix, divider=m, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=db1
+    )
 
     return ()
 end
@@ -242,7 +251,9 @@ func training{range_check_ptr}(
     # TODO allocate  dW1, db1, dW2, db2
     let (local dW1 : felt**) = alloc()  # 2x2 matrix
     let (local r1) = alloc()
+    let (local r2) = alloc()
     assert [dW1] = r1
+    assert [dW1 + 1] = r2
     let (local db1 : felt**) = alloc()  # 1x1 matrix
     let (local r1) = alloc()
     assert [db1] = r1
@@ -251,7 +262,9 @@ func training{range_check_ptr}(
     assert [dW2] = r1
     let (local db2 : felt**) = alloc()  # 2x1 matrix
     let (local r1) = alloc()
+    let (local r2) = alloc()
     assert [db2] = r1
+    assert [db2 + 1] = r2
 
     backward_propagation(
         X=X, Y=Y, parameters=parameters, A1=A1, A2=A2, dW1=dW1, db1=db1, dW2=dW2, db2=db2
