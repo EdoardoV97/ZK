@@ -406,7 +406,7 @@ func sinh{range_check_ptr}(x : felt) -> (res : felt):
 
     local x_scaled
     let (local x_temp, r) = signed_div_rem(x, PRECISION, DIV_BOUND)
-    let (local is_l) = is_in_range(x_temp, (-PRECISION) + 1, PRECISION)
+    let (local is_l) = is_in_range(x, (-PRECISION) + 1, PRECISION)
     if is_l == 1:
         x_scaled = 0
     else:
@@ -449,7 +449,7 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
     const e = 271828  # 2.71828 * 10^5
     local x_scaled
     let (local x_temp, r) = signed_div_rem(x, PRECISION, DIV_BOUND)
-    let (local is_l) = is_in_range(x_temp, (-PRECISION) + 1, PRECISION)
+    let (local is_l) = is_in_range(x, (-PRECISION) + 1, PRECISION)
     if is_l == 1:
         x_scaled = 0
     else:
@@ -831,10 +831,10 @@ func main{output_ptr : felt*, range_check_ptr}():
     # serialize_word([[res + 1] + 2])
     # serialize_word([[res + 1] + 3])
 
-    # let (res) = cosh(300)
-    # serialize_word(res)
-    # let (res) = sinh(300)
-    # serialize_word(res)
+    let (res) = cosh(300)
+    serialize_word(res)
+    let (res) = sinh(300)
+    serialize_word(res)
     # let (res) = tanh(300)
     # serialize_word(res)
 
