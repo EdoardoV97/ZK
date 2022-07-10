@@ -55,7 +55,7 @@ func forward_propagation{range_check_ptr}(
     # 1) temp = np.dot(W1, X)
     #    Z1 = temp + b1
     dot_product_matrix(
-        m_1=parameters.w1, m_2=X, row=0, col=0, step=N_X * m, m_1_cols=N_H, m_2_rows=2, res=temp
+        m_1=parameters.w1, m_2=X, row=0, col=0, step=N_X * m, m_1_rows=N_X, m_1_cols=N_H, m_2_cols=m, res=temp
     )
     sum_matrix_and_vector(
         m=temp,
@@ -80,8 +80,9 @@ func forward_propagation{range_check_ptr}(
         row=0,
         col=0,
         step=N_Y * m,
+        m_1_rows=N_Y,
         m_1_cols=N_H,
-        m_2_rows=N_X,
+        m_2_cols=m,
         res=temp2,
     )
     # Extra step to transform an 1x1 matrix(felt**) in a N_Y*m matrix(same as temp2)
@@ -132,7 +133,7 @@ func backward_propagation{range_check_ptr}(
     let (local r1) = alloc()
     assert [dot_product] = r1
     dot_product_matrix(
-        m_1=dZ2, m_2=transpose, row=0, col=0, step=m * m, m_1_cols=m, m_2_rows=m, res=dot_product
+        m_1=dZ2, m_2=transpose, row=0, col=0, step=N_Y * N_X, m_1_rows=N_Y, m_1_cols=m, m_2_cols=N_X, res=dot_product
     )
     # 3rd step
     # dW2 = dot_product/m
@@ -166,9 +167,10 @@ func backward_propagation{range_check_ptr}(
         m_2=dZ2,
         row=0,
         col=0,
-        step=m * m,
+        step=N_H * m,
+        m_1_rows=N_H,
         m_1_cols=N_Y,
-        m_2_rows=N_Y,
+        m_2_cols=m,
         res=dot_product,
     )
     # 3rd step: np.power(A1, 2)
@@ -208,7 +210,7 @@ func backward_propagation{range_check_ptr}(
     assert [dot_product] = r1
     assert [dot_product + 1] = r2
     dot_product_matrix(
-        m_1=dZ1, m_2=transpose, row=0, col=0, step=m * m, m_1_cols=m, m_2_rows=m, res=dot_product
+        m_1=dZ1, m_2=transpose, row=0, col=0, step=N_X * N_X, m_1_rows=N_X, m_1_cols=m, m_2_cols=N_X, res=dot_product
     )
     # 3rd step
     # dW1 = dot_product/m
