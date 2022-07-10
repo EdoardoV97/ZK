@@ -51,16 +51,26 @@ func forward_propagation{range_check_ptr}(
     let (local Z1 : felt**) = alloc()  # 2x4 matrix
     let (local transpose : felt**) = alloc()  # 4x2 matrix
     let (local Z2 : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [Z2] = r1
 
     # 1) temp = np.dot(W1, X)
     #    Z1 = temp + b1
     %{ print("Dot product") %}
     dot_product_matrix(
-        m_1=parameters.w1, m_2=X, row=0, col=0, step=N_X * m, m_1_rows=N_X, m_1_cols=N_H, m_2_cols=m, res=temp
+        m_1=parameters.w1,
+        m_2=X,
+        row=0,
+        col=0,
+        step=N_X * m,
+        m_1_rows=N_X,
+        m_1_cols=N_H,
+        m_2_cols=m,
+        res=temp,
     )
-    %{ 
+    %{
         print(f"Temp matrix:\n{memory[memory[ids.temp]]} {memory[memory[ids.temp] + 1]} {memory[memory[ids.temp] + 2]} {memory[memory[ids.temp] + 3]}") 
-        print(f"{memory[memory[ids.temp + 1]]} {memory[memory[ids.temp + 1] + 1]} {memory[memory[ids.temp + 1] + 2]} {memory[memory[ids.temp + 1] + 3]}") 
+        print(f"{memory[memory[ids.temp + 1]]} {memory[memory[ids.temp + 1] + 1]} {memory[memory[ids.temp + 1] + 2]} {memory[memory[ids.temp + 1] + 3]}")
     %}
     sum_matrix_and_vector(
         m=temp,
@@ -73,17 +83,17 @@ func forward_propagation{range_check_ptr}(
         temp=transpose,
         res=Z1,
     )
-    %{ 
+    %{
         print(f"Z1 matrix:\n{memory[memory[ids.Z1]]} {memory[memory[ids.Z1] + 1]} {memory[memory[ids.Z1] + 2]} {memory[memory[ids.Z1] + 3]}") 
-        print(f"{memory[memory[ids.Z1 + 1]]} {memory[memory[ids.Z1 + 1] + 1]} {memory[memory[ids.Z1 + 1] + 2]} {memory[memory[ids.Z1 + 1] + 3]}") 
+        print(f"{memory[memory[ids.Z1 + 1]]} {memory[memory[ids.Z1 + 1] + 1]} {memory[memory[ids.Z1 + 1] + 2]} {memory[memory[ids.Z1 + 1] + 3]}")
     %}
 
     # 2) A1 = np.tanh(Z1)
     %{ print("Matrix_tanh") %}
     matrix_tanh(m=Z1, row=0, col=0, step=f * m, rows=f, cols=m, res=A1)
-    %{ 
+    %{
         print(f"A1 matrix:\n{memory[memory[ids.A1]]} {memory[memory[ids.A1] + 1]} {memory[memory[ids.A1] + 2]} {memory[memory[ids.A1] + 3]}") 
-        print(f"{memory[memory[ids.A1 + 1]]} {memory[memory[ids.A1 + 1] + 1]} {memory[memory[ids.A1 + 1] + 2]} {memory[memory[ids.A1 + 1] + 3]}") 
+        print(f"{memory[memory[ids.A1 + 1]]} {memory[memory[ids.A1 + 1] + 1]} {memory[memory[ids.A1 + 1] + 2]} {memory[memory[ids.A1 + 1] + 3]}")
     %}
 
     # 3) # temp2 = np.dot(W2, A1)
@@ -99,16 +109,22 @@ func forward_propagation{range_check_ptr}(
         m_2_cols=m,
         res=temp2,
     )
+    %{ print(f"Temp2 matrix:\n{memory[memory[ids.temp2]]} {memory[memory[ids.temp2] + 1]} {memory[memory[ids.temp2] + 2]} {memory[memory[ids.temp2] + 3]}") %}
     # Extra step to transform an 1x1 matrix(felt**) in a N_Y*m matrix(same as temp2)
     let (local b1_expanded : felt**) = alloc()
+    let (local r1 : felt*) = alloc()
+    let (local r2 : felt*) = alloc()
+    assert [b1_expanded] = r1
+    assert [b1_expanded + 1] = r2
     init_matrix(
         value=[[parameters.b1]], row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=b1_expanded
     )
     sum_matrix(m_1=temp2, m_2=b1_expanded, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=Z2)
+    %{ print(f"Z2 matrix:\n{memory[memory[ids.Z2]]} {memory[memory[ids.Z2] + 1]} {memory[memory[ids.Z2] + 2]} {memory[memory[ids.Z2] + 3]}") %}
 
     # 4) # A2 = sigmoid(Z2)
     array_sigmoid(z=[Z2], size=m, res=[A2])
-
+    %{ print(f"A2 matrix:\n{memory[memory[ids.A2]]} {memory[memory[ids.A2] + 1]} {memory[memory[ids.A2] + 2]} {memory[memory[ids.A2] + 3]}") %}
     return ()
 end
 
@@ -147,7 +163,15 @@ func backward_propagation{range_check_ptr}(
     let (local r1) = alloc()
     assert [dot_product] = r1
     dot_product_matrix(
-        m_1=dZ2, m_2=transpose, row=0, col=0, step=N_Y * N_X, m_1_rows=N_Y, m_1_cols=m, m_2_cols=N_X, res=dot_product
+        m_1=dZ2,
+        m_2=transpose,
+        row=0,
+        col=0,
+        step=N_Y * N_X,
+        m_1_rows=N_Y,
+        m_1_cols=m,
+        m_2_cols=N_X,
+        res=dot_product,
     )
     # 3rd step
     # dW2 = dot_product/m
@@ -200,7 +224,7 @@ func backward_propagation{range_check_ptr}(
     let (local r2) = alloc()
     assert [ones_matrix] = r1
     assert [ones_matrix + 1] = r2
-    init_matrix(value=1*PRECISION, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=ones_matrix)
+    init_matrix(value=1 * PRECISION, row=0, col=0, step=N_X * m, rows=N_X, cols=m, res=ones_matrix)
     let (local diff_m : felt**) = alloc()  # Matrix N_X * m
     let (local r1) = alloc()
     let (local r2) = alloc()
@@ -224,7 +248,15 @@ func backward_propagation{range_check_ptr}(
     assert [dot_product] = r1
     assert [dot_product + 1] = r2
     dot_product_matrix(
-        m_1=dZ1, m_2=transpose, row=0, col=0, step=N_X * N_X, m_1_rows=N_X, m_1_cols=m, m_2_cols=N_X, res=dot_product
+        m_1=dZ1,
+        m_2=transpose,
+        row=0,
+        col=0,
+        step=N_X * N_X,
+        m_1_rows=N_X,
+        m_1_cols=m,
+        m_2_cols=N_X,
+        res=dot_product,
     )
     # 3rd step
     # dW1 = dot_product/m
@@ -248,11 +280,7 @@ end
 
 # # This is the GD
 func update_parameters{range_check_ptr}(
-    dW1 : felt**,
-    db1 : felt**,
-    dW2 : felt**,
-    db2 : felt**,
-    p_history : Parameters*
+    dW1 : felt**, db1 : felt**, dW2 : felt**, db2 : felt**, p_history : Parameters*
 ):
     alloc_locals
     local new_parameters : Parameters
@@ -277,24 +305,43 @@ func update_parameters{range_check_ptr}(
     assert new_parameters.b1 = alloc_b1
     assert new_parameters.b2 = alloc_b2
 
-
     # W1 = W1 - learning_rate*dW1
     let (local mul : felt**) = alloc()
     let (local r1) = alloc()
     let (local r2) = alloc()
     assert [mul] = r1
     assert [mul + 1] = r2
-    mul_matrix_by_scalar(m=dW1, factor=LEARNING_RATE, row=0, col=0, step=N_X*N_H, rows=N_X, cols=N_H, res=mul)
-    diff_matrix(m_1=[p_history].w1, m_2=mul, row=0, col=0, step=N_X*N_H, rows=N_X, cols=N_H, res=new_parameters.w1)
-
+    mul_matrix_by_scalar(
+        m=dW1, factor=LEARNING_RATE, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=mul
+    )
+    diff_matrix(
+        m_1=[p_history].w1,
+        m_2=mul,
+        row=0,
+        col=0,
+        step=N_X * N_H,
+        rows=N_X,
+        cols=N_H,
+        res=new_parameters.w1,
+    )
 
     # b1 = b1 - learning_rate*db1
     let (local mul : felt**) = alloc()
     let (local r1) = alloc()
     assert [mul] = r1
-    mul_matrix_by_scalar(m=db1, factor=LEARNING_RATE, row=0, col=0, step=N_H*1, rows=N_H, cols=1, res=mul)
-    diff_matrix(m_1=[p_history].b1, m_2=mul, row=0, col=0, step=N_H*1, rows=N_H, cols=1, res=new_parameters.b1)
-
+    mul_matrix_by_scalar(
+        m=db1, factor=LEARNING_RATE, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=mul
+    )
+    diff_matrix(
+        m_1=[p_history].b1,
+        m_2=mul,
+        row=0,
+        col=0,
+        step=N_H * 1,
+        rows=N_H,
+        cols=1,
+        res=new_parameters.b1,
+    )
 
     # W2 = W2 - learning_rate*dW2
     let (local mul : felt**) = alloc()
@@ -302,17 +349,37 @@ func update_parameters{range_check_ptr}(
     let (local r2) = alloc()
     assert [mul] = r1
     assert [mul + 1] = r2
-    mul_matrix_by_scalar(m=dW2, factor=LEARNING_RATE, row=0, col=0, step=N_Y*N_H, rows=N_Y, cols=N_H, res=mul)
-    diff_matrix(m_1=[p_history].w2, m_2=mul, row=0, col=0, step=N_Y*N_H, rows=N_Y, cols=N_H, res=new_parameters.w2)
-
+    mul_matrix_by_scalar(
+        m=dW2, factor=LEARNING_RATE, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=mul
+    )
+    diff_matrix(
+        m_1=[p_history].w2,
+        m_2=mul,
+        row=0,
+        col=0,
+        step=N_Y * N_H,
+        rows=N_Y,
+        cols=N_H,
+        res=new_parameters.w2,
+    )
 
     # b2 = b2 - learning_rate*db2
     let (local mul : felt**) = alloc()
     let (local r1) = alloc()
     assert [mul] = r1
-    mul_matrix_by_scalar(m=db2, factor=LEARNING_RATE, row=0, col=0, step=N_Y*1, rows=N_Y, cols=1, res=mul)
-    diff_matrix(m_1=[p_history].b2, m_2=mul, row=0, col=0, step=N_Y*1, rows=N_Y, cols=1, res=new_parameters.b2)
-
+    mul_matrix_by_scalar(
+        m=db2, factor=LEARNING_RATE, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=mul
+    )
+    diff_matrix(
+        m_1=[p_history].b2,
+        m_2=mul,
+        row=0,
+        col=0,
+        step=N_Y * 1,
+        rows=N_Y,
+        cols=1,
+        res=new_parameters.b2,
+    )
 
     assert [p_history + 1] = new_parameters
     return ()
@@ -334,9 +401,8 @@ func training{range_check_ptr}(
     assert [A1] = r1
     assert [A1 + 1] = r2
     let (local A2 : felt**) = alloc()  # 1x4 matrix
-    # TODO check
-    # let (local r1) = alloc()
-    # assert [A2] = r1
+    let (local r1) = alloc()
+    assert [A2] = r1
 
     forward_propagation(X=X, parameters=[p_history], A1=A1, A2=A2)
 
@@ -364,7 +430,7 @@ func training{range_check_ptr}(
 
     update_parameters(dW1=dW1, db1=db1, dW2=dW2, db2=db2, p_history=p_history)
 
-    return training(X=X, Y=Y, p_history=p_history+1, num_of_iters=num_of_iters-1)
+    return training(X=X, Y=Y, p_history=p_history + 1, num_of_iters=num_of_iters - 1)
 end
 
 func main{output_ptr : felt*, range_check_ptr}():
@@ -425,10 +491,12 @@ func main{output_ptr : felt*, range_check_ptr}():
     # Initialize all the matrix with all elements
     # init_matrix(value=0, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=parameters.w1)
     assert [[parameters.w1]] = 3 * PRECISION
-    assert [[parameters.w1] + 1] = -3 * PRECISION
-    assert [[parameters.w1 + 1]] = -3 * PRECISION
+    assert [[parameters.w1] + 1] = (-3) * PRECISION
+    assert [[parameters.w1 + 1]] = (-3) * PRECISION
     assert [[parameters.w1 + 1] + 1] = 3 * PRECISION
-    init_matrix(value=-5*PRECISION, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=parameters.w2)
+    init_matrix(
+        value=(-5) * PRECISION, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=parameters.w2
+    )
     init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
     init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
 
