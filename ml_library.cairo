@@ -64,6 +64,7 @@ func get_column(m : felt**, rows : felt, index : felt, res : felt*) -> ():
         return ()
     end
     assert [res] = [[m] + index]
+    %{ print(f"Getting column #({ids.index}): {memory[ids.res]}") %}
     get_column(m=m + 1, rows=rows - 1, index=index, res=res + 1)
     return ()
 end
@@ -79,16 +80,16 @@ func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ()
 end
 
 # Transform a col-vector in an array
-func squeeze_col_vector(v : felt**, index : felt, size : felt, res : felt*):
-    alloc_locals
-    if index == size:
-        return ()
-    end
-    let (local column_element : felt*) = alloc()
-    get_column(m=v, rows=size, index=0, res=column_element)
-    assert [res + index] = [column_element]
-    return squeeze_col_vector(v=v, index=index + 1, size=size, res=res)
-end
+# func squeeze_col_vector(v : felt**, index : felt, size : felt, res : felt*):
+#     alloc_locals
+#     if index == size:
+#         return ()
+#     end
+#     let (local column_element : felt*) = alloc()
+#     get_column(m=v, rows=size, index=0, res=column_element)
+#     assert [res + index] = [column_element]
+#     return squeeze_col_vector(v=v, index=index + 1, size=size, res=res)
+# end
 
 # Sum a matrix and and a vector(row or column)
 func sum_matrix_and_vector(
@@ -111,7 +112,7 @@ func sum_matrix_and_vector(
         end
         sum_array(array_1=[m + index], array_2=[v], size=num_cols_v, res=sum)
         assert [res + index] = sum
-        # Summing col array to cols of matrix
+    # Summing col array to cols of matrix
     else:
         if index == num_cols_m:
             matrix_transpose(m=temp, index=0, rows=num_cols_m, cols=num_rows_m, res=res)
@@ -120,9 +121,10 @@ func sum_matrix_and_vector(
         let (local matr_col : felt*) = alloc()
         get_column(m=m, rows=num_rows_m, index=index, res=matr_col)
         let (local sq_v : felt*) = alloc()
-        squeeze_col_vector(v=v, index=0, size=num_rows_v, res=sq_v)
+        # squeeze_col_vector(v=v, index=0, size=num_rows_v, res=sq_v)
+        get_column(m=v, rows=num_rows_v, index=0, res=sq_v) 
         sum_array(array_1=matr_col, array_2=sq_v, size=num_rows_v, res=sum)
-        # %{ print(f"Writing at row:({ids.index}): {memory[ids.sum]} {memory[ids.sum + 1]} {memory[ids.sum + 2]}") %}
+        %{ print(f"Writing at row:({ids.index}): {memory[ids.sum]} {memory[ids.sum + 1]}") %}
         assert [temp + index] = sum
     end
     sum_matrix_and_vector(
@@ -701,32 +703,23 @@ end
 # let (local res : felt**) = alloc()
 # let (local r1) = alloc()
 # let (local r2) = alloc()
-# let (local r3) = alloc()
-# assert [res] = r1
-# assert [res + 1] = r2
-# assert [res + 2] = r3
-# let (local r1) = alloc()
-# let (local r2) = alloc()
-# let (local r3) = alloc()
 # assert [ptr] = r1
 # assert [ptr + 1] = r2
-# assert [ptr + 2] = r3
 # assert [[ptr]] = 0
-# assert [[ptr] + 1] = 0
-# assert [[ptr + 1]] = 1
-# assert [[ptr + 1] + 1] = 1
-# assert [[ptr + 2]] = 2
-# assert [[ptr + 2] + 1] = 2
+# assert [[ptr] + 1] = -300
+# assert [[ptr] + 2] = 300
+# assert [[ptr] + 3] = 0
+# assert [[ptr + 1]] = 0
+# assert [[ptr + 1] + 1] = 300
+# assert [[ptr + 1] + 2] = -300
+# assert [[ptr + 1] + 3] = 0
 # let (local r1) = alloc()
 # let (local r2) = alloc()
-# let (local r3) = alloc()
 # assert [ptr1] = r1
 # assert [ptr1 + 1] = r2
-# assert [ptr1 + 2] = r3
-# assert [[ptr1]] = 1
-# assert [[ptr1 + 1]] = 1
-# assert [[ptr1 + 2]] = 1
-# sum_matrix_and_vector(m=ptr, v=ptr1, index = 0, num_rows_m = 3, num_cols_m = 2, num_rows_v = 3, num_cols_v = 1, temp=temp, res=res)
+# assert [[ptr1]] = 0
+# assert [[ptr1 + 1]] = 0
+# sum_matrix_and_vector(m=ptr, v=ptr1, index = 0, num_rows_m = 2, num_cols_m = 4, num_rows_v = 2, num_cols_v = 1, temp=temp, res=res)
 #     # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
 #     # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
 #     # diff_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
@@ -735,10 +728,12 @@ end
 # mul_matrix_by_scalar(m=ptr, factor=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
 # serialize_word([[res]])
 # serialize_word([[res] + 1])
+# serialize_word([[res] + 2])
+# serialize_word([[res] + 3])
 # serialize_word([[res + 1]])
 # serialize_word([[res + 1] + 1])
-# serialize_word([[res + 2]])
-# serialize_word([[res + 2] + 1])
+# serialize_word([[res + 1] + 2])
+# serialize_word([[res + 1] + 3])
 
 # # let (res) = cosh(1)
 #     # serialize_word(res)
