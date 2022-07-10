@@ -24,7 +24,7 @@ const PRECISION = 100
 const N_X = 2
 const N_H = 2
 const N_Y = 1
-const NUM_OF_ITERS = 1000
+const NUM_OF_ITERS = 1
 const LEARNING_RATE = 3  # = 0.3 * 10
 const f = 2  # number of rows of X
 const m = 4  # number of cols of X
@@ -54,9 +54,14 @@ func forward_propagation{range_check_ptr}(
 
     # 1) temp = np.dot(W1, X)
     #    Z1 = temp + b1
+    %{ print("Dot product") %}
     dot_product_matrix(
         m_1=parameters.w1, m_2=X, row=0, col=0, step=N_X * m, m_1_rows=N_X, m_1_cols=N_H, m_2_cols=m, res=temp
     )
+    %{ 
+        print(f"Temp matrix:\n{memory[memory[ids.temp]]} {memory[memory[ids.temp] + 1]} {memory[memory[ids.temp] + 2]} {memory[memory[ids.temp] + 3]}") 
+        print(f"{memory[memory[ids.temp + 1]]} {memory[memory[ids.temp + 1] + 1]} {memory[memory[ids.temp + 1] + 2]} {memory[memory[ids.temp + 1] + 3]}") 
+    %}
     sum_matrix_and_vector(
         m=temp,
         v=parameters.b1,
@@ -68,9 +73,18 @@ func forward_propagation{range_check_ptr}(
         temp=transpose,
         res=Z1,
     )
+    %{ 
+        print(f"Z1 matrix:\n{memory[memory[ids.Z1]]} {memory[memory[ids.Z1] + 1]} {memory[memory[ids.Z1] + 2]} {memory[memory[ids.Z1] + 3]}") 
+        print(f"{memory[memory[ids.Z1 + 1]]} {memory[memory[ids.Z1 + 1] + 1]} {memory[memory[ids.Z1 + 1] + 2]} {memory[memory[ids.Z1 + 1] + 3]}") 
+    %}
 
     # 2) A1 = np.tanh(Z1)
+    %{ print("Matrix_tanh") %}
     matrix_tanh(m=Z1, row=0, col=0, step=f * m, rows=f, cols=m, res=A1)
+    %{ 
+        print(f"A1 matrix:\n{memory[memory[ids.A1]]} {memory[memory[ids.A1] + 1]} {memory[memory[ids.A1] + 2]} {memory[memory[ids.A1] + 3]}") 
+        print(f"{memory[memory[ids.A1 + 1]]} {memory[memory[ids.A1 + 1] + 1]} {memory[memory[ids.A1 + 1] + 2]} {memory[memory[ids.A1 + 1] + 3]}") 
+    %}
 
     # 3) # temp2 = np.dot(W2, A1)
     # Z2 = temp2 + b2
@@ -418,7 +432,7 @@ func main{output_ptr : felt*, range_check_ptr}():
     init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
     init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
 
-    training(X=X, Y=Y, p_history=p_history, num_of_iters=2)
+    training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
 
     # serialize_word([[[p_history].w1]])
     # serialize_word([[[p_history].w1] + 1])
