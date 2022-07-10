@@ -3,10 +3,11 @@ from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
+from starkware.cairo.common.math_cmp import is_nn
 from starkware.cairo.common.alloc import alloc
 
 const PRECISION = 100
-const DIV_BOUND = 10000000000
+const DIV_BOUND = 100000000000000000000000000000000000000
 
 # Function that return dot product of two vector array.
 func dot_product_array(array_1 : felt*, array_2 : felt*, size : felt) -> (res : felt):
@@ -50,7 +51,7 @@ func dot_product_matrix{range_check_ptr}(
     let (arr_prod) = dot_product_array(array_1=[m_1 + row], array_2=column_array, size=m_1_cols)
     let (result, reminder) = signed_div_rem(arr_prod, PRECISION, DIV_BOUND)
     assert [[res + row] + col] = result
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
 
     dot_product_matrix(
         m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, m_1_rows=m_1_rows, m_1_cols=m_1_cols, m_2_cols=m_2_cols, res=res
@@ -64,7 +65,7 @@ func get_column(m : felt**, rows : felt, index : felt, res : felt*) -> ():
         return ()
     end
     assert [res] = [[m] + index]
-    %{ print(f"Getting column #({ids.index}): {memory[ids.res]}") %}
+    # %{ print(f"Getting column #({ids.index}): {memory[ids.res]}") %}
     get_column(m=m + 1, rows=rows - 1, index=index, res=res + 1)
     return ()
 end
@@ -124,7 +125,7 @@ func sum_matrix_and_vector(
         # squeeze_col_vector(v=v, index=0, size=num_rows_v, res=sq_v)
         get_column(m=v, rows=num_rows_v, index=0, res=sq_v) 
         sum_array(array_1=matr_col, array_2=sq_v, size=num_rows_v, res=sum)
-        %{ print(f"Writing at row:({ids.index}): {memory[ids.sum]} {memory[ids.sum + 1]}") %}
+        # %{ print(f"Writing at row:({ids.index}): {memory[ids.sum]} {memory[ids.sum + 1]}") %}
         assert [temp + index] = sum
     end
     sum_matrix_and_vector(
@@ -370,14 +371,33 @@ end
 func sinh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
     const e = 271828  # 2.71828 * 10^5
-    let (local internal_precision) = pow(10, x * 5)
 
-    let (local pow_res1) = pow(base=e, exp=x)
+    let (local x_scaled, r) = signed_div_rem(x, PRECISION, DIV_BOUND)
 
-    let (pow_res2) = pow(base=e, exp=x)
-    let (pow_res2_inverted, r1) = signed_div_rem(1 * internal_precision * PRECISION, pow_res2, DIV_BOUND)
+    let (local is_not_negative) = is_nn(x)
 
-    let (res, r2) = signed_div_rem((pow_res1 - pow_res2_inverted), 2, DIV_BOUND)
+    if is_not_negative == 1:
+        let ( local internal_precision) = pow(10, x_scaled * 5)
+        # This is e^x
+        let (local exp_res) = pow(base=e, exp=x_scaled)
+        # This is e^-x
+        let (exp_res_inverted, r1) = signed_div_rem(1 * internal_precision * PRECISION, exp_res, DIV_BOUND)
+        # This is (e^x - e^-x)/2
+        let (res, r2) = signed_div_rem((exp_res* PRECISION - exp_res_inverted), 2, DIV_BOUND)
+    else:
+        let (local internal_precision_temp) = pow(10, - x_scaled * 5)
+        let (internal_precision, r1) = signed_div_rem(1 * PRECISION, internal_precision_temp, DIV_BOUND)
+        # This is e^-x
+        let (local exp_res_inverted) = pow(base=e, exp= - x_scaled)
+        # This is e^x
+        let (exp_res, r1) = signed_div_rem(1 * internal_precision * PRECISION, exp_res_inverted, DIV_BOUND)
+        # This is (e^x - e^-x)/2
+        let (res, r2) = signed_div_rem((exp_res* PRECISION - exp_res_inverted), 2, DIV_BOUND)
+    end 
+
+    %{ 
+        print(f"Sinh of {ids.x} = {ids.res}") 
+    %}
     return (res=res)
 end
 
@@ -385,14 +405,33 @@ end
 func cosh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
     const e = 271828  # 2.71828 * 10^5
-    let (local internal_precision) = pow(10, x * 5)
 
-    let (local pow_res1) = pow(base=e, exp=x)
+    let (local x_scaled, r) = signed_div_rem(x, PRECISION, DIV_BOUND)
 
-    let (pow_res2) = pow(base=e, exp=x)
-    let (pow_res2_inverted, r1) = signed_div_rem(1 * internal_precision * PRECISION, pow_res2, DIV_BOUND)
+    let (local is_not_negative) = is_nn(x)
 
-    let (res, r2) = signed_div_rem((pow_res1 + pow_res2_inverted), 2, DIV_BOUND)
+    if is_not_negative == 1:
+        let ( local internal_precision) = pow(10, x_scaled * 5)
+        # This is e^x
+        let (local exp_res) = pow(base=e, exp=x_scaled)
+        # This is e^-x
+        let (exp_res_inverted, r1) = signed_div_rem(1 * internal_precision * PRECISION, exp_res, DIV_BOUND)
+        # This is (e^x + e^-x)/2
+        let (res, r2) = signed_div_rem((exp_res* PRECISION + exp_res_inverted), 2, DIV_BOUND)
+    else:
+        let (local internal_precision_temp) = pow(10, - x_scaled * 5)
+        let (internal_precision, r1) = signed_div_rem(1 * PRECISION, internal_precision_temp, DIV_BOUND)
+        # This is e^-x
+        let (local exp_res_inverted) = pow(base=e, exp= - x_scaled)
+        # This is e^x
+        let (exp_res, r1) = signed_div_rem(1 * internal_precision * PRECISION, exp_res_inverted, DIV_BOUND)
+        # This is (e^x + e^-x)/2
+        let (res, r2) = signed_div_rem((exp_res* PRECISION + exp_res_inverted), 2, DIV_BOUND)
+    end 
+
+    %{ 
+        print(f"Cosh of {ids.x} = {ids.res}") 
+    %}
     return (res=res)
 end
 
@@ -403,6 +442,9 @@ func tanh{range_check_ptr}(x : felt) -> (res : felt):
     let (local cosh_r) = cosh(x=x)
 
     let (res, r2) = signed_div_rem(sinh_r*PRECISION, cosh_r, DIV_BOUND)
+    %{ 
+        print(f"Tanh of {ids.x} = {ids.res}") 
+    %}
     return (res=res)
 end
 
@@ -521,6 +563,8 @@ func matrix_transpose(m : felt**, index : felt, rows : felt, cols : felt, res : 
     get_column(m, rows=rows, index=index, res=column_array)
 
     assert [res + index] = column_array
+
+    # %{ print(f"Writing at row:({ids.index}): {memory[ids.column_array]} {memory[ids.column_array + 1]} {memory[ids.column_array + 2]} {memory[ids.column_array + 3]}") %}
 
     matrix_transpose(m=m, index=index + 1, rows=rows, cols=cols, res=res)
     return ()
