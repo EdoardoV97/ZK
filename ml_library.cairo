@@ -210,7 +210,7 @@ func diff_matrix(
     end
     assert diff = [[m_1 + row] + col] - [[m_2 + row] + col]
     assert [[res + row] + col] = diff
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.diff}") %}
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.diff}") %}
 
     diff_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
@@ -244,7 +244,7 @@ func mul_matrix{range_check_ptr}(
     assert sum = [[m_1 + row] + col] * [[m_2 + row] + col]
     let (result, reminder) = signed_div_rem(sum, PRECISION, DIV_BOUND)
     assert [[res + row] + col] = result
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
 
     mul_matrix(m_1=m_1, m_2=m_2, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
@@ -311,7 +311,7 @@ func div_matrix_by_scalar{range_check_ptr}(
     end
     let (division, r) = signed_div_rem([[m + row] + col], divider, DIV_BOUND)
     assert [[res + row] + col] = division
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.division}") %}
 
     div_matrix_by_scalar(
         m=m, divider=divider, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
@@ -553,7 +553,7 @@ func matrix_pow{range_check_ptr}(
     let (local pow_r) = pow([[m + row] + col], exp)
     let (result, reminder) = signed_div_rem(pow_r, pow_precision, DIV_BOUND)
     assert [[res + row] + col] = result
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
     matrix_pow(m=m, exp=exp, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
 end
