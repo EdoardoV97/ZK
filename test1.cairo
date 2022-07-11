@@ -56,7 +56,6 @@ func forward_propagation{range_check_ptr}(
 
     # 1) temp = np.dot(W1, X)
     #    Z1 = temp + b1
-    %{ print("Dot product") %}
     dot_product_matrix(
         m_1=parameters.w1,
         m_2=X,
@@ -632,9 +631,5 @@ func main{output_ptr : felt*, range_check_ptr}():
 
     training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
 
-    # serialize_word([[[p_history].w1]])
-    # serialize_word([[[p_history].w1] + 1])
-    # serialize_word([[[p_history].w1 + 1]])
-    # serialize_word([[[p_history].w1 + 1] + 1])
     return ()
 end

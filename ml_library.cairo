@@ -415,28 +415,31 @@ func sinh{range_check_ptr}(x : felt) -> (res : felt):
     let (local is_not_negative) = is_nn(x)
 
     if is_not_negative == 1:
-        let (local internal_precision) = pow(10, x_scaled * 5)
         # This is e^x
         let (local exp_res) = pow(base=e, exp=x_scaled)
         # This is e^-x
-        let (exp_res_inverted, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res, DIV_BOUND
-        )
+        let (exp_res_inverted, r1) = signed_div_rem(1 * PRECISION, exp_res, DIV_BOUND)
         # This is (e^x - e^-x)/2
         let (res, r2) = signed_div_rem((exp_res * PRECISION - exp_res_inverted), 2, DIV_BOUND)
+        %{
+            print(f"exp_res: {ids.exp_res}")
+            print(f"exp_res_inverted: {ids.exp_res_inverted}")
+            print(f"sinh: {ids.res}")
+        %}
+        local k = 0
     else:
-        let (local internal_precision_temp) = pow(10, (-x_scaled) * 5)
-        let (internal_precision, r1) = signed_div_rem(
-            1 * PRECISION, internal_precision_temp, DIV_BOUND
-        )
         # This is e^-x
         let (local exp_res_inverted) = pow(base=e, exp=-x_scaled)
         # This is e^x
-        let (exp_res, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res_inverted, DIV_BOUND
-        )
+        let (exp_res, r1) = signed_div_rem(1 * PRECISION, exp_res_inverted, DIV_BOUND)
         # This is (e^x - e^-x)/2
         let (res, r2) = signed_div_rem((exp_res * PRECISION - exp_res_inverted), 2, DIV_BOUND)
+        %{
+            print(f"exp_res: {ids.exp_res}")
+            print(f"exp_res_inverted: {ids.exp_res_inverted}")
+            print(f"sinh: {ids.res}")
+        %}
+        local k = 0
     end
 
     # %{ print(f"Sinh of {ids.x} = {ids.res}") %}
@@ -459,28 +462,31 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
     let (local is_not_negative) = is_nn(x)
 
     if is_not_negative == 1:
-        let (local internal_precision) = pow(10, x_scaled * 5)
         # This is e^x
         let (local exp_res) = pow(base=e, exp=x_scaled)
         # This is e^-x
-        let (exp_res_inverted, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res, DIV_BOUND
-        )
+        let (exp_res_inverted, r1) = signed_div_rem(1 * PRECISION, exp_res, DIV_BOUND)
         # This is (e^x + e^-x)/2
         let (res, r2) = signed_div_rem((exp_res * PRECISION + exp_res_inverted), 2, DIV_BOUND)
+        %{
+            print(f"exp_res: {ids.exp_res}")
+            print(f"exp_res_inverted: {ids.exp_res_inverted}")
+            print(f"cosh: {ids.res}")
+        %}
+        local k = 0
     else:
-        let (local internal_precision_temp) = pow(10, (-x_scaled) * 5)
-        let (internal_precision, r1) = signed_div_rem(
-            1 * PRECISION, internal_precision_temp, DIV_BOUND
-        )
         # This is e^-x
         let (local exp_res_inverted) = pow(base=e, exp=-x_scaled)
         # This is e^x
-        let (exp_res, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res_inverted, DIV_BOUND
-        )
+        let (exp_res, r1) = signed_div_rem(1 * PRECISION, exp_res_inverted, DIV_BOUND)
         # This is (e^x + e^-x)/2
         let (res, r2) = signed_div_rem((exp_res * PRECISION + exp_res_inverted), 2, DIV_BOUND)
+        %{
+            print(f"exp_res: {ids.exp_res}")
+            print(f"exp_res_inverted: {ids.exp_res_inverted}")
+            print(f"cosh: {ids.res}")
+        %}
+        local k = 0
     end
 
     # %{ print(f"Cosh of {ids.x} = {ids.res}") %}
@@ -831,11 +837,11 @@ end
 # serialize_word([[res + 1] + 2])
 # serialize_word([[res + 1] + 3])
 
-# let (res) = cosh(300)
+# let (res) = cosh(-300)
 # serialize_word(res)
-# let (res) = sinh(300)
+# let (res) = sinh(-300)
 # serialize_word(res)
-# let (res) = tanh(300)
+# let (res) = tanh(-300)
 # serialize_word(res)
 
 # let (local ptr : felt**) = alloc()
