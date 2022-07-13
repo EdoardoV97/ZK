@@ -25,7 +25,7 @@ const N_X = 2
 const N_H = 2
 const N_Y = 1
 const NUM_OF_ITERS = 1
-const LEARNING_RATE = 3  # = 0.3 * 10
+const LEARNING_RATE = 30  # = 0.3 * 100
 const f = 2  # number of rows of X
 const m = 4  # number of cols of X
 
@@ -475,12 +475,13 @@ func training{output_ptr : felt*, range_check_ptr}(
     X : felt**, Y : felt**, p_history : Parameters*, num_of_iters : felt
 ):
     alloc_locals
-    serialize_word(NUM_OF_ITERS - num_of_iters)
 
     if num_of_iters == 0:
         return ()
     end
 
+    serialize_word(NUM_OF_ITERS - num_of_iters)
+    
     let (local A1 : felt**) = alloc()  # 2x4 matrix
     let (local r1) = alloc()
     let (local r2) = alloc()
@@ -534,12 +535,12 @@ func training{output_ptr : felt*, range_check_ptr}(
     serialize_word([[dW1] + 1])
     serialize_word([[dW1 + 1]])
     serialize_word([[dW1 + 1] + 1])
-    # Print dW2
-    serialize_word([[dW2]])
-    serialize_word([[dW2] + 1])
     # Print db1
     serialize_word([[db1]])
     serialize_word([[db1 + 1]])
+    # Print dW2
+    serialize_word([[dW2]])
+    serialize_word([[dW2] + 1])
     # Print db2
     serialize_word([[db2]])
 

@@ -1,4 +1,4 @@
-%builtins output range_check
+# %builtins output range_check
 from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
@@ -343,7 +343,10 @@ func mul_matrix_by_scalar{range_check_ptr}(
         assert i = row
         assert j = col + 1
     end
-    assert [[res + row] + col] = [[m + row] + col] * factor
+
+    let (division, r) = signed_div_rem([[m + row] + col] * factor, PRECISION, DIV_BOUND)
+    assert [[res + row] + col] = division
+
 
     mul_matrix_by_scalar(
         m=m, factor=factor, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res
@@ -722,8 +725,8 @@ func sum_all_matrix_elements_by_axis(
     )
 end
 
-func main{output_ptr : felt*, range_check_ptr}():
-    alloc_locals
+# func main{output_ptr : felt*, range_check_ptr}():
+    # alloc_locals
 # # const ARRAY_SIZE = 3
 #     # const ROWS = 2
 #     # const COLS = 2
@@ -857,8 +860,8 @@ func main{output_ptr : felt*, range_check_ptr}():
 # serialize_word(res)
 # let (res) = cosh(120)
 # serialize_word(res)
-let (res) = tanh(3)
-serialize_word(res)
+# let (res) = tanh(3)
+# serialize_word(res)
 
 # let (local ptr : felt**) = alloc()
 # let (local res : felt**) = alloc()
@@ -931,5 +934,5 @@ serialize_word(res)
 # serialize_word([[res + 1] + 1])
 # serialize_word([[res + 2]])
 # serialize_word([[res + 2] + 1])
-    return ()
-end
+#     return ()
+# end
