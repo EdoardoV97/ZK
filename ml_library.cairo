@@ -1,8 +1,8 @@
-# %builtins output range_check
+%builtins output range_check
 from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
-from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem, assert_in_range
 from starkware.cairo.common.math_cmp import is_nn, is_in_range
 from starkware.cairo.common.alloc import alloc
 
@@ -400,102 +400,122 @@ func array_sigmoid{range_check_ptr}(z : felt*, size : felt, res : felt*) -> ():
 end
 
 # Scalar sinh function
+# NB x > =0
 func sinh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
-    const e = 271828  # 2.71828 * 10^5
-
+    const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
-    let (local x_temp, r) = signed_div_rem(x, PRECISION, DIV_BOUND)
-    let (local is_l) = is_in_range(x, (-PRECISION) + 1, PRECISION)
+    local x_internal_precision = PRECISION/10
+    # Check if x is out of the [-PRECISION, PRECISON] bound.
+    let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
+    let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
     if is_l == 1:
+        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our PRECISION
         x_scaled = 0
     else:
         x_scaled = x_temp
     end
-    let (local is_not_negative) = is_nn(x)
 
-    if is_not_negative == 1:
-        let (local internal_precision) = pow(10, x_scaled * 5)
-        # This is e^x
-        let (local exp_res) = pow(base=e, exp=x_scaled)
-        # This is e^-x
-        let (exp_res_inverted, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res, DIV_BOUND
-        )
-        # This is (e^x - e^-x)/2
-        let (res, r2) = signed_div_rem((exp_res * PRECISION - exp_res_inverted), 2, DIV_BOUND)
-    else:
-        let (local internal_precision_temp) = pow(10, (-x_scaled) * 5)
-        let (internal_precision, r1) = signed_div_rem(
-            1 * PRECISION, internal_precision_temp, DIV_BOUND
-        )
-        # This is e^-x
-        let (local exp_res_inverted) = pow(base=e, exp=-x_scaled)
-        # This is e^x
-        let (exp_res, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res_inverted, DIV_BOUND
-        )
-        # This is (e^x - e^-x)/2
-        let (res, r2) = signed_div_rem((exp_res * PRECISION - exp_res_inverted), 2, DIV_BOUND)
-    end
+    # Idea is to calculate with an hint the real e^x with x being the real number not scaled with our PRECISION.
+    # The result is then multiplied by PRECISION and rounded to integer
+    # We call this result y.
+    # Then we calculate e^x with x being scaled with our precision. We call this exp_res
+    # Now with an assert we pow y to obtain exp_res and we check that the y provided by the hint is in a certain range
+
+
+    # This is e^x
+    let (local exp_res) = pow(base=e, exp=x_scaled)
+    local y : felt
+    %{
+        from starkware.python.math_utils import isqrt
+        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x/x_internal_precision) * 100
+        # print(f"y = {ids.y}")
+    %}
+    let (local pow_temp) = pow(PRECISION, x_internal_precision) 
+    local exp_res_powered = exp_res * pow_temp
+    let (local pow_lower) = pow(y, x_internal_precision)
+    let (local pow_upper) = pow(y + 1, x_internal_precision)
+    assert_in_range(exp_res_powered, pow_lower, pow_upper)
+
+
+    # This is e^-x
+    let (exp_res_inverted, r1) = signed_div_rem(
+        1 * PRECISION * PRECISION, y, DIV_BOUND
+    )
+    # %{ print(f"Exp res: {ids.y}") %}
+    # %{ print(f"Exp res inverted: {ids.exp_res_inverted}") %}
+    # This is (e^x - e^-x)/2
+    let (res, r2) = signed_div_rem((y - exp_res_inverted), 2, DIV_BOUND)
 
     # %{ print(f"Sinh of {ids.x} = {ids.res}") %}
     return (res=res)
 end
 
 # Scalar cosh function
+# NB x > =0
 func cosh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
-    const e = 271828  # 2.71828 * 10^5
+    const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
-    let (local x_temp, r) = signed_div_rem(x, PRECISION, DIV_BOUND)
-    let (local is_l) = is_in_range(x, (-PRECISION) + 1, PRECISION)
+    local x_internal_precision = PRECISION/10
+    # Check if x is out of the [-PRECISION, PRECISON] bound.
+    let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
+    let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
     if is_l == 1:
+        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our PRECISION
         x_scaled = 0
     else:
         x_scaled = x_temp
     end
 
-    let (local is_not_negative) = is_nn(x)
+    # This is e^x
+    let (local exp_res) = pow(base=e, exp=x_scaled)
 
-    if is_not_negative == 1:
-        let (local internal_precision) = pow(10, x_scaled * 5)
-        # This is e^x
-        let (local exp_res) = pow(base=e, exp=x_scaled)
-        # This is e^-x
-        let (exp_res_inverted, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res, DIV_BOUND
-        )
-        # This is (e^x + e^-x)/2
-        let (res, r2) = signed_div_rem((exp_res * PRECISION + exp_res_inverted), 2, DIV_BOUND)
-    else:
-        let (local internal_precision_temp) = pow(10, (-x_scaled) * 5)
-        let (internal_precision, r1) = signed_div_rem(
-            1 * PRECISION, internal_precision_temp, DIV_BOUND
-        )
-        # This is e^-x
-        let (local exp_res_inverted) = pow(base=e, exp=-x_scaled)
-        # This is e^x
-        let (exp_res, r1) = signed_div_rem(
-            1 * internal_precision * PRECISION, exp_res_inverted, DIV_BOUND
-        )
-        # This is (e^x + e^-x)/2
-        let (res, r2) = signed_div_rem((exp_res * PRECISION + exp_res_inverted), 2, DIV_BOUND)
-    end
+    local y : felt
+    %{
+        from starkware.python.math_utils import isqrt
+        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x/x_internal_precision) * 100
+        # print(f"y = {ids.y}")
+    %}
+    let (local pow_temp) = pow(PRECISION, x_internal_precision) 
+    local exp_res_powered = exp_res * pow_temp
+    let (local pow_lower) = pow(y, x_internal_precision)
+    let (local pow_upper) = pow(y + 1, x_internal_precision)
+    assert_in_range(exp_res_powered, pow_lower, pow_upper)
+
+
+    # This is e^-x
+    let (exp_res_inverted, r1) = signed_div_rem(
+        1 * PRECISION * PRECISION, y, DIV_BOUND
+    )
+    # %{ print(f"Exp res: {ids.y}") %}
+    # %{ print(f"Exp res inverted: {ids.exp_res_inverted}") %}
+    # This is (e^x + e^-x)/2
+    let (res, r2) = signed_div_rem((y + exp_res_inverted), 2, DIV_BOUND)
 
     # %{ print(f"Cosh of {ids.x} = {ids.res}") %}
     return (res=res)
 end
 
 # Scalar tanh function
+# Use the fact that tanh is an odd function so f(x) = -f(x)
 func tanh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
-    let (local sinh_r) = sinh(x=x)
-    let (local cosh_r) = cosh(x=x)
-
-    let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
+    let (local is_not_negative) = is_nn(x)
+    # If x is positive
+    if is_not_negative == 1: 
+        let (local sinh_r) = sinh(x=x)
+        let (local cosh_r) = cosh(x=x)
+        let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
+        return (res=res)
+    # If x is negative
+    else:
+        let (local sinh_r) = sinh(x=-x)
+        let (local cosh_r) = cosh(x=-x)
+        let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
+        return (res=-res)
+    end
     # %{ print(f"Tanh of {ids.x} = {ids.res}") %}
-    return (res=res)
 end
 
 # Matrix tanh function
@@ -702,8 +722,8 @@ func sum_all_matrix_elements_by_axis(
     )
 end
 
-# func main{output_ptr : felt*, range_check_ptr}():
-#     alloc_locals
+func main{output_ptr : felt*, range_check_ptr}():
+    alloc_locals
 # # const ARRAY_SIZE = 3
 #     # const ROWS = 2
 #     # const COLS = 2
@@ -831,12 +851,14 @@ end
 # serialize_word([[res + 1] + 2])
 # serialize_word([[res + 1] + 3])
 
-# let (res) = cosh(300)
+# let (res) = sinh(160)
 # serialize_word(res)
-# let (res) = sinh(300)
+# let (res) = pow(10, 180)
 # serialize_word(res)
-# let (res) = tanh(300)
+# let (res) = cosh(120)
 # serialize_word(res)
+let (res) = tanh(3)
+serialize_word(res)
 
 # let (local ptr : felt**) = alloc()
 # let (local res : felt**) = alloc()
@@ -909,5 +931,5 @@ end
 # serialize_word([[res + 1] + 1])
 # serialize_word([[res + 2]])
 # serialize_word([[res + 2] + 1])
-#     return ()
-# end
+    return ()
+end
