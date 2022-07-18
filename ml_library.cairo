@@ -1,10 +1,12 @@
-%builtins output range_check
+%builtins output pedersen range_check
 from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem, assert_in_range
 from starkware.cairo.common.math_cmp import is_nn, is_in_range
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.hash import hash2
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 const PRECISION = 100
 const DIV_BOUND = 100000000000000000000000000000000000000
@@ -99,6 +101,25 @@ end
 #     assert [res + index] = [column_element]
 #     return squeeze_col_vector(v=v, index=index + 1, size=size, res=res)
 # end
+
+# Transform a matrix in an array (flattening from top-left to bottom-right)
+func matrix_flattening(m : felt**, step : felt, row : felt, col : felt, cols : felt, res : felt*):
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    assert [res] = [[m + row] + col]
+    return matrix_flattening(m=m, step=step - 1, row=i, col=j, cols=cols, res=res + 1)
+end
 
 # Sum a matrix and and a vector(row or column)
 func sum_matrix_and_vector(
@@ -693,7 +714,32 @@ func sum_all_matrix_elements_by_axis(
     )
 end
 
-func main{output_ptr : felt*, range_check_ptr}():
+func build_merkle_tree_level{hash_ptr : HashBuiltin*}(array : felt*, index : felt, res : felt*):
+    alloc_locals
+    if index == 0:
+        return ()
+    end
+    let (hash) = hash2([array], [array + 1])
+    assert [res] = hash
+    return build_merkle_tree_level(array=array + 2, index=index - 2, res=res + 1)
+end
+
+func build_merkle_root{hash_ptr : HashBuiltin*}(counter : felt, res : felt**) -> (
+    merkle_root : felt
+):
+    alloc_locals
+    if counter == 1:
+        return (merkle_root=[[res - 1]])
+    end
+    let (local row : felt*) = alloc()
+    assert [res] = row
+    %{ print(ids.counter) %}
+    build_merkle_tree_level(array=[res - 1], index=counter, res=row)
+    let (merkle_root) = build_merkle_root(counter=counter / 2, res=res + 1)
+    return (merkle_root=merkle_root)
+end
+
+func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
     # # const ARRAY_SIZE = 3
     #     # const ROWS = 2
@@ -770,19 +816,19 @@ func main{output_ptr : felt*, range_check_ptr}():
     # serialize_word([[res + 1] + 2])
     # serialize_word([[res + 1] + 3])
 
-    # # let (local ptr : felt*) = alloc()
-    #     # let (local ptr1 : felt*) = alloc()
-    #     # let (local res : felt*) = alloc()
-    #     # assert [ptr] = 1
-    #     # assert [ptr + 1] = 1
-    #     # assert [ptr + 2] = 1
-    #     # assert [ptr1] = 1
-    #     # assert [ptr1 + 1] = 2
-    #     # assert [ptr1 + 2] = 3
-    #     # sum_array(array_1=ptr, array_2=ptr1, size=3, res=res)
-    #     # serialize_word([res])
-    #     # serialize_word([res + 1])
-    #     # serialize_word([res + 2])
+    # let (local ptr : felt*) = alloc()
+    # let (local ptr1 : felt*) = alloc()
+    # let (local res : felt*) = alloc()
+    # assert [ptr] = 1
+    # assert [ptr + 1] = 1
+    # assert [ptr + 2] = 1
+    # assert [ptr1] = 1
+    # assert [ptr1 + 1] = 2
+    # assert [ptr1 + 2] = 3
+    # sum_array(array_1=ptr, array_2=ptr1, size=3, res=res)
+    # serialize_word([res])
+    # serialize_word([res + 1])
+    # serialize_word([res + 2])
 
     # let (local ptr : felt**) = alloc()
     # let (local ptr1 : felt**) = alloc()
@@ -902,5 +948,41 @@ func main{output_ptr : felt*, range_check_ptr}():
     # serialize_word([[res + 1] + 1])
     # serialize_word([[res + 2]])
     # serialize_word([[res + 2] + 1])
+
+    # let (local ptr1 : felt*) = alloc()
+    # assert [ptr1] = 1
+    # assert [ptr1 + 1] = 2
+    # assert [ptr1 + 2] = 3
+    # assert [ptr1 + 3] = 4
+    # assert [ptr1 + 4] = 5
+    # assert [ptr1 + 5] = 6
+    # assert [ptr1 + 6] = 7
+    # assert [ptr1 + 7] = 8
+    # let (local res : felt**) = alloc()
+    # assert [res] = ptr1
+    # let (local m_r) = build_merkle_root{hash_ptr=pedersen_ptr}(counter=8, res=res + 1)
+    # serialize_word(m_r)
+
+    # let (local ptr : felt**) = alloc()
+    # let (local res : felt*) = alloc()
+    # let (local r1 : felt*) = alloc()
+    # let (local r2 : felt*) = alloc()
+    # let (local r3 : felt*) = alloc()
+    # assert [ptr] = r1
+    # assert [ptr + 1] = r2
+    # assert [ptr + 2] = r3
+    # assert [[ptr]] = 1
+    # assert [[ptr] + 1] = 2
+    # assert [[ptr + 1]] = 3
+    # assert [[ptr + 1] + 1] = 4
+    # assert [[ptr + 2]] = 5
+    # assert [[ptr + 2] + 1] = 6
+    # matrix_flattening(m=ptr, step=6, row=0, col=0, cols=2, res=res)
+    # serialize_word([res])
+    # serialize_word([res + 1])
+    # serialize_word([res + 2])
+    # serialize_word([res + 3])
+    # serialize_word([res + 4])
+    # serialize_word([res + 5])
     return ()
 end
