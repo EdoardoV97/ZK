@@ -1,4 +1,4 @@
-%builtins output pedersen range_check
+# %builtins output pedersen range_check
 from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
@@ -720,6 +720,7 @@ func build_merkle_tree_level{hash_ptr : HashBuiltin*}(array : felt*, index : fel
         return ()
     end
     let (hash) = hash2([array], [array + 1])
+    # %{ print(f"Hash between {memory[ids.array]} and {memory[ids.array+1]}: {ids.hash}") %}
     assert [res] = hash
     return build_merkle_tree_level(array=array + 2, index=index - 2, res=res + 1)
 end
@@ -733,256 +734,256 @@ func build_merkle_root{hash_ptr : HashBuiltin*}(counter : felt, res : felt**) ->
     end
     let (local row : felt*) = alloc()
     assert [res] = row
-    %{ print(ids.counter) %}
+    # %{ print(ids.counter) %}
     build_merkle_tree_level(array=[res - 1], index=counter, res=row)
     let (merkle_root) = build_merkle_root(counter=counter / 2, res=res + 1)
     return (merkle_root=merkle_root)
 end
 
-func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    alloc_locals
-    # # const ARRAY_SIZE = 3
-    #     # const ROWS = 2
-    #     # const COLS = 2
+# func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+#     alloc_locals
+# # const ARRAY_SIZE = 3
+#     # const ROWS = 2
+#     # const COLS = 2
 
-    # Allocate an array.
-    # let (local ptr) = alloc()
-    # let (local ptr1) = alloc()
-    # let (local res) = alloc()
+# Allocate an array.
+# let (local ptr) = alloc()
+# let (local ptr1) = alloc()
+# let (local res) = alloc()
 
-    # Populate some values in the array.
-    # assert [ptr] = -5
-    # assert [ptr + 1] = -5
-    # assert [ptr + 2] = 5
+# Populate some values in the array.
+# assert [ptr] = -5
+# assert [ptr + 1] = -5
+# assert [ptr + 2] = 5
 
-    # assert [ptr1] = 1
-    #     assert [ptr1 + 1] = 2
-    #     assert [ptr1 + 2] = 3
+# assert [ptr1] = 1
+#     assert [ptr1 + 1] = 2
+#     assert [ptr1 + 2] = 3
 
-    # array_sigmoid(z=ptr, size=1, res=ptr1)
-    # Print the array of sigmoid values
-    # let (local r) = sigmoid(100)
-    # serialize_word(r)
-    # serialize_word([ptr1])  # Equivalente come accedo
-    # serialize_word([ptr1 + 1])
-    # serialize_word([ptr1 + 2])
+# array_sigmoid(z=ptr, size=1, res=ptr1)
+# Print the array of sigmoid values
+# let (local r) = sigmoid(100)
+# serialize_word(r)
+# serialize_word([ptr1])  # Equivalente come accedo
+# serialize_word([ptr1 + 1])
+# serialize_word([ptr1 + 2])
 
-    # # let (dot_prod) = dot_product_array(array_1=ptr, array_2=ptr1, size=ARRAY_SIZE)
-    #     # serialize_word(dot_prod)
+# # let (dot_prod) = dot_product_array(array_1=ptr, array_2=ptr1, size=ARRAY_SIZE)
+#     # serialize_word(dot_prod)
 
-    # let (local ptr : felt**) = alloc()
-    # let (local ptr1 : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    #     # assert [ptr] = alloc()
-    #     # assert [ptr + 1] = alloc()
-    #     # assert [res] = alloc()
+# let (local ptr : felt**) = alloc()
+# let (local ptr1 : felt**) = alloc()
+# let (local res : felt**) = alloc()
+#     # assert [ptr] = alloc()
+#     # assert [ptr + 1] = alloc()
+#     # assert [res] = alloc()
 
-    # # assert [ptr1] = alloc()
-    #     # assert [ptr1 + 1] = alloc()
+# # assert [ptr1] = alloc()
+#     # assert [ptr1 + 1] = alloc()
 
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [[ptr]] = 300
-    # assert [[ptr] + 1] = -300
-    # assert [[ptr + 1]] = -300
-    # assert [[ptr + 1] + 1] = 300
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # assert [[ptr1]] = 0
-    # assert [[ptr1] + 1] = 0
-    # assert [[ptr1] + 2] = 100
-    # assert [[ptr1] + 3] = 100
-    # assert [[ptr1 + 1]] = 0
-    # assert [[ptr1 + 1] + 1] = 100
-    # assert [[ptr1 + 1] + 2] = 0
-    # assert [[ptr1 + 1] + 3] = 100
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [res] = r1
-    # assert [res + 1] = r2
-    # dot_product_matrix(
-    #     m_1=ptr, m_2=ptr1, row=0, col=0, step=8, m_1_rows=2, m_1_cols=2, m_2_cols=4, res=res
-    # )
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res] + 2])
-    # serialize_word([[res] + 3])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
-    # serialize_word([[res + 1] + 2])
-    # serialize_word([[res + 1] + 3])
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [ptr] = r1
+# assert [ptr + 1] = r2
+# assert [[ptr]] = 300
+# assert [[ptr] + 1] = -300
+# assert [[ptr + 1]] = -300
+# assert [[ptr + 1] + 1] = 300
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [ptr1] = r1
+# assert [ptr1 + 1] = r2
+# assert [[ptr1]] = 0
+# assert [[ptr1] + 1] = 0
+# assert [[ptr1] + 2] = 100
+# assert [[ptr1] + 3] = 100
+# assert [[ptr1 + 1]] = 0
+# assert [[ptr1 + 1] + 1] = 100
+# assert [[ptr1 + 1] + 2] = 0
+# assert [[ptr1 + 1] + 3] = 100
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [res] = r1
+# assert [res + 1] = r2
+# dot_product_matrix(
+#     m_1=ptr, m_2=ptr1, row=0, col=0, step=8, m_1_rows=2, m_1_cols=2, m_2_cols=4, res=res
+# )
+# serialize_word([[res]])
+# serialize_word([[res] + 1])
+# serialize_word([[res] + 2])
+# serialize_word([[res] + 3])
+# serialize_word([[res + 1]])
+# serialize_word([[res + 1] + 1])
+# serialize_word([[res + 1] + 2])
+# serialize_word([[res + 1] + 3])
 
-    # let (local ptr : felt*) = alloc()
-    # let (local ptr1 : felt*) = alloc()
-    # let (local res : felt*) = alloc()
-    # assert [ptr] = 1
-    # assert [ptr + 1] = 1
-    # assert [ptr + 2] = 1
-    # assert [ptr1] = 1
-    # assert [ptr1 + 1] = 2
-    # assert [ptr1 + 2] = 3
-    # sum_array(array_1=ptr, array_2=ptr1, size=3, res=res)
-    # serialize_word([res])
-    # serialize_word([res + 1])
-    # serialize_word([res + 2])
+# let (local ptr : felt*) = alloc()
+# let (local ptr1 : felt*) = alloc()
+# let (local res : felt*) = alloc()
+# assert [ptr] = 1
+# assert [ptr + 1] = 1
+# assert [ptr + 2] = 1
+# assert [ptr1] = 1
+# assert [ptr1 + 1] = 2
+# assert [ptr1 + 2] = 3
+# sum_array(array_1=ptr, array_2=ptr1, size=3, res=res)
+# serialize_word([res])
+# serialize_word([res + 1])
+# serialize_word([res + 2])
 
-    # let (local ptr : felt**) = alloc()
-    # let (local ptr1 : felt**) = alloc()
-    # let (local temp : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [[ptr]] = 0
-    # assert [[ptr] + 1] = -300
-    # assert [[ptr] + 2] = 300
-    # assert [[ptr] + 3] = 0
-    # assert [[ptr + 1]] = 0
-    # assert [[ptr + 1] + 1] = 300
-    # assert [[ptr + 1] + 2] = -300
-    # assert [[ptr + 1] + 3] = 0
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # assert [[ptr1]] = 0
-    # assert [[ptr1 + 1]] = 0
-    # sum_matrix_and_vector(m=ptr, v=ptr1, index = 0, num_rows_m = 2, num_cols_m = 4, num_rows_v = 2, num_cols_v = 1, temp=temp, res=res)
-    #     # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    #     # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    #     # diff_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    #     # div_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    #     # div_matrix_by_scalar(m=ptr1, divider=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # mul_matrix_by_scalar(m=ptr, factor=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res] + 2])
-    # serialize_word([[res] + 3])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
-    # serialize_word([[res + 1] + 2])
-    # serialize_word([[res + 1] + 3])
+# let (local ptr : felt**) = alloc()
+# let (local ptr1 : felt**) = alloc()
+# let (local temp : felt**) = alloc()
+# let (local res : felt**) = alloc()
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [ptr] = r1
+# assert [ptr + 1] = r2
+# assert [[ptr]] = 0
+# assert [[ptr] + 1] = -300
+# assert [[ptr] + 2] = 300
+# assert [[ptr] + 3] = 0
+# assert [[ptr + 1]] = 0
+# assert [[ptr + 1] + 1] = 300
+# assert [[ptr + 1] + 2] = -300
+# assert [[ptr + 1] + 3] = 0
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [ptr1] = r1
+# assert [ptr1 + 1] = r2
+# assert [[ptr1]] = 0
+# assert [[ptr1 + 1]] = 0
+# sum_matrix_and_vector(m=ptr, v=ptr1, index = 0, num_rows_m = 2, num_cols_m = 4, num_rows_v = 2, num_cols_v = 1, temp=temp, res=res)
+#     # sum_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+#     # mul_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+#     # diff_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+#     # div_matrix(m_1=ptr, m_2=ptr1, row=0, col=0, step=6, rows=3, cols=2, res=res)
+#     # div_matrix_by_scalar(m=ptr1, divider=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
+# mul_matrix_by_scalar(m=ptr, factor=2, row=0, col=0, step=6, rows=3, cols=2, res=res)
+# serialize_word([[res]])
+# serialize_word([[res] + 1])
+# serialize_word([[res] + 2])
+# serialize_word([[res] + 3])
+# serialize_word([[res + 1]])
+# serialize_word([[res + 1] + 1])
+# serialize_word([[res + 1] + 2])
+# serialize_word([[res + 1] + 3])
 
-    # let (res) = sinh(160)
-    # serialize_word(res)
-    # let (res) = pow(10, 180)
-    # serialize_word(res)
-    # let (res) = cosh(120)
-    # serialize_word(res)
-    # let (res) = tanh(3)
-    # serialize_word(res)
+# let (res) = sinh(160)
+# serialize_word(res)
+# let (res) = pow(10, 180)
+# serialize_word(res)
+# let (res) = cosh(120)
+# serialize_word(res)
+# let (res) = tanh(3)
+# serialize_word(res)
 
-    # let (local ptr : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [[ptr]] = 2
-    # assert [[ptr] + 1] = 2
-    # assert [[ptr + 1]] = 2
-    # assert [[ptr + 1] + 1] = 2
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [res] = r1
-    # assert [res + 1] = r2
-    # matrix_tanh(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=res)
-    # matrix_pow(m=ptr, exp=2, row=0, col=0, step=4, rows=2, cols=2, res=res)
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
+# let (local ptr : felt**) = alloc()
+# let (local res : felt**) = alloc()
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [ptr] = r1
+# assert [ptr + 1] = r2
+# assert [[ptr]] = 2
+# assert [[ptr] + 1] = 2
+# assert [[ptr + 1]] = 2
+# assert [[ptr + 1] + 1] = 2
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [res] = r1
+# assert [res + 1] = r2
+# matrix_tanh(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=res)
+# matrix_pow(m=ptr, exp=2, row=0, col=0, step=4, rows=2, cols=2, res=res)
+# serialize_word([[res]])
+# serialize_word([[res] + 1])
+# serialize_word([[res + 1]])
+# serialize_word([[res + 1] + 1])
 
-    # # let (local ptr : felt**) = alloc()
-    #     # let (local ptr1 : felt**) = alloc()
-    #     # let (local r1) = alloc()
-    #     # let (local r2) = alloc()
-    #     # assert [ptr] = r1
-    #     # assert [ptr + 1] = r2
-    #     # assert [[ptr]] = 1
-    #     # assert [[ptr] + 1] = 1
-    #     # assert [[ptr + 1]] = 1
-    #     # assert [[ptr + 1] + 1] = 1
-    #     # let (local r1) = alloc()
-    #     # let (local r2) = alloc()
-    #     # assert [ptr1] = r1
-    #     # assert [ptr1 + 1] = r2
-    #     # matrix_sign_inversion(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
-    #     # serialize_word([[ptr1]])
-    #     # serialize_word([[ptr1] + 1])
-    #     # serialize_word([[ptr1 + 1]])
-    #     # serialize_word([[ptr1 + 1] + 1])
+# # let (local ptr : felt**) = alloc()
+#     # let (local ptr1 : felt**) = alloc()
+#     # let (local r1) = alloc()
+#     # let (local r2) = alloc()
+#     # assert [ptr] = r1
+#     # assert [ptr + 1] = r2
+#     # assert [[ptr]] = 1
+#     # assert [[ptr] + 1] = 1
+#     # assert [[ptr + 1]] = 1
+#     # assert [[ptr + 1] + 1] = 1
+#     # let (local r1) = alloc()
+#     # let (local r2) = alloc()
+#     # assert [ptr1] = r1
+#     # assert [ptr1 + 1] = r2
+#     # matrix_sign_inversion(m=ptr, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
+#     # serialize_word([[ptr1]])
+#     # serialize_word([[ptr1] + 1])
+#     # serialize_word([[ptr1 + 1]])
+#     # serialize_word([[ptr1 + 1] + 1])
 
-    # # let (result) = log(8)
-    #     # serialize_word(result)
+# # let (result) = log(8)
+#     # serialize_word(result)
 
-    # let (local ptr1 : felt**) = alloc()
-    # let (local res : felt**) = alloc()
-    # let (local r1) = alloc()
-    # let (local r2) = alloc()
-    # assert [ptr1] = r1
-    # assert [ptr1 + 1] = r2
-    # assert [[ptr1]] = 1
-    # assert [[ptr1] + 1] = 2
-    # assert [[ptr1] + 2] = 3
-    # assert [[ptr1 + 1] ] = 4
-    # assert [[ptr1 + 1] + 1] = 5
-    # assert [[ptr1 + 1] + 2] = 6
-    # squeeze_col_vector(v=ptr1, index=0, size=3, res=res)
+# let (local ptr1 : felt**) = alloc()
+# let (local res : felt**) = alloc()
+# let (local r1) = alloc()
+# let (local r2) = alloc()
+# assert [ptr1] = r1
+# assert [ptr1 + 1] = r2
+# assert [[ptr1]] = 1
+# assert [[ptr1] + 1] = 2
+# assert [[ptr1] + 2] = 3
+# assert [[ptr1 + 1] ] = 4
+# assert [[ptr1 + 1] + 1] = 5
+# assert [[ptr1 + 1] + 2] = 6
+# squeeze_col_vector(v=ptr1, index=0, size=3, res=res)
 
-    # # # init_matrix(value=5, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
-    # matrix_transpose(m=ptr1, index=0,rows=2, cols=3,res=res)
-    #     # sum_all_matrix_elements_by_axis(m = ptr1, axis=1, index=0, rows=3, cols = 2, res=res)
+# # # init_matrix(value=5, row=0, col=0, step=4, rows=2, cols=2, res=ptr1)
+# matrix_transpose(m=ptr1, index=0,rows=2, cols=3,res=res)
+#     # sum_all_matrix_elements_by_axis(m = ptr1, axis=1, index=0, rows=3, cols = 2, res=res)
 
-    # serialize_word([res])
-    # serialize_word([res + 1])
-    # serialize_word([res + 2])
-    # serialize_word([[res]])
-    # serialize_word([[res] + 1])
-    # serialize_word([[res + 1]])
-    # serialize_word([[res + 1] + 1])
-    # serialize_word([[res + 2]])
-    # serialize_word([[res + 2] + 1])
+# serialize_word([res])
+# serialize_word([res + 1])
+# serialize_word([res + 2])
+# serialize_word([[res]])
+# serialize_word([[res] + 1])
+# serialize_word([[res + 1]])
+# serialize_word([[res + 1] + 1])
+# serialize_word([[res + 2]])
+# serialize_word([[res + 2] + 1])
 
-    # let (local ptr1 : felt*) = alloc()
-    # assert [ptr1] = 1
-    # assert [ptr1 + 1] = 2
-    # assert [ptr1 + 2] = 3
-    # assert [ptr1 + 3] = 4
-    # assert [ptr1 + 4] = 5
-    # assert [ptr1 + 5] = 6
-    # assert [ptr1 + 6] = 7
-    # assert [ptr1 + 7] = 8
-    # let (local res : felt**) = alloc()
-    # assert [res] = ptr1
-    # let (local m_r) = build_merkle_root{hash_ptr=pedersen_ptr}(counter=8, res=res + 1)
-    # serialize_word(m_r)
+# let (local ptr1 : felt*) = alloc()
+# assert [ptr1] = 1
+# assert [ptr1 + 1] = 2
+# assert [ptr1 + 2] = 3
+# assert [ptr1 + 3] = 4
+# assert [ptr1 + 4] = 5
+# assert [ptr1 + 5] = 6
+# assert [ptr1 + 6] = 7
+# assert [ptr1 + 7] = 8
+# let (local res : felt**) = alloc()
+# assert [res] = ptr1
+# let (local m_r) = build_merkle_root{hash_ptr=pedersen_ptr}(counter=8, res=res + 1)
+# serialize_word(m_r)
 
-    # let (local ptr : felt**) = alloc()
-    # let (local res : felt*) = alloc()
-    # let (local r1 : felt*) = alloc()
-    # let (local r2 : felt*) = alloc()
-    # let (local r3 : felt*) = alloc()
-    # assert [ptr] = r1
-    # assert [ptr + 1] = r2
-    # assert [ptr + 2] = r3
-    # assert [[ptr]] = 1
-    # assert [[ptr] + 1] = 2
-    # assert [[ptr + 1]] = 3
-    # assert [[ptr + 1] + 1] = 4
-    # assert [[ptr + 2]] = 5
-    # assert [[ptr + 2] + 1] = 6
-    # matrix_flattening(m=ptr, step=6, row=0, col=0, cols=2, res=res)
-    # serialize_word([res])
-    # serialize_word([res + 1])
-    # serialize_word([res + 2])
-    # serialize_word([res + 3])
-    # serialize_word([res + 4])
-    # serialize_word([res + 5])
-    return ()
-end
+# let (local ptr : felt**) = alloc()
+# let (local res : felt*) = alloc()
+# let (local r1 : felt*) = alloc()
+# let (local r2 : felt*) = alloc()
+# let (local r3 : felt*) = alloc()
+# assert [ptr] = r1
+# assert [ptr + 1] = r2
+# assert [ptr + 2] = r3
+# assert [[ptr]] = 1
+# assert [[ptr] + 1] = 2
+# assert [[ptr + 1]] = 3
+# assert [[ptr + 1] + 1] = 4
+# assert [[ptr + 2]] = 5
+# assert [[ptr + 2] + 1] = 6
+# matrix_flattening(m=ptr, step=6, row=0, col=0, cols=2, res=res)
+# serialize_word([res])
+# serialize_word([res + 1])
+# serialize_word([res + 2])
+# serialize_word([res + 3])
+# serialize_word([res + 4])
+# serialize_word([res + 5])
+#     return ()
+# end

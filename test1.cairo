@@ -1,6 +1,7 @@
-%builtins output range_check
+%builtins output pedersen range_check
 from starkware.cairo.common.serialize import serialize_word
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 from ml_library import (
     dot_product_array,
     dot_product_matrix,
@@ -16,6 +17,8 @@ from ml_library import (
     matrix_pow,
     mul_matrix,
     mul_matrix_by_scalar,
+    matrix_flattening,
+    build_merkle_root,
 )
 
 const PRECISION = 100
@@ -24,10 +27,11 @@ const PRECISION = 100
 const N_X = 2
 const N_H = 2
 const N_Y = 1
-const NUM_OF_ITERS = 500
+const NUM_OF_ITERS = 1
 const LEARNING_RATE = 30  # = 0.3 * 100
 const f = 2  # number of rows of X
 const m = 4  # number of cols of X
+const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496571699381303113357185  # 1419832118711440540010636386214391686376015713241217190564056350739172392712 if with precision in the matrixes
 
 struct Parameters:
     member w1 : felt**
@@ -562,7 +566,7 @@ func training{output_ptr : felt*, range_check_ptr}(
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
 
-func main{output_ptr : felt*, range_check_ptr}():
+func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
     # Initializing training samples
     # Load with python hint the input data
@@ -590,8 +594,40 @@ func main{output_ptr : felt*, range_check_ptr}():
             memory[ids.r3 + index] = y*ids.PRECISION
             index += 1
     %}
-    # TODO Compute merkle_tree root of input data and insert an assert to check if result equal to known harcoded value
-
+    # Compute merkle_tree root of input data and assert to check if result equal to known harcoded value
+    let (local X_without_precision : felt**) = alloc()
+    let (local r1 : felt*) = alloc()
+    let (local r2 : felt*) = alloc()
+    assert [X_without_precision] = r1
+    assert [X_without_precision + 1] = r2
+    let (local Y_without_precision : felt**) = alloc()
+    let (local r1 : felt*) = alloc()
+    assert [Y_without_precision] = r1
+    div_matrix_by_scalar(
+        m=X, divider=PRECISION, row=0, col=0, step=f * m, rows=f, cols=m, res=X_without_precision
+    )
+    div_matrix_by_scalar(
+        m=Y,
+        divider=PRECISION,
+        row=0,
+        col=0,
+        step=N_Y * m,
+        rows=N_Y,
+        cols=m,
+        res=Y_without_precision,
+    )
+    let (local flattened_array : felt*) = alloc()
+    matrix_flattening(m=X_without_precision, step=8, row=0, col=0, cols=4, res=flattened_array)
+    matrix_flattening(m=Y_without_precision, step=4, row=0, col=0, cols=4, res=flattened_array + 8)
+    assert [flattened_array + 12] = 0
+    assert [flattened_array + 13] = 0
+    assert [flattened_array + 14] = 0
+    assert [flattened_array + 15] = 0
+    let (local merkle_tree : felt**) = alloc()
+    assert [merkle_tree] = flattened_array
+    let (merkle_root) = build_merkle_root{hash_ptr=pedersen_ptr}(counter=16, res=merkle_tree + 1)
+    serialize_word(merkle_root)
+    assert MERKLE_TREE_ROOT = merkle_root
     # Initialize the weights parameters
     let (local p_history : Parameters*) = alloc()
     local parameters : Parameters
