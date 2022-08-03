@@ -566,6 +566,48 @@ func training{output_ptr : felt*, range_check_ptr}(
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
 
+# Evaluate the pulled models and output the best_K models
+# func evaluation():
+
+# end
+
+
+# Compute the loss function. Smaller value imply a better accuracy
+# A2 = 1x4 matrix
+# Y = 1x4 matrix
+func calculate_cost(A2 : felt**, Y : felt**) -> (cost : felt):
+    alloc_locals
+    # log(A2)
+    let (local log_A2 : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [log_A2] = r1
+    # Id matrix 1x4
+    let (local id_matrix : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [id_matrix] = r1
+    # 1-A2 matrix
+    let (local one_minus_A2 : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [one_minus_A2] = r1
+    # 1-Y matrix
+    let (local one_minus_Y : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [one_minus_Y] = r1
+    # np.multiply(Y, np.log(A2)
+    let (local plus_first_addend : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [plus_first_addend] = r1
+    # np.multiply(1-Y, np.log(1-A2))
+    let (local plus_second_addend : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [plus_second_addend] = r1
+    # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))
+    let local (sum_result : felt)
+    # - np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))/m
+    let local (sum_result_2 : felt)
+
+end
+
 func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
     # Initializing training samples
@@ -628,6 +670,7 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (merkle_root) = build_merkle_root{hash_ptr=pedersen_ptr}(counter=16, res=merkle_tree + 1)
     serialize_word(merkle_root)
     assert MERKLE_TREE_ROOT = merkle_root
+
     # Initialize the weights parameters
     let (local p_history : Parameters*) = alloc()
     local parameters : Parameters
