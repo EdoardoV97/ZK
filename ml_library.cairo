@@ -1,4 +1,4 @@
-%builtins output pedersen range_check
+# %builtins output pedersen range_check
 from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
@@ -649,7 +649,7 @@ func log{range_check_ptr}(x : felt) -> (res : felt):
 end
 
 # Matrix log function
-func matrix_tanh{range_check_ptr}(
+func matrix_log{range_check_ptr}(
     m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
 ) -> ():
     alloc_locals
@@ -670,7 +670,7 @@ func matrix_tanh{range_check_ptr}(
     assert [[res + row] + col] = log_res
     # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.log_res}") %}
 
-    matrix_tanh(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    matrix_log(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
 end
 
@@ -800,8 +800,8 @@ func build_merkle_root{hash_ptr : HashBuiltin*}(counter : felt, res : felt**) ->
     return (merkle_root=merkle_root)
 end
 
-func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    alloc_locals
+# func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+#     alloc_locals
     # # const ARRAY_SIZE = 3
     #     # const ROWS = 2
     #     # const COLS = 2
@@ -1046,8 +1046,8 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     # serialize_word([res + 4])
     # serialize_word([res + 5])
 
-    let (res) = log(x=9)
-    serialize_word(res)
+    # let (res) = log(x=9)
+    # serialize_word(res)
 
     # To print hint of negative numbers
     # tempvar x = -1
@@ -1056,5 +1056,5 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     #     print(ids.x - 3618502788666131213697322783095070105623107215331596699973092056135872020481)
     #     print(ids.y - 3618502788666131213697322783095070105623107215331596699973092056135872020481)
     # %}
-    return ()
-end
+#     return ()
+# end
