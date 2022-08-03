@@ -4,7 +4,7 @@
     Simple Neural Network with 1 hidden layer with the number
     of hidden units as a hyperparameter to calculate the XOR function
 """
-
+#COmment
 import numpy as np
 
 # Activation function
