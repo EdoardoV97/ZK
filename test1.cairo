@@ -589,6 +589,10 @@ func calculate_cost(A2 : felt**, Y : felt**) -> (cost : felt):
     let (local one_minus_A2 : felt**) = alloc()  # 1x4 matrix
     let (local r1) = alloc()
     assert [one_minus_A2] = r1
+    # log(1-A2)
+    let (local one_minus_log_A2 : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [one_minus_log_A2] = r1
     # 1-Y matrix
     let (local one_minus_Y : felt**) = alloc()  # 1x4 matrix
     let (local r1) = alloc()
@@ -601,10 +605,57 @@ func calculate_cost(A2 : felt**, Y : felt**) -> (cost : felt):
     let (local plus_second_addend : felt**) = alloc()  # 1x4 matrix
     let (local r1) = alloc()
     assert [plus_second_addend] = r1
+    # np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2)
+    let (local plus_result : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [plus_result] = r1
     # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))
     let local (sum_result : felt)
     # - np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))/m
     let local (sum_result_2 : felt)
+
+    # Initialize id_matrix
+    init_matrix(value=1 * PRECISION, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=id_matrix)
+
+    # 1-Y
+    diff_matrix(
+        m_1=id_matrix,
+        m_2=Y,
+        row=0,
+        col=0,
+        step=N_Y * m,
+        rows=N_Y,
+        cols=m,
+        res=one_minus_Y,
+    )
+
+    # 1-A2
+    diff_matrix(
+        m_1=id_matrix,
+        m_2=A2,
+        row=0,
+        col=0,
+        step=N_Y * m,
+        rows=N_Y,
+        cols=m,
+        res=one_minus_A2,
+    )
+
+    # np.multiply(Y, np.log(A2)
+    mul_matrix(m_1=Y, m_2=log_A2, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=plus_first_addend)
+    # np.multiply(1-Y, np.log(1-A2))
+    mul_matrix(m_1=one_minus_Y, m_2=one_minus_log_A2, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=plus_second_addend)
+
+    # np.multiply(Y, np.log(A2) + np.multiply(1-Y, np.log(1-A2))
+    sum_matrix(m_1=plus_first_addend, m_2=plus_second_addend, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=plus_result)
+
+    # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))
+    assert sum_result = sum_all_matrix_elements(m=plus_result, row=0, col=0, step=N_Y*m, cols=m)
+
+    # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2)) / m
+    let (result, reminder) = signed_div_rem(sum_result, m, 10000000000000000000000000)
+
+    return (cost = -result)
 
 end
 
