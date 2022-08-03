@@ -648,6 +648,32 @@ func log{range_check_ptr}(x : felt) -> (res : felt):
     return (res=ln * 10)
 end
 
+# Matrix log function
+func matrix_tanh{range_check_ptr}(
+    m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+
+    let (local log_res) = log(x=[[m + row] + col])
+    assert [[res + row] + col] = log_res
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.log_res}") %}
+
+    matrix_tanh(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
 # rows, cols are the ones of the matrix m
 func matrix_transpose(m : felt**, index : felt, rows : felt, cols : felt, res : felt**) -> ():
     alloc_locals
