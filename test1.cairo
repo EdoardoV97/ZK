@@ -2,9 +2,11 @@
 from starkware.cairo.common.serialize import serialize_word
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.math import signed_div_rem
 from ml_library import (
     dot_product_array,
     dot_product_matrix,
+    sum_all_matrix_elements,
     sum_all_matrix_elements_by_axis,
     init_matrix,
     sum_matrix_and_vector,
@@ -19,6 +21,7 @@ from ml_library import (
     mul_matrix_by_scalar,
     matrix_flattening,
     build_merkle_root,
+    matrix_log
 )
 
 const PRECISION = 100
@@ -483,8 +486,8 @@ func training{output_ptr : felt*, range_check_ptr}(
     if num_of_iters == 0:
         return ()
     end
-    serialize_word('AAAAAAAAAAAAAAAAAAAAAAA')
-    serialize_word(NUM_OF_ITERS - num_of_iters)
+    # serialize_word('AAAAAAAAAAAAAAAAAAAAAAA')
+    # serialize_word(NUM_OF_ITERS - num_of_iters)
 
     let (local A1 : felt**) = alloc()  # 2x4 matrix
     let (local r1) = alloc()
@@ -506,10 +509,13 @@ func training{output_ptr : felt*, range_check_ptr}(
     # serialize_word([[A1 + 1] + 2])
     # serialize_word([[A1 + 1] + 3])
     # Print A2
-    # serialize_word([[A2]])
-    # serialize_word([[A2] + 1])
-    # serialize_word([[A2] + 2])
-    # serialize_word([[A2] + 3])
+    serialize_word([[A2]])
+    serialize_word([[A2] + 1])
+    serialize_word([[A2] + 2])
+    serialize_word([[A2] + 3])
+    let (local cost : felt) = calculate_cost(A2=A2, Y=Y)
+    serialize_word(cost)
+
 
     # Allocate  dW1, db1, dW2, db2
     let (local dW1 : felt**) = alloc()  # 2x2 matrix
@@ -550,18 +556,18 @@ func training{output_ptr : felt*, range_check_ptr}(
 
     update_parameters(dW1=dW1, db1=db1, dW2=dW2, db2=db2, p_history=p_history)
     # Print the new W1
-    serialize_word([[[p_history + Parameters.SIZE].w1]])
-    serialize_word([[[p_history + Parameters.SIZE].w1] + 1])
-    serialize_word([[[p_history + Parameters.SIZE].w1 + 1]])
-    serialize_word([[[p_history + Parameters.SIZE].w1 + 1] + 1])
+    # serialize_word([[[p_history + Parameters.SIZE].w1]])
+    # serialize_word([[[p_history + Parameters.SIZE].w1] + 1])
+    # serialize_word([[[p_history + Parameters.SIZE].w1 + 1]])
+    # serialize_word([[[p_history + Parameters.SIZE].w1 + 1] + 1])
     # Print the new W2
-    serialize_word([[[p_history + Parameters.SIZE].w2]])
-    serialize_word([[[p_history + Parameters.SIZE].w2] + 1])
+    # serialize_word([[[p_history + Parameters.SIZE].w2]])
+    # serialize_word([[[p_history + Parameters.SIZE].w2] + 1])
     # Print the new b1
-    serialize_word([[[p_history + Parameters.SIZE].b1]])
-    serialize_word([[[p_history + Parameters.SIZE].b1 + 1]])
+    # serialize_word([[[p_history + Parameters.SIZE].b1]])
+    # serialize_word([[[p_history + Parameters.SIZE].b1 + 1]])
     # Print the new b2
-    serialize_word([[[p_history + Parameters.SIZE].b2]])
+    # serialize_word([[[p_history + Parameters.SIZE].b2]])
 
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
@@ -575,7 +581,7 @@ end
 # Compute the loss function. Smaller value imply a better accuracy
 # A2 = 1x4 matrix
 # Y = 1x4 matrix
-func calculate_cost(A2 : felt**, Y : felt**) -> (cost : felt):
+func calculate_cost{output_ptr : felt*,range_check_ptr}(A2 : felt**, Y : felt**) -> (cost : felt):
     alloc_locals
     # log(A2)
     let (local log_A2 : felt**) = alloc()  # 1x4 matrix
@@ -590,9 +596,9 @@ func calculate_cost(A2 : felt**, Y : felt**) -> (cost : felt):
     let (local r1) = alloc()
     assert [one_minus_A2] = r1
     # log(1-A2)
-    let (local one_minus_log_A2 : felt**) = alloc()  # 1x4 matrix
+    let (local log_one_minus_A2 : felt**) = alloc()  # 1x4 matrix
     let (local r1) = alloc()
-    assert [one_minus_log_A2] = r1
+    assert [log_one_minus_A2] = r1
     # 1-Y matrix
     let (local one_minus_Y : felt**) = alloc()  # 1x4 matrix
     let (local r1) = alloc()
@@ -609,10 +615,13 @@ func calculate_cost(A2 : felt**, Y : felt**) -> (cost : felt):
     let (local plus_result : felt**) = alloc()  # 1x4 matrix
     let (local r1) = alloc()
     assert [plus_result] = r1
-    # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))
-    let local (sum_result : felt)
-    # - np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))/m
-    let local (sum_result_2 : felt)
+
+    # log(A2)
+    matrix_log(m=A2, row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=log_A2)
+    serialize_word([[log_A2]])
+    serialize_word([[log_A2] + 1])
+    serialize_word([[log_A2] + 2])
+    serialize_word([[log_A2] + 3])
 
     # Initialize id_matrix
     init_matrix(value=1 * PRECISION, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=id_matrix)
@@ -641,21 +650,25 @@ func calculate_cost(A2 : felt**, Y : felt**) -> (cost : felt):
         res=one_minus_A2,
     )
 
+    # log(1-A2)
+    matrix_log(m=A2, row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=log_one_minus_A2)
+    
+
     # np.multiply(Y, np.log(A2)
     mul_matrix(m_1=Y, m_2=log_A2, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=plus_first_addend)
     # np.multiply(1-Y, np.log(1-A2))
-    mul_matrix(m_1=one_minus_Y, m_2=one_minus_log_A2, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=plus_second_addend)
+    mul_matrix(m_1=one_minus_Y, m_2=log_one_minus_A2, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=plus_second_addend)
 
     # np.multiply(Y, np.log(A2) + np.multiply(1-Y, np.log(1-A2))
     sum_matrix(m_1=plus_first_addend, m_2=plus_second_addend, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=plus_result)
 
     # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))
-    assert sum_result = sum_all_matrix_elements(m=plus_result, row=0, col=0, step=N_Y*m, cols=m)
+    let (local sum_result : felt) = sum_all_matrix_elements(m=plus_result, row=0, col=0, step=N_Y*m, cols=m)
 
-    # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2)) / m
-    let (result, reminder) = signed_div_rem(sum_result, m, 10000000000000000000000000)
+    # np.sum(np.multiply(Y, np.log(A2)) +  np.multiply(1-Y, np.log(1-A2))) / m
+    let (sum_result_div, reminder) = signed_div_rem(sum_result, m, 10000000000000000000000000)
 
-    return (cost = -result)
+    return (cost = -sum_result_div)
 
 end
 
@@ -719,7 +732,7 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (local merkle_tree : felt**) = alloc()
     assert [merkle_tree] = flattened_array
     let (merkle_root) = build_merkle_root{hash_ptr=pedersen_ptr}(counter=16, res=merkle_tree + 1)
-    serialize_word(merkle_root)
+    # serialize_word(merkle_root)
     assert MERKLE_TREE_ROOT = merkle_root
 
     # Initialize the weights parameters
