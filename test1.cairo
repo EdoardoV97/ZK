@@ -36,6 +36,11 @@ const f = 2  # number of rows of X
 const m = 4  # number of cols of X
 const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496571699381303113357185  # 1419832118711440540010636386214391686376015713241217190564056350739172392712 if with precision in the matrixes
 
+# FL parameters
+const WORKERS_IN_ROUND = 2
+const BEST_K = 1
+
+
 struct Parameters:
     member w1 : felt**
     member w2 : felt**
@@ -509,12 +514,12 @@ func training{output_ptr : felt*, range_check_ptr}(
     # serialize_word([[A1 + 1] + 2])
     # serialize_word([[A1 + 1] + 3])
     # Print A2
-    serialize_word([[A2]])
-    serialize_word([[A2] + 1])
-    serialize_word([[A2] + 2])
-    serialize_word([[A2] + 3])
-    let (local cost : felt) = calculate_cost(A2=A2, Y=Y)
-    serialize_word(cost)
+    # serialize_word([[A2]])
+    # serialize_word([[A2] + 1])
+    # serialize_word([[A2] + 2])
+    # serialize_word([[A2] + 3])
+    # let (local cost : felt) = calculate_cost(A2=A2, Y=Y)
+    # serialize_word(cost)
 
 
     # Allocate  dW1, db1, dW2, db2
@@ -572,11 +577,84 @@ func training{output_ptr : felt*, range_check_ptr}(
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
 
-# Evaluate the pulled models and output the best_K models
-# func evaluation():
+func param_variables_initialization(counter : felt, models_to_evaluate : Parameters*)->():
+    alloc_locals
+    if counter == WORKERS_IN_ROUND:
+        return ()
+    end
 
-# end
+    local parameters : Parameters
+    let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_w1] = r1
+    assert [alloc_w1 + 1] = r2
+    let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
+    let (local r1) = alloc()
+    assert [alloc_w2] = r1
+    let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_b1] = r1
+    assert [alloc_b1 + 1] = r2
+    let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
+    let (local r1) = alloc()
+    assert [alloc_b2] = r1
+    assert parameters.w1 = alloc_w1
+    assert parameters.w2 = alloc_w2
+    assert parameters.b1 = alloc_b1
+    assert parameters.b2 = alloc_b2
+    assert [models_to_evaluate + counter*Parameters.SIZE] = parameters # TODO controllare qui
+    %{
+        # print(f"Iteration with counter {ids.counter} passed!")
+    %}
 
+    return param_variables_initialization(counter=counter+1, models_to_evaluate=models_to_evaluate)
+end
+
+# Evaluation function
+func evaluation()->():
+    alloc_locals
+    # Initialize the variables to store the models of the previous round
+    let (local models_to_evaluate : Parameters*) = alloc()
+    param_variables_initialization(counter=0, models_to_evaluate=models_to_evaluate)
+
+    # Load the params from input
+    %{
+        for i in range(0, ids.WORKERS_IN_ROUND):
+            index = 0
+            # Copy W1
+            for x in program_input['MODELS'][i]['W1'][0]:
+                memory[[[ids.models_to_evaluate + i].w1] + index] = x*ids.PRECISION
+                print(memory[[ids.models_to_evaluate[i].w1] + index])
+                index += 1
+            index = 0
+            for x in program_input['MODELS'][i]['W1'][1]:
+                memory[[ids.models_to_evaluate[i].w1 + 1] + index] = x*ids.PRECISION
+                index += 1
+            # Copy W2
+            index = 0
+            for x in program_input['MODELS'][i]['W2'][0]:
+                memory[[ids.models_to_evaluate[i].w2] + index] = x*ids.PRECISION
+                index += 1
+            # Copy B1
+            index = 0
+            for x in program_input['MODELS'][i]['B1'][0]:
+                memory[[ids.models_to_evaluate[i].b1] + index] = x*ids.PRECISION
+                index += 1
+            index = 0
+            for x in program_input['MODELS'][i]['B1'][1]:
+                memory[[ids.models_to_evaluate[i].b1 + 1] + index] = x*ids.PRECISION
+                index += 1
+            # Copy B2
+            memory[[ids.models_to_evaluate[i].b2]] = program_input['MODELS'][i]['B2'][0]*ids.PRECISION
+    %}
+
+
+    # 1) EVALUATE LOADED MODELS AND SELECT BEST K' WORKERS
+
+    return ()
+end
 
 # Compute the loss function. Smaller value imply a better accuracy
 # A2 = 1x4 matrix
@@ -618,10 +696,10 @@ func calculate_cost{output_ptr : felt*,range_check_ptr}(A2 : felt**, Y : felt**)
 
     # log(A2)
     matrix_log(m=A2, row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=log_A2)
-    serialize_word([[log_A2]])
-    serialize_word([[log_A2] + 1])
-    serialize_word([[log_A2] + 2])
-    serialize_word([[log_A2] + 3])
+    # serialize_word([[log_A2]])
+    # serialize_word([[log_A2] + 1])
+    # serialize_word([[log_A2] + 2])
+    # serialize_word([[log_A2] + 3])
 
     # Initialize id_matrix
     init_matrix(value=1 * PRECISION, row=0, col=0, step=N_Y * m, rows=N_Y, cols=m, res=id_matrix)
@@ -700,6 +778,7 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
             memory[ids.r3 + index] = y*ids.PRECISION
             index += 1
     %}
+
     # Compute merkle_tree root of input data and assert to check if result equal to known harcoded value
     let (local X_without_precision : felt**) = alloc()
     let (local r1 : felt*) = alloc()
@@ -760,6 +839,11 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     assert parameters.b2 = alloc_b2
     assert [p_history] = parameters
 
+
+    # Evaluation
+    evaluation()
+
+
     # Initialize all the matrix with all elements
     # init_matrix(value=0, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=parameters.w1)
     assert [[parameters.w1]] = 3 * PRECISION
@@ -772,7 +856,7 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
     init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
 
-    training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
-
+    # Training
+    # training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
     return ()
 end
