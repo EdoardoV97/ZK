@@ -1,4 +1,4 @@
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_in_range
 from starkware.cairo.common.alloc import alloc
 
 func tanh{range_check_ptr}(z : felt) -> (res : felt): 

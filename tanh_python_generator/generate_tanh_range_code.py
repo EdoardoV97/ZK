@@ -6,7 +6,7 @@ RANGE_PRECISION = 100
 STEP = 1
 
 f = open("tanh.cairo", "w")
-f.write("from starkware.cairo.common.math_cmp import is_le\nfrom starkware.cairo.common.alloc import alloc\n")
+f.write("from starkware.cairo.common.math_cmp import is_le, is_in_range\nfrom starkware.cairo.common.alloc import alloc\n")
 f.write("\nfunc tanh{range_check_ptr}(z : felt) -> (res : felt): \n\talloc_locals")
 f.write(f"\n\n\tlet (local low) = is_le(z, {int(-3*PRECISION)})")
 f.write(f"\n\tlet (local high) = is_le({int(3*PRECISION)}, z)")
