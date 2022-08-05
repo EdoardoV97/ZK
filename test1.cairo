@@ -21,7 +21,7 @@ from ml_library import (
     build_merkle_root,
 )
 
-const PRECISION = 100
+const PRECISION = 1000
 
 # Initialize the constant hyperparameters
 const N_X = 2
@@ -626,7 +626,7 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (local merkle_tree : felt**) = alloc()
     assert [merkle_tree] = flattened_array
     let (merkle_root) = build_merkle_root{hash_ptr=pedersen_ptr}(counter=16, res=merkle_tree + 1)
-    serialize_word(merkle_root)
+    # serialize_word(merkle_root)
     assert MERKLE_TREE_ROOT = merkle_root
     # Initialize the weights parameters
     let (local p_history : Parameters*) = alloc()

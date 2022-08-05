@@ -145,7 +145,7 @@ m = X.shape[1]
 n_x = 2     #No. of neurons in first layer
 n_h = 2     #No. of neurons in hidden layer
 n_y = 1     #No. of neurons in output layer
-num_of_iters = 1000
+num_of_iters = 51 -1
 learning_rate = 0.3
 
 trained_parameters = model(X, Y, n_x, n_h, n_y, num_of_iters, learning_rate)
