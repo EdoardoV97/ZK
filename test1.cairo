@@ -38,7 +38,7 @@ const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496
 
 # FL parameters
 const WORKERS_IN_ROUND = 2
-const BEST_K = 1
+const BEST_K = WORKERS_IN_ROUND / 2
 
 
 struct Parameters:
@@ -577,45 +577,10 @@ func training{output_ptr : felt*, range_check_ptr}(
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
 
-func param_variables_initialization(counter : felt, models_to_evaluate : Parameters*)->():
-    alloc_locals
-    if counter == WORKERS_IN_ROUND:
-        return ()
-    end
-
-    local parameters : Parameters
-    let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    assert [alloc_w1] = r1
-    assert [alloc_w1 + 1] = r2
-    let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
-    let (local r1) = alloc()
-    assert [alloc_w2] = r1
-    let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
-    let (local r1) = alloc()
-    let (local r2) = alloc()
-    assert [alloc_b1] = r1
-    assert [alloc_b1 + 1] = r2
-    let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
-    let (local r1) = alloc()
-    assert [alloc_b2] = r1
-    assert parameters.w1 = alloc_w1
-    assert parameters.w2 = alloc_w2
-    assert parameters.b1 = alloc_b1
-    assert parameters.b2 = alloc_b2
-    assert [models_to_evaluate + counter*Parameters.SIZE] = parameters # TODO controllare qui
-    %{
-        # print(f"Iteration with counter {ids.counter} passed!")
-    %}
-
-    return param_variables_initialization(counter=counter+1, models_to_evaluate=models_to_evaluate)
-end
-
 # Evaluation function
-func evaluation()->():
+func evaluation{range_check_ptr}(X : felt**, Y : felt**)->():
     alloc_locals
-    # Initialize the variables to store the models of the previous round
+    # Variables to store the models of the previous round
     let (local models_to_evaluate : Parameters*) = alloc()
     param_variables_initialization(counter=0, models_to_evaluate=models_to_evaluate)
 
@@ -625,7 +590,7 @@ func evaluation()->():
             index = 0
             # Copy W1
             for x in program_input['MODELS'][i]['W1'][0]:
-                memory[[[ids.models_to_evaluate + i].w1] + index] = x*ids.PRECISION
+                memory[memory[memory[ids.models_to_evaluate + i].w1] + index] = x*ids.PRECISION
                 print(memory[[ids.models_to_evaluate[i].w1] + index])
                 index += 1
             index = 0
@@ -652,14 +617,48 @@ func evaluation()->():
 
 
     # 1) EVALUATE LOADED MODELS AND SELECT BEST K' WORKERS
+    # Variable to store the cost of the models to evaluate
+    let (local cost_array) = alloc()
+
+    calculate_cost_models(X = X, Y = Y, index = 0, models_to_evaluate = models_to_evaluate, cost_array = cost_array)
 
     return ()
+end
+
+# Sort the cost array in increasing order of cost, and select then the best_K elements of the array
+# Output must be the indexes of the models in the models_to_evaluate array
+func foo()->():
+    
+    return ()
+end
+
+
+# Compute loss function of models to evaluate using calculate_cost function
+func calculate_cost_models{range_check_ptr}(X : felt**, Y : felt**, index : felt, models_to_evaluate : Parameters*, cost_array : felt*)->():
+    alloc_locals
+    if index == WORKERS_IN_ROUND:
+        return ()
+    end
+
+    let (local A1 : felt**) = alloc()  # 2x4 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [A1] = r1
+    assert [A1 + 1] = r2
+    let (local A2 : felt**) = alloc()  # 1x4 matrix
+    let (local r1) = alloc()
+    assert [A2] = r1
+    forward_propagation(X=X, parameters=[models_to_evaluate], A1=A1, A2=A2)
+
+    let (local cost) = calculate_cost(A2=A2, Y=Y)
+    assert [cost_array + index] = cost
+    return calculate_cost_models(X = X, Y = Y, index = index + 1, models_to_evaluate = models_to_evaluate + Parameters.SIZE, cost_array = cost_array)
 end
 
 # Compute the loss function. Smaller value imply a better accuracy
 # A2 = 1x4 matrix
 # Y = 1x4 matrix
-func calculate_cost{output_ptr : felt*,range_check_ptr}(A2 : felt**, Y : felt**) -> (cost : felt):
+func calculate_cost{range_check_ptr}(A2 : felt**, Y : felt**) -> (cost : felt):
     alloc_locals
     # log(A2)
     let (local log_A2 : felt**) = alloc()  # 1x4 matrix
@@ -747,7 +746,41 @@ func calculate_cost{output_ptr : felt*,range_check_ptr}(A2 : felt**, Y : felt**)
     let (sum_result_div, reminder) = signed_div_rem(sum_result, m, 10000000000000000000000000)
 
     return (cost = -sum_result_div)
+end
 
+func param_variables_initialization(counter : felt, models_to_evaluate : Parameters*)->():
+    alloc_locals
+    if counter == WORKERS_IN_ROUND:
+        return ()
+    end
+
+    local parameters : Parameters
+    let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_w1] = r1
+    assert [alloc_w1 + 1] = r2
+    let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
+    let (local r1) = alloc()
+    assert [alloc_w2] = r1
+    let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_b1] = r1
+    assert [alloc_b1 + 1] = r2
+    let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
+    let (local r1) = alloc()
+    assert [alloc_b2] = r1
+    assert parameters.w1 = alloc_w1
+    assert parameters.w2 = alloc_w2
+    assert parameters.b1 = alloc_b1
+    assert parameters.b2 = alloc_b2
+    assert [models_to_evaluate + counter*Parameters.SIZE] = parameters # TODO controllare qui
+    %{
+        # print(f"Iteration with counter {ids.counter} passed!")
+    %}
+
+    return param_variables_initialization(counter=counter+1, models_to_evaluate=models_to_evaluate)
 end
 
 func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -841,7 +874,7 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
 
     # Evaluation
-    evaluation()
+    evaluation(X = X, Y = Y)
 
 
     # Initialize all the matrix with all elements
