@@ -579,13 +579,50 @@ func training{output_ptr : felt*, range_check_ptr}(
 end
 
 # TODO average best_k_models
-func average_best_K_models():
-    return ()
-end
+# func average_best_K_models(counter : felt*, votes_array : felt*, models_to_evaluate : Parameters*)->(final_averaged_parameters : Parameters):
+
+#     if counter == 0:
+#         return ()
+#     end
+
+#     # local parameters : Parameters
+#     # let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
+#     # let (local r1) = alloc()
+#     # let (local r2) = alloc()
+#     # assert [alloc_w1] = r1
+#     # assert [alloc_w1 + 1] = r2
+#     # let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
+#     # let (local r1) = alloc()
+#     # assert [alloc_w2] = r1
+#     # let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
+#     # let (local r1) = alloc()
+#     # let (local r2) = alloc()
+#     # assert [alloc_b1] = r1
+#     # assert [alloc_b1 + 1] = r2
+#     # let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
+#     # let (local r1) = alloc()
+#     # assert [alloc_b2] = r1
+#     # assert parameters.w1 = alloc_w1
+#     # assert parameters.w2 = alloc_w2
+#     # assert parameters.b1 = alloc_b1
+#     # assert parameters.b2 = alloc_b2
+#     # assert [param_sum] = parameters
+
+#     # Sum of W1
+#     # assert [[parameters.w1]] = [[models_to_evaluate.w1]] + [[[param_sum - Parameters.SIZE].w1]]
+#     # assert [[parameters.w1] + 1] = [[models_to_evaluate.w1] + 1] + [[[param_sum - Parameters.SIZE].w1] + 1]
+#     # assert [[parameters.w1 + 1]] = [[models_to_evaluate.w1 + 1]] + [[[param_sum - Parameters.SIZE].w1 + 1]]
+#     # assert [[parameters.w1 + 1] + 1] = [[models_to_evaluate.w1 + 1]] + [[[param_sum - Parameters.SIZE].w1 + 1]]
+#     # let (w1) = 
+#     # Sum of W2 
+#     # Sum of B1 
+#     # Sum of B2 
+#     return average_best_K_models()
+# end
 
 
 # Evaluation function
-func evaluation{range_check_ptr}(X : felt**, Y : felt**)->():
+func evaluation{range_check_ptr}(X : felt**, Y : felt**, votes_array : felt*)->(models_to_evaluate : Parameters*):
     alloc_locals
 
     # Variables to store the models of the previous round
@@ -599,15 +636,15 @@ func evaluation{range_check_ptr}(X : felt**, Y : felt**)->():
     let (local votes_array : felt*) = alloc() # This is the variable containing the votes
 
     calculate_cost_models(X = X, Y = Y, index = 0, models_to_evaluate = models_to_evaluate, cost_array = cost_array)
-
     rank(index=0, cost_array=cost_array, ranking_array=ranking_array)
+    find_best_K(index=0, ranking_array=ranking_array, votes_array=votes_array)
 
-    find_best_K(index=0, ranking_array=ranking_array, position=0, votes_array=votes_array)
-    return () # TODO return the votes
+    return (models_to_evaluate = models_to_evaluate)
 end
 
-# Given the rank array extract the best_K elements
-func find_best_K{range_check_ptr}(index : felt, ranking_array : felt*, position : felt, votes_array : felt*):
+# Given the rank array extract the best_K elements 
+# Output the votes in votes_array
+func find_best_K{range_check_ptr}(index : felt, ranking_array : felt*, votes_array : felt*):
     alloc_locals
     if index == WORKERS_IN_ROUND:
         return()
@@ -616,34 +653,32 @@ func find_best_K{range_check_ptr}(index : felt, ranking_array : felt*, position 
     let (local comparison : felt) = is_le([ranking_array + index], BEST_K)
     # if [ranking_array + index] <= BEST_K
     if comparison == 1:
-        assert [votes_array + position] = index
-        return find_best_K(index=index+1, ranking_array=ranking_array, position=position+1, votes_array=votes_array)
+        assert [votes_array] = index
+        return find_best_K(index=index+1, ranking_array=ranking_array, votes_array=votes_array+1)
     else:
-        return find_best_K(index=index+1, ranking_array=ranking_array, position=position, votes_array=votes_array)
+        return find_best_K(index=index+1, ranking_array=ranking_array, votes_array=votes_array)
     end
 end
 
 # This function must be called only by rank function
 # Element position is the index of the target element on which do the comparison
-func internal_comparison{range_check_ptr}(index : felt, element : felt, temp : felt*, cost_array : felt*, element_position : felt, ranking_array : felt*):
+func internal_comparison{range_check_ptr}(counter : felt, element : felt, cost_array : felt*)->(res : felt):
     alloc_locals
 
-    if index == WORKERS_IN_ROUND:
-        assert [ranking_array + element_position] = [temp + index]
-        return ()
+    if counter == 0:
+        return (res = 0)
     end
 
-    let (local comparison : felt) = is_le([cost_array + index], element)
+    let (local comparison : felt) = is_le([cost_array], element)
     # if element >= [cost_array + index]
+    let (temp) = internal_comparison(counter=counter-1, element=element, cost_array=cost_array+1)
     if comparison == 1:
         # Increment the counter
-        assert [temp + index + 1] = [temp + index] + 1
+        return (res = temp + 1)
     else:
         # The counter doesn't change
-        assert [temp + index + 1] = [temp + index]
+        return (res = temp)
     end
-
-    return internal_comparison(index=index+1, element=element, temp=temp, cost_array=cost_array, element_position = element_position, ranking_array=ranking_array)
 end
 
 # Sort the cost array in increasing order of cost, and select then the best_K elements of the array
@@ -656,7 +691,8 @@ func rank{range_check_ptr}(index : felt, cost_array : felt*, ranking_array : fel
         return ()
     end
 
-    internal_comparison(index = 0, element = [cost_array + index], temp = temp, cost_array = cost_array, element_position = index, ranking_array=ranking_array)
+    let (local res) = internal_comparison(counter = WORKERS_IN_ROUND, element = [cost_array + index], cost_array = cost_array)
+    assert [ranking_array + index] = res
     
     return rank(index=index+1, cost_array=cost_array, ranking_array=ranking_array)
 end
@@ -932,20 +968,25 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
 
     # Evaluation
-    evaluation(X = X, Y = Y)
+    let (local votes_array : felt*) = alloc()
+    evaluation(X = X, Y = Y, votes_array = votes_array)
+
+    # Average Best_K models
+    let (local param_sum : Parameters*) = alloc()
+
 
 
     # Initialize all the matrix with all elements
     # init_matrix(value=0, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=parameters.w1)
-    assert [[parameters.w1]] = 3 * PRECISION
-    assert [[parameters.w1] + 1] = (-3) * PRECISION
-    assert [[parameters.w1 + 1]] = (-3) * PRECISION
-    assert [[parameters.w1 + 1] + 1] = 3 * PRECISION
-    init_matrix(
-        value=(-5) * PRECISION, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=parameters.w2
-    )
-    init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
-    init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
+    # assert [[parameters.w1]] = 3 * PRECISION
+    # assert [[parameters.w1] + 1] = (-3) * PRECISION
+    # assert [[parameters.w1 + 1]] = (-3) * PRECISION
+    # assert [[parameters.w1 + 1] + 1] = 3 * PRECISION
+    # init_matrix(
+    #     value=(-5) * PRECISION, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=parameters.w2
+    # )
+    # init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
+    # init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
 
     # Training
     # training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
