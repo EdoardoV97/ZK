@@ -580,41 +580,11 @@ end
 # Evaluation function
 func evaluation{range_check_ptr}(X : felt**, Y : felt**)->():
     alloc_locals
+
     # Variables to store the models of the previous round
     let (local models_to_evaluate : Parameters*) = alloc()
+    
     param_variables_initialization(counter=0, models_to_evaluate=models_to_evaluate)
-
-    # Load the params from input
-    %{
-        for i in range(0, ids.WORKERS_IN_ROUND):
-            index = 0
-            # Copy W1
-            for x in program_input['MODELS'][i]['W1'][0]:
-                memory[memory[memory[ids.models_to_evaluate + i].w1] + index] = x*ids.PRECISION
-                print(memory[[ids.models_to_evaluate[i].w1] + index])
-                index += 1
-            index = 0
-            for x in program_input['MODELS'][i]['W1'][1]:
-                memory[[ids.models_to_evaluate[i].w1 + 1] + index] = x*ids.PRECISION
-                index += 1
-            # Copy W2
-            index = 0
-            for x in program_input['MODELS'][i]['W2'][0]:
-                memory[[ids.models_to_evaluate[i].w2] + index] = x*ids.PRECISION
-                index += 1
-            # Copy B1
-            index = 0
-            for x in program_input['MODELS'][i]['B1'][0]:
-                memory[[ids.models_to_evaluate[i].b1] + index] = x*ids.PRECISION
-                index += 1
-            index = 0
-            for x in program_input['MODELS'][i]['B1'][1]:
-                memory[[ids.models_to_evaluate[i].b1 + 1] + index] = x*ids.PRECISION
-                index += 1
-            # Copy B2
-            memory[[ids.models_to_evaluate[i].b2]] = program_input['MODELS'][i]['B2'][0]*ids.PRECISION
-    %}
-
 
     # 1) EVALUATE LOADED MODELS AND SELECT BEST K' WORKERS
     # Variable to store the cost of the models to evaluate
@@ -622,15 +592,26 @@ func evaluation{range_check_ptr}(X : felt**, Y : felt**)->():
 
     calculate_cost_models(X = X, Y = Y, index = 0, models_to_evaluate = models_to_evaluate, cost_array = cost_array)
 
+    # Variable to store the indexes of the best models in cost_array
+    let (local best_K_array : felt*) = alloc()
+
     return ()
 end
 
+# This function must be called only by found_best_K
+# func internal_comparison(cost_array : felt*):
+# end
+
 # Sort the cost array in increasing order of cost, and select then the best_K elements of the array
 # Output must be the indexes of the models in the models_to_evaluate array
-func foo()->():
+# func found_best_K(index : felt, cost_array : felt*, best_K_array : felt*)->():
+#     if index == WORKERS_IN_ROUND:
+#         return ()
+#     end
+
+#     internal_comparison(cost_array = cost_array
     
-    return ()
-end
+# end
 
 
 # Compute loss function of models to evaluate using calculate_cost function
@@ -648,6 +629,7 @@ func calculate_cost_models{range_check_ptr}(X : felt**, Y : felt**, index : felt
     let (local A2 : felt**) = alloc()  # 1x4 matrix
     let (local r1) = alloc()
     assert [A2] = r1
+
     forward_propagation(X=X, parameters=[models_to_evaluate], A1=A1, A2=A2)
 
     let (local cost) = calculate_cost(A2=A2, Y=Y)
@@ -775,12 +757,40 @@ func param_variables_initialization(counter : felt, models_to_evaluate : Paramet
     assert parameters.w2 = alloc_w2
     assert parameters.b1 = alloc_b1
     assert parameters.b2 = alloc_b2
-    assert [models_to_evaluate + counter*Parameters.SIZE] = parameters # TODO controllare qui
+    assert [models_to_evaluate] = parameters
     %{
-        # print(f"Iteration with counter {ids.counter} passed!")
+        # Copy W1
+        print(f"Iteration #{ids.counter}")
+        index = 0
+        for x in program_input['MODELS'][ids.counter]['W1'][0]:
+            memory[memory[ids.models_to_evaluate.w1] + index] = x*ids.PRECISION
+            print(memory[memory[ids.models_to_evaluate.w1] + index])
+            index += 1
+        index = 0
+        for x in program_input['MODELS'][ids.counter]['W1'][1]:
+            memory[memory[ids.models_to_evaluate.w1 + 1] + index] = x*ids.PRECISION
+            print(memory[memory[ids.models_to_evaluate.w1 + 1] + index])
+            index += 1
+         # Copy W2
+        index = 0
+        for x in program_input['MODELS'][ids.counter]['W2'][0]:
+            memory[memory[ids.models_to_evaluate.w2] + index] = x*ids.PRECISION
+            index += 1
+        # Copy B1
+        index = 0
+        for x in program_input['MODELS'][ids.counter]['B1'][0]:
+            memory[memory[ids.models_to_evaluate.b1] + index] = x*ids.PRECISION
+            index += 1
+        index = 0
+        for x in program_input['MODELS'][ids.counter]['B1'][1]:
+            memory[memory[ids.models_to_evaluate.b1 + 1] + index] = x*ids.PRECISION
+            index += 1
+        # Copy B2
+        # TODO ERRORE QUI
+        memory[[ids.models_to_evaluate.b2]] = program_input['MODELS'][ids.counter]['B2'][0]*ids.PRECISION
     %}
 
-    return param_variables_initialization(counter=counter+1, models_to_evaluate=models_to_evaluate)
+    return param_variables_initialization(counter=counter+1, models_to_evaluate=models_to_evaluate+Parameters.SIZE)
 end
 
 func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
