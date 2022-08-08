@@ -3,6 +3,7 @@ from starkware.cairo.common.serialize import serialize_word
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import signed_div_rem
+from starkware.cairo.common.math_cmp import is_le 
 from ml_library import (
     dot_product_array,
     dot_product_matrix,
@@ -577,6 +578,12 @@ func training{output_ptr : felt*, range_check_ptr}(
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
 
+# TODO average best_k_models
+func average_best_K_models():
+    return ()
+end
+
+
 # Evaluation function
 func evaluation{range_check_ptr}(X : felt**, Y : felt**)->():
     alloc_locals
@@ -587,31 +594,72 @@ func evaluation{range_check_ptr}(X : felt**, Y : felt**)->():
     param_variables_initialization(counter=0, models_to_evaluate=models_to_evaluate)
 
     # 1) EVALUATE LOADED MODELS AND SELECT BEST K' WORKERS
-    # Variable to store the cost of the models to evaluate
     let (local cost_array) = alloc()
+    let (local ranking_array : felt*) = alloc()
+    let (local votes_array : felt*) = alloc() # This is the variable containing the votes
 
     calculate_cost_models(X = X, Y = Y, index = 0, models_to_evaluate = models_to_evaluate, cost_array = cost_array)
 
-    # Variable to store the indexes of the best models in cost_array
-    let (local best_K_array : felt*) = alloc()
+    rank(index=0, cost_array=cost_array, ranking_array=ranking_array)
 
-    return ()
+    find_best_K(index=0, ranking_array=ranking_array, position=0, votes_array=votes_array)
+    return () # TODO return the votes
 end
 
-# This function must be called only by found_best_K
-# func internal_comparison(cost_array : felt*):
-# end
+# Given the rank array extract the best_K elements
+func find_best_K{range_check_ptr}(index : felt, ranking_array : felt*, position : felt, votes_array : felt*):
+    alloc_locals
+    if index == WORKERS_IN_ROUND:
+        return()
+    end
+
+    let (local comparison : felt) = is_le([ranking_array + index], BEST_K)
+    # if [ranking_array + index] <= BEST_K
+    if comparison == 1:
+        assert [votes_array + position] = index
+        return find_best_K(index=index+1, ranking_array=ranking_array, position=position+1, votes_array=votes_array)
+    else:
+        return find_best_K(index=index+1, ranking_array=ranking_array, position=position, votes_array=votes_array)
+    end
+end
+
+# This function must be called only by rank function
+# Element position is the index of the target element on which do the comparison
+func internal_comparison{range_check_ptr}(index : felt, element : felt, temp : felt*, cost_array : felt*, element_position : felt, ranking_array : felt*):
+    alloc_locals
+
+    if index == WORKERS_IN_ROUND:
+        assert [ranking_array + element_position] = [temp + index]
+        return ()
+    end
+
+    let (local comparison : felt) = is_le([cost_array + index], element)
+    # if element >= [cost_array + index]
+    if comparison == 1:
+        # Increment the counter
+        assert [temp + index + 1] = [temp + index] + 1
+    else:
+        # The counter doesn't change
+        assert [temp + index + 1] = [temp + index]
+    end
+
+    return internal_comparison(index=index+1, element=element, temp=temp, cost_array=cost_array, element_position = element_position, ranking_array=ranking_array)
+end
 
 # Sort the cost array in increasing order of cost, and select then the best_K elements of the array
 # Output must be the indexes of the models in the models_to_evaluate array
-# func found_best_K(index : felt, cost_array : felt*, best_K_array : felt*)->():
-#     if index == WORKERS_IN_ROUND:
-#         return ()
-#     end
+func rank{range_check_ptr}(index : felt, cost_array : felt*, ranking_array : felt*)->():
+    alloc_locals
+    let (local temp : felt*) = alloc()
+    assert [temp] = 0
+    if index == WORKERS_IN_ROUND:
+        return ()
+    end
 
-#     internal_comparison(cost_array = cost_array
+    internal_comparison(index = 0, element = [cost_array + index], temp = temp, cost_array = cost_array, element_position = index, ranking_array=ranking_array)
     
-# end
+    return rank(index=index+1, cost_array=cost_array, ranking_array=ranking_array)
+end
 
 
 # Compute loss function of models to evaluate using calculate_cost function
