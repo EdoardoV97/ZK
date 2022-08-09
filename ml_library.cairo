@@ -11,7 +11,7 @@ from ln_python_generator.ln import ln
 from sigmoid_python_generator.sigmoid import sigmoid
 from tanh_python_generator.tanh import tanh
 
-const PRECISION = 1000
+const PRECISION = 100
 const DIV_BOUND = 100000000000000000000000000000000000000
 
 # Function that return dot product of two vector array.

@@ -1,9 +1,10 @@
 import math
 import numpy as np
 
-PRECISION = 1000
+PRECISION = 100000000
 RANGE_PRECISION = 100
-STEP = 1
+STEP = 0.6
+R = 8
 
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
@@ -17,10 +18,9 @@ f.write(f"\n\n\tif low == 1:\n\t\treturn (res=0)\n\tend")
 f.write(f"\n\tif high == 1:\n\t\treturn (res={1*PRECISION})\n\tend\n")
 for x in np.arange(0,10,STEP*1/RANGE_PRECISION):
     if x<=5.2999999999:
-        f.write(f"\n\tlet (check) = is_in_range({int(x*PRECISION)},z,{int(x*PRECISION+PRECISION*STEP*1/RANGE_PRECISION)})")
-        f.write(f"\n\tif check == 1: \n\t\treturn (res={int(round(sigmoid(x), 2) * PRECISION) })\n\tend")
-        if x != 0:
-            f.write(f"\n\tlet (check) = is_in_range({int(-x*PRECISION)},z,{int(-x*PRECISION-PRECISION*STEP*1/RANGE_PRECISION)})")
-            f.write(f"\n\tif z == 1: \n\t\treturn (res={int(round(sigmoid(-x), 2) * PRECISION) })\n\tend")
+        f.write(f"\n\tlet (check) = is_in_range({int(x*PRECISION)},z,{int((x + STEP*1/RANGE_PRECISION) * PRECISION)})")
+        f.write(f"\n\tif check == 1: \n\t\treturn (res={int(round(sigmoid((x + x +STEP*1/RANGE_PRECISION)/2), R) * PRECISION) })\n\tend")
+        f.write(f"\n\tlet (check) = is_in_range({int(-x*PRECISION)},z,{int((-x-STEP*1/RANGE_PRECISION) * PRECISION)})")
+        f.write(f"\n\tif z == 1: \n\t\treturn (res={int(round(sigmoid(-(x + x*STEP*1/RANGE_PRECISION)/2), R) * PRECISION) })\n\tend")
 f.write("\n\treturn (res=0)\nend")
 f.close()
