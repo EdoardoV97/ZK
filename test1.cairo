@@ -34,7 +34,7 @@ const N_X = 2
 const N_H = 2
 const N_Y = 1
 const NUM_OF_ITERS = 1
-const LEARNING_RATE = 30  # = 0.3 * 100
+const LEARNING_RATE = 30  # = 0.3 * 100 Need to be adapted to the PRECISION
 const f = 2  # number of rows of X
 const m = 4  # number of cols of X
 const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496571699381303113357185  # 1419832118711440540010636386214391686376015713241217190564056350739172392712 if with precision in the matrixes
@@ -409,8 +409,11 @@ func update_parameters{range_check_ptr}(
         res=new_parameters.w1,
     )
     # %{
-    #     print(f"New w1 matrix:\n{memory[memory[ids.new_parameters.w1]]} {memory[memory[ids.new_parameters.w1] + 1]}")
-    #     print(f"{memory[memory[ids.new_parameters.w1 + 1]]} {memory[memory[ids.new_parameters.w1 + 1] + 1]}")
+    #     c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+    #     h = 99999999999999999999999999999999999999999
+    #     f = open("weights_cairo.txt", "a")
+    #     f.write(f"W1:[[{memory[memory[ids.new_parameters.w1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1]] < h else (memory[memory[ids.new_parameters.w1]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w1] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1] + 1] < h else (memory[memory[ids.new_parameters.w1] + 1] - c)/(ids.PRECISION)}], [{memory[memory[ids.new_parameters.w1 + 1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1 + 1]] < h else (memory[memory[ids.new_parameters.w1 + 1]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w1 + 1] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1 + 1] + 1] < h else (memory[memory[ids.new_parameters.w1 + 1] + 1] - c)/(ids.PRECISION)}]")
+    #     f.close()
     # %}
 
     # b1 = b1 - learning_rate*db1
@@ -437,8 +440,11 @@ func update_parameters{range_check_ptr}(
         res=new_parameters.b1,
     )
     # %{
-    #     print(f"New db1 matrix:\n{memory[memory[ids.new_parameters.b1]]}")
-    #     print(f"{memory[memory[ids.new_parameters.b1 + 1]]}")
+    #     c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+    #     h = 99999999999999999999999999999999999999999
+    #     f = open("weights_cairo.txt", "a")
+    #     f.write(f"\nb1:[[{memory[memory[ids.new_parameters.b1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.b1]] < h else (memory[memory[ids.new_parameters.b1]] - c)/(ids.PRECISION)}], [{memory[memory[ids.new_parameters.b1 + 1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.b1 + 1]] < h else (memory[memory[ids.new_parameters.b1 + 1]] - c)/(ids.PRECISION)}]]")
+    #     f.close()
     # %}
 
     # W2 = W2 - learning_rate*dW2
@@ -459,7 +465,13 @@ func update_parameters{range_check_ptr}(
         cols=N_H,
         res=new_parameters.w2,
     )
-    # %{ print(f"New w2 matrix:\n{memory[memory[ids.new_parameters.w2]]} {memory[memory[ids.new_parameters.w2] + 1]}") %}
+    # %{
+    #     c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+    #     h = 99999999999999999999999999999999999999999
+    #     f = open("weights_cairo.txt", "a")
+    #     f.write(f"\nW2:[[{memory[memory[ids.new_parameters.w2]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w2]] < h else (memory[memory[ids.new_parameters.w2]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w2] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w2] + 1] < h else (memory[memory[ids.new_parameters.w2] + 1] - c)/(ids.PRECISION)}]]")
+    #     f.close()
+    # %}
 
     # b2 = b2 - learning_rate*db2
     let (local mul : felt**) = alloc()
@@ -479,7 +491,13 @@ func update_parameters{range_check_ptr}(
         cols=1,
         res=new_parameters.b2,
     )
-    # %{ print(f"New db2 matrix:\n{memory[memory[ids.new_parameters.b2]]}") %}
+    # %{
+    #     c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+    #     h = 99999999999999999999999999999999999999999
+    #     f = open("weights_cairo.txt", "a")
+    #     f.write(f"\nb2:[[{memory[memory[ids.new_parameters.b2]]/(ids.PRECISION) if memory[memory[ids.new_parameters.b2]] < h else (memory[memory[ids.new_parameters.b2]] - c)/(ids.PRECISION)}]]\n")
+    #     f.close()
+    # %}
 
     assert [p_history + Parameters.SIZE] = new_parameters
     return ()
@@ -561,7 +579,11 @@ func training{output_ptr : felt*, range_check_ptr}(
     # serialize_word([[dW2] + 1])
     # Print db2
     # serialize_word([[db2]])
-
+    # %{
+    #     f = open("weights_cairo.txt", "a")
+    #     f.write(f"{ids.NUM_OF_ITERS - ids.num_of_iters}\n")
+    #     f.close()
+    # %}
     update_parameters(dW1=dW1, db1=db1, dW2=dW2, db2=db2, p_history=p_history)
     # Print the new W1
     # serialize_word([[[p_history + Parameters.SIZE].w1]])

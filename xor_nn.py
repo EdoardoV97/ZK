@@ -115,6 +115,19 @@ def model(X, Y, n_x, n_h, n_y, num_of_iters, learning_rate):
         if(i%100 == 0):
             print('Cost after iteration# {:d}: {:f}'.format(i, cost))
 
+        f = open("weights_python.txt", "a")
+        f.write(f"{i}\n")
+        f.write("W1:")
+        f.write(str(parameters["W1"].tolist()))
+        f.write("\nb1:")
+        f.write(str(parameters["b1"].tolist()))
+        f.write("\nW2:")
+        f.write(str(parameters["W2"].tolist()))
+        f.write("\nb2:")
+        f.write(str(parameters["b2"].tolist()))
+        f.write("\n")
+        f.close()
+
     return parameters
 
 def predict(X, parameters):
@@ -145,12 +158,16 @@ m = X.shape[1]
 n_x = 2     #No. of neurons in first layer
 n_h = 2     #No. of neurons in hidden layer
 n_y = 1     #No. of neurons in output layer
-num_of_iters = 1000
+num_of_iters = 50 -1
 learning_rate = 0.3
 
 trained_parameters = model(X, Y, n_x, n_h, n_y, num_of_iters, learning_rate)
 print("\nParameters value at the end of training:")
-print(trained_parameters)
+print(trained_parameters["W1"])
+print(trained_parameters["b1"])
+print(trained_parameters["W2"])
+print(trained_parameters["b2"])
+
 
 # Test 2X1 vector to calculate the XOR of its elements. 
 # Try (0, 0), (0, 1), (1, 0), (1, 1)
