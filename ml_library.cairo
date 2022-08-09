@@ -683,7 +683,7 @@ func matrix_ln{range_check_ptr}(
         assert j = col + 1
     end
 
-    let (local ln_res) = ln(x=[[m + row] + col])
+    let (local ln_res) = ln(z=[[m + row] + col])
     assert [[res + row] + col] = ln_res
     # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.ln_res}") %}
 

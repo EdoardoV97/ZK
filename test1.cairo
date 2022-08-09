@@ -23,7 +23,7 @@ from ml_library import (
     mul_matrix_by_scalar,
     matrix_flattening,
     build_merkle_root,
-    matrix_log,
+    matrix_ln,
     contains
 )
 
@@ -41,7 +41,7 @@ const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496
 
 # FL parameters
 const WORKERS_IN_ROUND = 2
-const BEST_K = WORKERS_IN_ROUND / 2
+const BEST_K = 1
 
 
 struct Parameters:
@@ -98,8 +98,8 @@ func forward_propagation{range_check_ptr}(
         res=Z1,
     )
     %{
-        print(f"Z1 matrix:\n{memory[memory[ids.Z1]]} {memory[memory[ids.Z1] + 1]} {memory[memory[ids.Z1] + 2]} {memory[memory[ids.Z1] + 3]}")
-        print(f"{memory[memory[ids.Z1 + 1]]} {memory[memory[ids.Z1 + 1] + 1]} {memory[memory[ids.Z1 + 1] + 2]} {memory[memory[ids.Z1 + 1] + 3]}")
+        # print(f"Z1 matrix:\n{memory[memory[ids.Z1]]} {memory[memory[ids.Z1] + 1]} {memory[memory[ids.Z1] + 2]} {memory[memory[ids.Z1] + 3]}")
+        # print(f"{memory[memory[ids.Z1 + 1]]} {memory[memory[ids.Z1 + 1] + 1]} {memory[memory[ids.Z1 + 1] + 2]} {memory[memory[ids.Z1 + 1] + 3]}")
     %}
 
     # 2) A1 = np.tanh(Z1)
@@ -711,6 +711,9 @@ func find_best_K{range_check_ptr}(index : felt, ranking_array : felt*, votes_arr
     # if [ranking_array + index] <= BEST_K
     if comparison == 1:
         assert [votes_array] = index
+        %{
+            print(f"Voted:{ids.index}")
+        %}
         return find_best_K(index=index+1, ranking_array=ranking_array, votes_array=votes_array+1)
     else:
         return find_best_K(index=index+1, ranking_array=ranking_array, votes_array=votes_array)
@@ -775,6 +778,9 @@ func calculate_cost_models{range_check_ptr}(X : felt**, Y : felt**, index : felt
 
     let (local cost) = calculate_cost(A2=A2, Y=Y)
     assert [cost_array + index] = cost
+    %{
+        print(f"Cost of model {ids.index} is {ids.cost}")
+    %}
     return calculate_cost_models(X = X, Y = Y, index = index + 1, models_to_evaluate = models_to_evaluate + Parameters.SIZE, cost_array = cost_array)
 end
 
@@ -817,7 +823,7 @@ func calculate_cost{range_check_ptr}(A2 : felt**, Y : felt**) -> (cost : felt):
     assert [plus_result] = r1
 
     # log(A2)
-    matrix_log(m=A2, row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=log_A2)
+    matrix_ln(m=A2, row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=log_A2)
     # serialize_word([[log_A2]])
     # serialize_word([[log_A2] + 1])
     # serialize_word([[log_A2] + 2])
@@ -851,7 +857,7 @@ func calculate_cost{range_check_ptr}(A2 : felt**, Y : felt**) -> (cost : felt):
     )
 
     # log(1-A2)
-    matrix_log(m=A2, row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=log_one_minus_A2)
+    matrix_ln(m=A2, row=0, col=0, step=N_Y*m, rows=N_Y, cols=m, res=log_one_minus_A2)
     
 
     # np.multiply(Y, np.log(A2)
@@ -901,11 +907,11 @@ func param_variables_initialization(counter : felt, models_to_evaluate : Paramet
     assert [models_to_evaluate] = parameters
     %{
         # Copy W1
-        print(f"Iteration #{ids.counter}")
+        # print(f"Iteration #{ids.counter}")
         index = 0
         for x in program_input['MODELS'][ids.counter]['W1'][0]:
             memory[memory[ids.models_to_evaluate.w1] + index] = x*ids.PRECISION
-            print(memory[memory[ids.models_to_evaluate.w1] + index])
+            # print(memory[memory[ids.models_to_evaluate.w1] + index])
             index += 1
         index = 0
         for x in program_input['MODELS'][ids.counter]['W1'][1]:
