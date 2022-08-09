@@ -11,6 +11,21 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 const PRECISION = 100
 const DIV_BOUND = 100000000000000000000000000000000000000
 
+# Return the # of times "element" is contained in "array"
+func contains(counter : felt, array : felt*, element : felt)->(res : felt):
+    if counter == 0:
+        return (res = 0)
+    end
+
+    let (rest) = contains(counter=counter-1, array=array+1, element=element)
+    if [array] == element:
+        return (res = rest + 1)
+    else:
+        return (res = rest)
+    end
+
+end
+
 # Function that return dot product of two vector array.
 func dot_product_array(array_1 : felt*, array_2 : felt*, size : felt) -> (res : felt):
     if size == 0:

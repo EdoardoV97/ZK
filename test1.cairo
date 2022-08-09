@@ -4,6 +4,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import signed_div_rem
 from starkware.cairo.common.math_cmp import is_le 
+
 from ml_library import (
     dot_product_array,
     dot_product_matrix,
@@ -22,7 +23,8 @@ from ml_library import (
     mul_matrix_by_scalar,
     matrix_flattening,
     build_merkle_root,
-    matrix_log
+    matrix_log,
+    contains
 )
 
 const PRECISION = 100
@@ -95,10 +97,10 @@ func forward_propagation{range_check_ptr}(
         temp=transpose,
         res=Z1,
     )
-    # %{
-    #     print(f"Z1 matrix:\n{memory[memory[ids.Z1]]} {memory[memory[ids.Z1] + 1]} {memory[memory[ids.Z1] + 2]} {memory[memory[ids.Z1] + 3]}")
-    #     print(f"{memory[memory[ids.Z1 + 1]]} {memory[memory[ids.Z1 + 1] + 1]} {memory[memory[ids.Z1 + 1] + 2]} {memory[memory[ids.Z1 + 1] + 3]}")
-    # %}
+    %{
+        print(f"Z1 matrix:\n{memory[memory[ids.Z1]]} {memory[memory[ids.Z1] + 1]} {memory[memory[ids.Z1] + 2]} {memory[memory[ids.Z1] + 3]}")
+        print(f"{memory[memory[ids.Z1 + 1]]} {memory[memory[ids.Z1 + 1] + 1]} {memory[memory[ids.Z1 + 1] + 2]} {memory[memory[ids.Z1 + 1] + 3]}")
+    %}
 
     # 2) A1 = np.tanh(Z1)
     # %{ print("Matrix_tanh") %}
@@ -578,47 +580,80 @@ func training{output_ptr : felt*, range_check_ptr}(
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
 
-# TODO average best_k_models
-# func average_best_K_models(counter : felt*, votes_array : felt*, models_to_evaluate : Parameters*)->(final_averaged_parameters : Parameters):
+# Average best_k_models
+func average_best_K_models{range_check_ptr}(counter : felt, votes_array : felt*, param_avg : Parameters*, models_to_evaluate : Parameters*)->(final_averaged_parameters : Parameters):
+    alloc_locals
+    if counter == WORKERS_IN_ROUND:
+        return ([param_avg - Parameters.SIZE])
+    end
 
-#     if counter == 0:
-#         return ()
-#     end
+    let (local is_in_best_k) = contains(counter=BEST_K, array=votes_array, element=counter)
+    if is_in_best_k == 0:
+        return average_best_K_models(counter=counter+1, votes_array=votes_array, param_avg=param_avg+Parameters.SIZE, models_to_evaluate=models_to_evaluate+Parameters.SIZE)
+    end
 
-#     # local parameters : Parameters
-#     # let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
-#     # let (local r1) = alloc()
-#     # let (local r2) = alloc()
-#     # assert [alloc_w1] = r1
-#     # assert [alloc_w1 + 1] = r2
-#     # let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
-#     # let (local r1) = alloc()
-#     # assert [alloc_w2] = r1
-#     # let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
-#     # let (local r1) = alloc()
-#     # let (local r2) = alloc()
-#     # assert [alloc_b1] = r1
-#     # assert [alloc_b1 + 1] = r2
-#     # let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
-#     # let (local r1) = alloc()
-#     # assert [alloc_b2] = r1
-#     # assert parameters.w1 = alloc_w1
-#     # assert parameters.w2 = alloc_w2
-#     # assert parameters.b1 = alloc_b1
-#     # assert parameters.b2 = alloc_b2
-#     # assert [param_sum] = parameters
+    local parameters : Parameters
+    let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_w1] = r1
+    assert [alloc_w1 + 1] = r2
+    let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
+    let (local r1) = alloc()
+    assert [alloc_w2] = r1
+    let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_b1] = r1
+    assert [alloc_b1 + 1] = r2
+    let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
+    let (local r1) = alloc()
+    assert [alloc_b2] = r1
+    assert parameters.w1 = alloc_w1
+    assert parameters.w2 = alloc_w2
+    assert parameters.b1 = alloc_b1
+    assert parameters.b2 = alloc_b2
+    assert [param_avg] = parameters
 
-#     # Sum of W1
-#     # assert [[parameters.w1]] = [[models_to_evaluate.w1]] + [[[param_sum - Parameters.SIZE].w1]]
-#     # assert [[parameters.w1] + 1] = [[models_to_evaluate.w1] + 1] + [[[param_sum - Parameters.SIZE].w1] + 1]
-#     # assert [[parameters.w1 + 1]] = [[models_to_evaluate.w1 + 1]] + [[[param_sum - Parameters.SIZE].w1 + 1]]
-#     # assert [[parameters.w1 + 1] + 1] = [[models_to_evaluate.w1 + 1]] + [[[param_sum - Parameters.SIZE].w1 + 1]]
-#     # let (w1) = 
-#     # Sum of W2 
-#     # Sum of B1 
-#     # Sum of B2 
-#     return average_best_K_models()
-# end
+
+    local temp : Parameters
+    let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_w1] = r1
+    assert [alloc_w1 + 1] = r2
+    let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
+    let (local r1) = alloc()
+    assert [alloc_w2] = r1
+    let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [alloc_b1] = r1
+    assert [alloc_b1 + 1] = r2
+    let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
+    let (local r1) = alloc()
+    assert [alloc_b2] = r1
+    assert temp.w1 = alloc_w1
+    assert temp.w2 = alloc_w2
+    assert temp.b1 = alloc_b1
+    assert temp.b2 = alloc_b2
+
+
+    # Avg of W1
+    sum_matrix(m_1=models_to_evaluate.w1, m_2=[param_avg - Parameters.SIZE].w1, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=temp.w1)
+    div_matrix_by_scalar(m=temp.w1, divider=BEST_K, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=param_avg.w1)
+    # Avg of W2 
+    sum_matrix(m_1=models_to_evaluate.w2, m_2=[param_avg - Parameters.SIZE].w2, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=temp.w2)
+    div_matrix_by_scalar(m=temp.w2, divider=BEST_K, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=param_avg.w2)
+    # Avg of B1 
+    sum_matrix(m_1=models_to_evaluate.b1, m_2=[param_avg - Parameters.SIZE].b1, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=temp.b1)
+    div_matrix_by_scalar(m=temp.b1, divider=BEST_K, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=param_avg.b1)
+    # Avg of B2 
+    sum_matrix(m_1=models_to_evaluate.b2, m_2=[param_avg - Parameters.SIZE].b2, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=temp.b2)
+    div_matrix_by_scalar(m=temp.b2, divider=BEST_K, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=param_avg.b2)
+
+    return average_best_K_models(counter=counter+1, votes_array=votes_array, param_avg=param_avg+Parameters.SIZE, models_to_evaluate=models_to_evaluate+Parameters.SIZE)
+end
 
 
 # Evaluation function
@@ -871,7 +906,7 @@ func param_variables_initialization(counter : felt, models_to_evaluate : Paramet
             index += 1
         # Copy B2
         # TODO ERRORE QUI
-        memory[[ids.models_to_evaluate.b2]] = program_input['MODELS'][ids.counter]['B2'][0]*ids.PRECISION
+        memory[memory[ids.models_to_evaluate.b2]] = program_input['MODELS'][ids.counter]['B2'][0][0]*ids.PRECISION
     %}
 
     return param_variables_initialization(counter=counter+1, models_to_evaluate=models_to_evaluate+Parameters.SIZE)
@@ -943,7 +978,37 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
     # Initialize the weights parameters
     let (local p_history : Parameters*) = alloc()
-    local parameters : Parameters
+    # local parameters : Parameters
+    # let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # assert [alloc_w1] = r1
+    # assert [alloc_w1 + 1] = r2
+    # let (local alloc_w2 : felt**) = alloc()  # 1x2 matrix
+    # let (local r1) = alloc()
+    # assert [alloc_w2] = r1
+    # let (local alloc_b1 : felt**) = alloc()  # 2x1 matrix
+    # let (local r1) = alloc()
+    # let (local r2) = alloc()
+    # assert [alloc_b1] = r1
+    # assert [alloc_b1 + 1] = r2
+    # let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
+    # let (local r1) = alloc()
+    # assert [alloc_b2] = r1
+    # assert parameters.w1 = alloc_w1
+    # assert parameters.w2 = alloc_w2
+    # assert parameters.b1 = alloc_b1
+    # assert parameters.b2 = alloc_b2
+    # assert [p_history] = parameters
+
+
+    # Evaluation
+    let (local votes_array : felt*) = alloc()
+    let (local models_to_evaluate : Parameters*) = evaluation(X = X, Y = Y, votes_array = votes_array)
+
+    # Average Best_K models
+    let (local param_avg : Parameters*) = alloc()
+    local temp : Parameters
     let (local alloc_w1 : felt**) = alloc()  # 2x2 matrix
     let (local r1) = alloc()
     let (local r2) = alloc()
@@ -960,21 +1025,24 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (local alloc_b2 : felt**) = alloc()  # 1x1 matrix
     let (local r1) = alloc()
     assert [alloc_b2] = r1
-    assert parameters.w1 = alloc_w1
-    assert parameters.w2 = alloc_w2
-    assert parameters.b1 = alloc_b1
-    assert parameters.b2 = alloc_b2
-    assert [p_history] = parameters
+    assert temp.w1 = alloc_w1
+    assert temp.w2 = alloc_w2
+    assert temp.b1 = alloc_b1
+    assert temp.b2 = alloc_b2
+    assert [param_avg] = temp
+    init_matrix(value=0, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=temp.w1)
+    init_matrix(value=0, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=temp.w2)
+    init_matrix(value=0, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=temp.b1)
+    init_matrix(value=0, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=temp.b2)
 
+    let (avg : Parameters) = average_best_K_models(counter=0, votes_array=votes_array, param_avg=param_avg+Parameters.SIZE, models_to_evaluate=models_to_evaluate)
+    assert [p_history] = avg
 
-    # Evaluation
-    let (local votes_array : felt*) = alloc()
-    evaluation(X = X, Y = Y, votes_array = votes_array)
+    # Training
+    # training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
 
-    # Average Best_K models
-    let (local param_sum : Parameters*) = alloc()
-
-
+    # TODO calcolare merkle tree root o hash chain del modello finale
+    return ()
 
     # Initialize all the matrix with all elements
     # init_matrix(value=0, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=parameters.w1)
@@ -987,8 +1055,4 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     # )
     # init_matrix(value=0, row=0, col=0, step=N_H, rows=N_H, cols=1, res=parameters.b1)
     # init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
-
-    # Training
-    # training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
-    return ()
 end
