@@ -493,16 +493,53 @@ func update_parameters{range_check_ptr}(
 end
 
 # X, Y, n_x, n_h, n_y, num_of_iters, learning_rate
-func training{output_ptr : felt*, range_check_ptr}(
+func training{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     X : felt**, Y : felt**, p_history : Parameters*, num_of_iters : felt
 ):
     alloc_locals
 
     if num_of_iters == 0:
+        # Compute the Merkle Tree root of the new model
+        let (local flattened_model : felt*) = alloc()
+        matrix_flattening(
+            m=p_history.w1, step=N_X * N_H, row=0, col=0, cols=N_H, res=flattened_model
+        )
+        matrix_flattening(
+            m=p_history.b1, step=N_H * 1, row=0, col=0, cols=1, res=flattened_model + N_X * N_H
+        )
+        matrix_flattening(
+            m=p_history.w2,
+            step=N_Y * N_H,
+            row=0,
+            col=0,
+            cols=N_H,
+            res=flattened_model + N_X * N_H + N_H * 1,
+        )
+        matrix_flattening(
+            m=p_history.b2,
+            step=N_Y * 1,
+            row=0,
+            col=0,
+            cols=1,
+            res=flattened_model + N_X * N_H + N_H * 1 + N_Y * N_H,
+        )
+        assert [flattened_model + 9] = 0
+        assert [flattened_model + 10] = 0
+        assert [flattened_model + 11] = 0
+        assert [flattened_model + 12] = 0
+        assert [flattened_model + 13] = 0
+        assert [flattened_model + 14] = 0
+        assert [flattened_model + 15] = 0
+        let (local merkle_tree_model : felt**) = alloc()
+        assert [merkle_tree_model] = flattened_model
+        let (merkle_root) = build_merkle_root{hash_ptr=pedersen_ptr}(
+            counter=16, res=merkle_tree_model + 1
+        )
+        serialize_word(merkle_root)
         return ()
     end
-    serialize_word('AAAAAAAAAAAAAAAAAAAAAAA')
-    serialize_word(NUM_OF_ITERS - num_of_iters)
+    # serialize_word('AAAAAAAAAAAAAAAAAAAAAAA')
+    # serialize_word(NUM_OF_ITERS - num_of_iters)
 
     let (local A1 : felt**) = alloc()  # 2x4 matrix
     let (local r1) = alloc()
@@ -688,6 +725,5 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     init_matrix(value=0, row=0, col=0, step=N_Y, rows=N_Y, cols=1, res=parameters.b2)
 
     training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
-
     return ()
 end
