@@ -1152,9 +1152,6 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
     # Training
     training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
-    
-
-    # TODO calcolare merkle tree root o hash chain del modello finale
     return ()
 
     # Initialize all the matrix with all elements
