@@ -41,7 +41,7 @@ const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496
 
 # FL parameters
 const WORKERS_IN_ROUND = 2
-const BEST_K = 1
+const BEST_K = 2
 
 
 struct Parameters:
@@ -585,18 +585,15 @@ func training{output_ptr : felt*, range_check_ptr}(
     #     f.close()
     # %}
     update_parameters(dW1=dW1, db1=db1, dW2=dW2, db2=db2, p_history=p_history)
-    # Print the new W1
+    # Print the new model after the training step
     # serialize_word([[[p_history + Parameters.SIZE].w1]])
     # serialize_word([[[p_history + Parameters.SIZE].w1] + 1])
     # serialize_word([[[p_history + Parameters.SIZE].w1 + 1]])
     # serialize_word([[[p_history + Parameters.SIZE].w1 + 1] + 1])
-    # Print the new W2
     # serialize_word([[[p_history + Parameters.SIZE].w2]])
     # serialize_word([[[p_history + Parameters.SIZE].w2] + 1])
-    # Print the new b1
     # serialize_word([[[p_history + Parameters.SIZE].b1]])
     # serialize_word([[[p_history + Parameters.SIZE].b1 + 1]])
-    # Print the new b2
     # serialize_word([[[p_history + Parameters.SIZE].b2]])
 
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
@@ -609,9 +606,14 @@ func average_best_K_models{range_check_ptr}(counter : felt, votes_array : felt*,
         return ([param_avg - Parameters.SIZE])
     end
 
+    %{
+        print(f"Counter: {ids.counter}")
+        print(f"Votes array:{memory[ids.votes_array]}")
+    %}
     let (local is_in_best_k) = contains(counter=BEST_K, array=votes_array, element=counter)
-    if is_in_best_k == 0:
-        return average_best_K_models(counter=counter+1, votes_array=votes_array, param_avg=param_avg+Parameters.SIZE, models_to_evaluate=models_to_evaluate+Parameters.SIZE)
+    # If element not found in votes_array
+    if is_in_best_k == 0: 
+        return average_best_K_models(counter=counter+1, votes_array=votes_array, param_avg=param_avg, models_to_evaluate=models_to_evaluate+Parameters.SIZE)
     end
 
     local parameters : Parameters
@@ -662,17 +664,17 @@ func average_best_K_models{range_check_ptr}(counter : felt, votes_array : felt*,
 
 
     # Avg of W1
-    sum_matrix(m_1=models_to_evaluate.w1, m_2=[param_avg - Parameters.SIZE].w1, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=temp.w1)
-    div_matrix_by_scalar(m=temp.w1, divider=BEST_K, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=param_avg.w1)
+    div_matrix_by_scalar(m=models_to_evaluate.w1, divider=BEST_K, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=temp.w1)
+    sum_matrix(m_1=temp.w1, m_2=[param_avg - Parameters.SIZE].w1, row=0, col=0, step=N_X * N_H, rows=N_X, cols=N_H, res=param_avg.w1)
     # Avg of W2 
-    sum_matrix(m_1=models_to_evaluate.w2, m_2=[param_avg - Parameters.SIZE].w2, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=temp.w2)
-    div_matrix_by_scalar(m=temp.w2, divider=BEST_K, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=param_avg.w2)
+    div_matrix_by_scalar(m=models_to_evaluate.w2, divider=BEST_K, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=temp.w2)
+    sum_matrix(m_1=temp.w2, m_2=[param_avg - Parameters.SIZE].w2, row=0, col=0, step=N_Y * N_H, rows=N_Y, cols=N_H, res=param_avg.w2)
     # Avg of B1 
-    sum_matrix(m_1=models_to_evaluate.b1, m_2=[param_avg - Parameters.SIZE].b1, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=temp.b1)
-    div_matrix_by_scalar(m=temp.b1, divider=BEST_K, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=param_avg.b1)
+    div_matrix_by_scalar(m=models_to_evaluate.b1, divider=BEST_K, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=temp.b1)
+    sum_matrix(m_1=temp.b1, m_2=[param_avg - Parameters.SIZE].b1, row=0, col=0, step=N_H * 1, rows=N_H, cols=1, res=param_avg.b1)
     # Avg of B2 
-    sum_matrix(m_1=models_to_evaluate.b2, m_2=[param_avg - Parameters.SIZE].b2, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=temp.b2)
-    div_matrix_by_scalar(m=temp.b2, divider=BEST_K, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=param_avg.b2)
+    div_matrix_by_scalar(m=models_to_evaluate.b2, divider=BEST_K, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=temp.b2)
+    sum_matrix(m_1=temp.b2, m_2=[param_avg - Parameters.SIZE].b2, row=0, col=0, step=N_Y * 1, rows=N_Y, cols=1, res=param_avg.b2)
 
     return average_best_K_models(counter=counter+1, votes_array=votes_array, param_avg=param_avg+Parameters.SIZE, models_to_evaluate=models_to_evaluate+Parameters.SIZE)
 end
@@ -690,7 +692,6 @@ func evaluation{range_check_ptr}(X : felt**, Y : felt**, votes_array : felt*)->(
     # 1) EVALUATE LOADED MODELS AND SELECT BEST K' WORKERS
     let (local cost_array) = alloc()
     let (local ranking_array : felt*) = alloc()
-    let (local votes_array : felt*) = alloc() # This is the variable containing the votes
 
     calculate_cost_models(X = X, Y = Y, index = 0, models_to_evaluate = models_to_evaluate, cost_array = cost_array)
     rank(index=0, cost_array=cost_array, ranking_array=ranking_array)
@@ -916,7 +917,7 @@ func param_variables_initialization(counter : felt, models_to_evaluate : Paramet
         index = 0
         for x in program_input['MODELS'][ids.counter]['W1'][1]:
             memory[memory[ids.models_to_evaluate.w1 + 1] + index] = x*ids.PRECISION
-            print(memory[memory[ids.models_to_evaluate.w1 + 1] + index])
+            # print(memory[memory[ids.models_to_evaluate.w1 + 1] + index])
             index += 1
          # Copy W2
         index = 0
@@ -1031,7 +1032,7 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
 
     # Evaluation
-    let (local votes_array : felt*) = alloc()
+    let (local votes_array : felt*) = alloc() # This is the variable containing the votes
     let (local models_to_evaluate : Parameters*) = evaluation(X = X, Y = Y, votes_array = votes_array)
 
     # Average Best_K models
@@ -1065,9 +1066,20 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
     let (avg : Parameters) = average_best_K_models(counter=0, votes_array=votes_array, param_avg=param_avg+Parameters.SIZE, models_to_evaluate=models_to_evaluate)
     assert [p_history] = avg
+    # Print the new averaged model
+    serialize_word([[p_history.w1]])
+    serialize_word([[p_history.w1] + 1])
+    serialize_word([[p_history.w1 + 1]])
+    serialize_word([[p_history.w1 + 1] + 1])
+    serialize_word([[p_history.w2]])
+    serialize_word([[p_history.w2] + 1])
+    serialize_word([[p_history.b1]])
+    serialize_word([[p_history.b1 + 1]])
+    serialize_word([[p_history.b2]])
 
     # Training
-    # training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
+    training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
+    
 
     # TODO calcolare merkle tree root o hash chain del modello finale
     return ()

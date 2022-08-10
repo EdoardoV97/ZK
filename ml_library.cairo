@@ -20,8 +20,15 @@ func contains(counter : felt, array : felt*, element : felt)->(res : felt):
         return (res = 0)
     end
 
+    %{
+        # print(f"Searchin element {ids.element} at iteration {ids.counter}")
+        # print(f"Votes array:{memory[ids.array]}")
+    %}
     let (rest) = contains(counter=counter-1, array=array+1, element=element)
     if [array] == element:
+        # %{
+        #     print(f"Element {ids.element} found in votes array")
+        # %}
         return (res = rest + 1)
     else:
         return (res = rest)

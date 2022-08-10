@@ -1,10 +1,10 @@
 import math
 import numpy as np
 
-PRECISION = 100000000
+PRECISION = 100
 RANGE_PRECISION = 100
-STEP = 0.6
-R = 8
+STEP = 5
+R = 2
 
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
