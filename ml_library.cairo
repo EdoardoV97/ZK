@@ -381,7 +381,7 @@ end
 #     alloc_locals
 
 # let (local z_temp, r) = signed_div_rem(z, 2, DIV_BOUND)
-#     let (tanh_res) = tanh(x=z_temp)
+#     let (tanh_res) = tanh(z=z_temp)
 #     let (local res, r) = signed_div_rem(tanh_res + 1 * PRECISION, 2, DIV_BOUND)
 #     return (res=res)
 # end
@@ -782,7 +782,7 @@ func build_merkle_tree_level{hash_ptr : HashBuiltin*}(array : felt*, index : fel
         return ()
     end
     let (hash) = hash2([array], [array + 1])
-    %{ print(f"Hash between {memory[ids.array]} and {memory[ids.array+1]}: {ids.hash}") %}
+    # %{ print(f"Hash between {memory[ids.array]} and {memory[ids.array+1]}: {ids.hash}") %}
     assert [res] = hash
     return build_merkle_tree_level(array=array + 2, index=index - 2, res=res + 1)
 end

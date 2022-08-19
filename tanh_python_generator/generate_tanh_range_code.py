@@ -1,10 +1,10 @@
 import math
 import numpy as np
 
-PRECISION = 100000000
+PRECISION = 1000
 RANGE_PRECISION = 100
 STEP = 0.6
-R = 8
+R = 3
 
 f = open("tanh.cairo", "w")
 f.write("from starkware.cairo.common.math_cmp import is_le, is_in_range\nfrom starkware.cairo.common.alloc import alloc\n")
