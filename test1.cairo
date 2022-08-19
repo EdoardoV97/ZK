@@ -813,15 +813,21 @@ func average_best_K_models{range_check_ptr}(
 end
 
 # Evaluation function
-func evaluation{range_check_ptr}(X : felt**, Y : felt**, votes_array : felt*) -> (
-    models_to_evaluate : Parameters*
-):
+func evaluation{hash_ptr : HashBuiltin*, range_check_ptr}(
+    X : felt**, Y : felt**, votes_array : felt*
+) -> (models_to_evaluate : Parameters*):
     alloc_locals
 
     # Variables to store the models of the previous round
     let (local models_to_evaluate : Parameters*) = alloc()
 
-    param_variables_initialization(counter=0, models_to_evaluate=models_to_evaluate)
+    let (local mtr_array : felt*) = alloc()
+    assert [mtr_array] = 2510606795594016528757737335392368846832447185261444171681621870500954786851
+    assert [mtr_array + 1] = 644276521491268565734675713715444844528586000028762921758873936439483201636
+
+    param_variables_initialization{hash_ptr=hash_ptr}(
+        counter=0, models_to_evaluate=models_to_evaluate, mtr_array=mtr_array
+    )
 
     # 1) EVALUATE LOADED MODELS AND SELECT BEST K' WORKERS
     let (local cost_array) = alloc()
@@ -1030,7 +1036,9 @@ func calculate_cost{range_check_ptr}(A2 : felt**, Y : felt**) -> (cost : felt):
     return (cost=-sum_result_div)
 end
 
-func param_variables_initialization(counter : felt, models_to_evaluate : Parameters*) -> ():
+func param_variables_initialization{hash_ptr : HashBuiltin*, range_check_ptr}(
+    counter : felt, models_to_evaluate : Parameters*, mtr_array : felt*
+) -> ():
     alloc_locals
     if counter == WORKERS_IN_ROUND:
         return ()
@@ -1090,8 +1098,85 @@ func param_variables_initialization(counter : felt, models_to_evaluate : Paramet
         memory[memory[ids.models_to_evaluate.b2]] = program_input['MODELS'][ids.counter]['B2'][0][0]*ids.PRECISION
     %}
 
+    # Compute merkle_tree root of input data and assert to check if result equal to known harcoded value
+    let (local w1_without_precision : felt**) = alloc()
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [w1_without_precision] = r1
+    assert [w1_without_precision + 1] = r2
+    let (local w2_without_precision : felt**) = alloc()
+    let (local r1) = alloc()
+    assert [w2_without_precision] = r1
+    let (local b1_without_precision : felt**) = alloc()
+    let (local r1) = alloc()
+    let (local r2) = alloc()
+    assert [b1_without_precision] = r1
+    assert [b1_without_precision + 1] = r2
+    let (local b2_without_precision : felt**) = alloc()
+    let (local r1) = alloc()
+    assert [b2_without_precision] = r1
+
+    div_matrix_by_scalar(
+        m=alloc_w1,
+        divider=PRECISION,
+        row=0,
+        col=0,
+        step=N_X * N_H,
+        rows=N_X,
+        cols=N_H,
+        res=w1_without_precision,
+    )
+    div_matrix_by_scalar(
+        m=alloc_b1,
+        divider=PRECISION,
+        row=0,
+        col=0,
+        step=N_H * 1,
+        rows=N_H,
+        cols=1,
+        res=b1_without_precision,
+    )
+    div_matrix_by_scalar(
+        m=alloc_w2,
+        divider=PRECISION,
+        row=0,
+        col=0,
+        step=N_Y * N_H,
+        rows=N_Y,
+        cols=N_H,
+        res=w2_without_precision,
+    )
+    div_matrix_by_scalar(
+        m=alloc_b2,
+        divider=PRECISION,
+        row=0,
+        col=0,
+        step=N_Y * 1,
+        rows=N_Y,
+        cols=1,
+        res=b2_without_precision,
+    )
+    let (local flattened_array : felt*) = alloc()
+    matrix_flattening(m=w1_without_precision, step=4, row=0, col=0, cols=2, res=flattened_array)
+    matrix_flattening(m=b1_without_precision, step=2, row=0, col=0, cols=1, res=flattened_array + 4)
+    matrix_flattening(m=w2_without_precision, step=2, row=0, col=0, cols=2, res=flattened_array + 6)
+    matrix_flattening(m=b2_without_precision, step=1, row=0, col=0, cols=1, res=flattened_array + 8)
+    assert [flattened_array + 9] = 0
+    assert [flattened_array + 10] = 0
+    assert [flattened_array + 11] = 0
+    assert [flattened_array + 12] = 0
+    assert [flattened_array + 13] = 0
+    assert [flattened_array + 14] = 0
+    assert [flattened_array + 15] = 0
+    let (local merkle_tree : felt**) = alloc()
+    assert [merkle_tree] = flattened_array
+    let (merkle_root) = build_merkle_root{hash_ptr=hash_ptr}(counter=16, res=merkle_tree + 1)
+    assert [mtr_array] = merkle_root
+
     return param_variables_initialization(
-        counter=counter + 1, models_to_evaluate=models_to_evaluate + Parameters.SIZE
+        counter=counter + 1,
+        models_to_evaluate=models_to_evaluate + Parameters.SIZE,
+        mtr_array=mtr_array + 1,
     )
 end
 
@@ -1186,7 +1271,9 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
     # Evaluation
     let (local votes_array : felt*) = alloc()  # This is the variable containing the votes
-    let (local models_to_evaluate : Parameters*) = evaluation(X=X, Y=Y, votes_array=votes_array)
+    let (local models_to_evaluate : Parameters*) = evaluation{hash_ptr=pedersen_ptr}(
+        X=X, Y=Y, votes_array=votes_array
+    )
 
     # Average Best_K models
     let (local param_avg : Parameters*) = alloc()
