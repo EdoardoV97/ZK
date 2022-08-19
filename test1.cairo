@@ -42,6 +42,7 @@ const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496
 # FL parameters
 const WORKERS_IN_ROUND = 2
 const BEST_K = 2
+const IS_LAST_ROUND = 1
 
 struct Parameters:
     member w1 : felt**
@@ -821,6 +822,7 @@ func evaluation{hash_ptr : HashBuiltin*, range_check_ptr}(
     # Variables to store the models of the previous round
     let (local models_to_evaluate : Parameters*) = alloc()
 
+    # Array that contains the Merkle Tree roots of the models to load
     let (local mtr_array : felt*) = alloc()
     assert [mtr_array] = 2510606795594016528757737335392368846832447185261444171681621870500954786851
     assert [mtr_array + 1] = 644276521491268565734675713715444844528586000028762921758873936439483201636
@@ -1323,6 +1325,9 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     serialize_word([[p_history.b2]])
 
     # Training
+    if IS_LAST_ROUND == 1:
+        return ()
+    end
     training(X=X, Y=Y, p_history=p_history, num_of_iters=NUM_OF_ITERS)
     return ()
 
