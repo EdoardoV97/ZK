@@ -80,16 +80,6 @@ func get_column(m : felt**, rows : felt, index : felt, res : felt*) -> ():
     return ()
 end
 
-# Sum two arrays
-func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ():
-    alloc_locals
-    if size == 0:
-        return ()
-    end
-    assert [res] = [array_1] + [array_2]
-    return sum_array(array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1, res=res + 1)
-end
-
 # Transform a col-vector in an array
 # func squeeze_col_vector(v : felt**, index : felt, size : felt, res : felt*):
 #     alloc_locals
@@ -169,6 +159,16 @@ func sum_matrix_and_vector(
         res=res,
     )
     return ()
+end
+
+# Sum two arrays element wise
+func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ():
+    alloc_locals
+    if size == 0:
+        return ()
+    end
+    assert [res] = [array_1] + [array_2]
+    return sum_array(array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1, res=res + 1)
 end
 
 # Sum two matrixes element wise
@@ -374,6 +374,166 @@ func mul_matrix_by_scalar{range_check_ptr}(
     return ()
 end
 
+# Matrix sign inversion function element wise
+func matrix_sign_inversion{range_check_ptr}(
+    m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    local inverse
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+
+    assert inverse = -[[m + row] + col]
+    assert [[res + row] + col] = inverse
+    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.inverse}") %}
+
+    return matrix_sign_inversion(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+end
+
+# Matrix pow function. Compute pow for all the elements of the matrix element-wise
+func matrix_pow{range_check_ptr}(
+    m : felt**,
+    exp : felt,
+    row : felt,
+    col : felt,
+    step : felt,
+    rows : felt,
+    cols : felt,
+    res : felt**,
+) -> ():
+    alloc_locals
+    let (local pow_precision) = pow(PRECISION, exp - 1)
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+
+    let (local pow_r) = pow([[m + row] + col], exp)
+    let (result, reminder) = signed_div_rem(pow_r, pow_precision, DIV_BOUND)
+    assert [[res + row] + col] = result
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
+    matrix_pow(m=m, exp=exp, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
+# rows, cols are the ones of the matrix m
+func matrix_transpose(m : felt**, index : felt, rows : felt, cols : felt, res : felt**) -> ():
+    alloc_locals
+    if index == cols:
+        return ()
+    end
+
+    let (local column_array) = alloc()
+    get_column(m, rows=rows, index=index, res=column_array)
+
+    assert [res + index] = column_array
+
+    # %{ print(f"Writing at row:({ids.index}): {memory[ids.column_array]} {memory[ids.column_array + 1]} {memory[ids.column_array + 2]} {memory[ids.column_array + 3]}") %}
+
+    matrix_transpose(m=m, index=index + 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
+# Return a matrix with all elements with same value
+func init_matrix{range_check_ptr}(
+    value : felt, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
+) -> ():
+    alloc_locals
+    if step == 0:
+        return ()
+    end
+    local i
+    local j
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+    assert [[res + row] + col] = value
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.value}") %}
+
+    init_matrix(value=value, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
+    return ()
+end
+
+# Sum all elements of an array
+func sum_all_array_elements(arr : felt*, size) -> (sum : felt):
+    if size == 0:
+        return (sum=0)
+    end
+
+    let (sum_of_rest) = sum_all_array_elements(arr=arr + 1, size=size - 1)
+    return (sum=[arr] + sum_of_rest)
+end
+
+# Sum all elements of a matrix
+func sum_all_matrix_elements(m : felt**, row : felt, col : felt, step : felt, cols : felt) -> (
+    res : felt
+):
+    alloc_locals
+    if step == 0:
+        return (res=0)
+    end
+    local i
+    local j
+    if col == cols - 1:
+        assert i = row + 1
+        assert j = 0
+    else:
+        assert i = row
+        assert j = col + 1
+    end
+
+    let (rest_of_sum) = sum_all_matrix_elements(m=m, row=i, col=j, step=step - 1, cols=cols)
+    return (res=[[m + row] + col] + rest_of_sum)
+end
+
+# Sum all elements of a matrix by axis
+func sum_all_matrix_elements_by_axis(
+    m : felt**, axis : felt, index : felt, rows : felt, cols : felt, res : felt*
+):
+    alloc_locals
+    if axis == 0:
+        if index == cols:
+            return ()
+        end
+        let (local column_array) = alloc()
+        get_column(m=m, rows=rows, index=index, res=column_array)
+        let (sum) = sum_all_array_elements(arr=column_array, size=rows)
+        %{ print(f"Sum at index ({ids.index}): {ids.sum}") %}
+        assert [res] = sum
+    else:
+        if index == rows:
+            return ()
+        end
+        let (sum) = sum_all_array_elements(arr=[m + index], size=cols)
+        assert [res] = sum
+    end
+    return sum_all_matrix_elements_by_axis(
+        m=m, axis=axis, index=index + 1, rows=rows, cols=cols, res=res + 1
+    )
+end
+
 # Scalar sigmoid function
 func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
     alloc_locals
@@ -535,66 +695,6 @@ func matrix_tanh{range_check_ptr}(
     return ()
 end
 
-# Matrix pow function. Compute pow for all the elements of the matrix element-wise
-func matrix_pow{range_check_ptr}(
-    m : felt**,
-    exp : felt,
-    row : felt,
-    col : felt,
-    step : felt,
-    rows : felt,
-    cols : felt,
-    res : felt**,
-) -> ():
-    alloc_locals
-    let (local pow_precision) = pow(PRECISION, exp - 1)
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-
-    let (local pow_r) = pow([[m + row] + col], exp)
-    let (result, reminder) = signed_div_rem(pow_r, pow_precision, DIV_BOUND)
-    assert [[res + row] + col] = result
-    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
-    matrix_pow(m=m, exp=exp, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Matrix sign inversion function
-func matrix_sign_inversion{range_check_ptr}(
-    m : felt**, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    local inverse
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-
-    assert inverse = -[[m + row] + col]
-    assert [[res + row] + col] = inverse
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.inverse}") %}
-
-    return matrix_sign_inversion(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-end
-
 # Scalar log function
 func log{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
@@ -672,106 +772,6 @@ func matrix_log{range_check_ptr}(
 
     matrix_log(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
     return ()
-end
-
-# rows, cols are the ones of the matrix m
-func matrix_transpose(m : felt**, index : felt, rows : felt, cols : felt, res : felt**) -> ():
-    alloc_locals
-    if index == cols:
-        return ()
-    end
-
-    let (local column_array) = alloc()
-    get_column(m, rows=rows, index=index, res=column_array)
-
-    assert [res + index] = column_array
-
-    # %{ print(f"Writing at row:({ids.index}): {memory[ids.column_array]} {memory[ids.column_array + 1]} {memory[ids.column_array + 2]} {memory[ids.column_array + 3]}") %}
-
-    matrix_transpose(m=m, index=index + 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Return a matrix with all elements with same value
-func init_matrix{range_check_ptr}(
-    value : felt, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    assert [[res + row] + col] = value
-    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.value}") %}
-
-    init_matrix(value=value, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Sum all elements of an array
-func sum_all_array_elements(arr : felt*, size) -> (sum : felt):
-    if size == 0:
-        return (sum=0)
-    end
-
-    let (sum_of_rest) = sum_all_array_elements(arr=arr + 1, size=size - 1)
-    return (sum=[arr] + sum_of_rest)
-end
-
-# Sum all elements of a matrix
-func sum_all_matrix_elements(m : felt**, row : felt, col : felt, step : felt, cols : felt) -> (
-    res : felt
-):
-    alloc_locals
-    if step == 0:
-        return (res=0)
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-
-    let (rest_of_sum) = sum_all_matrix_elements(m=m, row=i, col=j, step=step - 1, cols=cols)
-    return (res=[[m + row] + col] + rest_of_sum)
-end
-
-# Sum all elements of a matrix by axis
-func sum_all_matrix_elements_by_axis(
-    m : felt**, axis : felt, index : felt, rows : felt, cols : felt, res : felt*
-):
-    alloc_locals
-    if axis == 0:
-        if index == cols:
-            return ()
-        end
-        let (local column_array) = alloc()
-        get_column(m=m, rows=rows, index=index, res=column_array)
-        let (sum) = sum_all_array_elements(arr=column_array, size=rows)
-        %{ print(f"Sum at index ({ids.index}): {ids.sum}") %}
-        assert [res] = sum
-    else:
-        if index == rows:
-            return ()
-        end
-        let (sum) = sum_all_array_elements(arr=[m + index], size=cols)
-        assert [res] = sum
-    end
-    return sum_all_matrix_elements_by_axis(
-        m=m, axis=axis, index=index + 1, rows=rows, cols=cols, res=res + 1
-    )
 end
 
 func build_merkle_tree_level{hash_ptr : HashBuiltin*}(array : felt*, index : felt, res : felt*):
