@@ -376,16 +376,6 @@ func mul_matrix_by_scalar{range_check_ptr}(
     return ()
 end
 
-# Scalar sigmoid function
-func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
-    alloc_locals
-
-    let (local z_temp, r) = signed_div_rem(z, 2, DIV_BOUND)
-    let (tanh_res) = tanh(x=z_temp)
-    let (local res, r) = signed_div_rem(tanh_res + 1 * PRECISION, 2, DIV_BOUND)
-    return (res=res)
-end
-
 # Matrix pow function. Compute pow for all the elements of the matrix element-wise
 func matrix_pow{range_check_ptr}(
     m : felt**,
