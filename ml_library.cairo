@@ -625,7 +625,7 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
 end
 
 # Scalar tanh function
-# Use the fact that tanh is an odd function so f(x) = -f(x)
+# Use the fact that tanh is an odd function so f(-x) = -f(x)
 # func tanh{range_check_ptr}(z : felt) -> (res : felt):
 #     alloc_locals
 #     let (local is_not_negative) = is_nn(z)
@@ -781,8 +781,8 @@ func log{range_check_ptr}(x : felt) -> (res : felt):
         assert_in_range(x_check, pow_res * PRECISION, pow_res3 * PRECISION)
     end
 
-# return (res=ln * 10)
-# end
+    return (res=ln * 10)
+end
 
 # Matrix ln function
 func matrix_ln{range_check_ptr}(
