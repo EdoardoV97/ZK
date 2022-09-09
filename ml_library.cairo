@@ -15,25 +15,24 @@ const PRECISION = 100
 const DIV_BOUND = 100000000000000000000000000000000000000
 
 # Return the # of times "element" is contained in "array"
-func contains(counter : felt, array : felt*, element : felt)->(res : felt):
+func contains(counter : felt, array : felt*, element : felt) -> (res : felt):
     if counter == 0:
-        return (res = 0)
+        return (res=0)
     end
 
     %{
         # print(f"Searchin element {ids.element} at iteration {ids.counter}")
         # print(f"Votes array:{memory[ids.array]}")
     %}
-    let (rest) = contains(counter=counter-1, array=array+1, element=element)
+    let (rest) = contains(counter=counter - 1, array=array + 1, element=element)
     if [array] == element:
         # %{
         #     print(f"Element {ids.element} found in votes array")
         # %}
-        return (res = rest + 1)
+        return (res=rest + 1)
     else:
-        return (res = rest)
+        return (res=rest)
     end
-
 end
 
 # Function that return dot product of two vector array.
@@ -429,11 +428,11 @@ func sinh{range_check_ptr}(x : felt) -> (res : felt):
     const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
     local x_internal_precision = PRECISION / 10
-    # Check if x is out of the [-PRECISION, PRECISON] bound.
+    # Check if x is out of the (-x_internal_precision, x_internal_precision) bound.
     let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
     let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
     if is_l == 1:
-        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our PRECISION
+        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our x_internal_precision
         x_scaled = 0
     else:
         x_scaled = x_temp
@@ -476,11 +475,11 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
     const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
     local x_internal_precision = PRECISION / 10
-    # Check if x is out of the [-PRECISION, PRECISON] bound.
+    # Check if x is out of the (-x_internal_precision, x_internal_precision) bound.
     let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
     let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
     if is_l == 1:
-        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our PRECISION
+        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our x_internal_precision
         x_scaled = 0
     else:
         x_scaled = x_temp
@@ -492,7 +491,7 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
     local y : felt
     %{
         from starkware.python.math_utils import isqrt
-        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x/x_internal_precision) * 100
+        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x_scaled/x_internal_precision) * 100
         # print(f"y = {ids.y}")
     %}
     let (local pow_temp) = pow(PRECISION, x_internal_precision)
