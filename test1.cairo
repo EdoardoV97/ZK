@@ -566,24 +566,24 @@ func training{output_ptr : felt*, range_check_ptr}(
     # Print db2
     # serialize_word([[db2]])
     %{
-        f = open("weights_cairo.txt", "a")
-        f.write(f"{ids.NUM_OF_ITERS - ids.num_of_iters}\n")
-        f.close()
+        # f = open("weights_cairo.txt", "a")
+        # f.write(f"{ids.NUM_OF_ITERS - ids.num_of_iters}\n")
+        # f.close()
     %}
     update_parameters(dW1=dW1, db1=db1, dW2=dW2, db2=db2, p_history=p_history)
     # Print the new W1
-    serialize_word([[[p_history + Parameters.SIZE].w1]])
-    serialize_word([[[p_history + Parameters.SIZE].w1] + 1])
-    serialize_word([[[p_history + Parameters.SIZE].w1 + 1]])
-    serialize_word([[[p_history + Parameters.SIZE].w1 + 1] + 1])
+    # serialize_word([[[p_history + Parameters.SIZE].w1]])
+    # serialize_word([[[p_history + Parameters.SIZE].w1] + 1])
+    # serialize_word([[[p_history + Parameters.SIZE].w1 + 1]])
+    # serialize_word([[[p_history + Parameters.SIZE].w1 + 1] + 1])
     # Print the new W2
-    serialize_word([[[p_history + Parameters.SIZE].w2]])
-    serialize_word([[[p_history + Parameters.SIZE].w2] + 1])
+    # serialize_word([[[p_history + Parameters.SIZE].w2]])
+    # serialize_word([[[p_history + Parameters.SIZE].w2] + 1])
     # Print the new b1
-    serialize_word([[[p_history + Parameters.SIZE].b1]])
-    serialize_word([[[p_history + Parameters.SIZE].b1 + 1]])
+    # serialize_word([[[p_history + Parameters.SIZE].b1]])
+    # serialize_word([[[p_history + Parameters.SIZE].b1 + 1]])
     # Print the new b2
-    serialize_word([[[p_history + Parameters.SIZE].b2]])
+    # serialize_word([[[p_history + Parameters.SIZE].b2]])
 
     return training(X=X, Y=Y, p_history=p_history + Parameters.SIZE, num_of_iters=num_of_iters - 1)
 end
