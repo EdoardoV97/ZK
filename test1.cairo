@@ -398,11 +398,11 @@ func update_parameters{range_check_ptr}(
         res=new_parameters.w1,
     )
     %{
-        c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
-        h = 99999999999999999999999999999999999999999
-        f = open("weights_cairo.txt", "a")
-        f.write(f"W1:[[{memory[memory[ids.new_parameters.w1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1]] < h else (memory[memory[ids.new_parameters.w1]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w1] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1] + 1] < h else (memory[memory[ids.new_parameters.w1] + 1] - c)/(ids.PRECISION)}], [{memory[memory[ids.new_parameters.w1 + 1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1 + 1]] < h else (memory[memory[ids.new_parameters.w1 + 1]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w1 + 1] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1 + 1] + 1] < h else (memory[memory[ids.new_parameters.w1 + 1] + 1] - c)/(ids.PRECISION)}]]")
-        f.close()
+        #c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+        #h = 99999999999999999999999999999999999999999
+        #f = open("weights_cairo.txt", "a")
+        #f.write(f"W1:[[{memory[memory[ids.new_parameters.w1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1]] < h else (memory[memory[ids.new_parameters.w1]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w1] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1] + 1] < h else (memory[memory[ids.new_parameters.w1] + 1] - c)/(ids.PRECISION)}], [{memory[memory[ids.new_parameters.w1 + 1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1 + 1]] < h else (memory[memory[ids.new_parameters.w1 + 1]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w1 + 1] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w1 + 1] + 1] < h else (memory[memory[ids.#new_parameters.w1 + 1] + 1] - c)/(ids.PRECISION)}]]")
+        #f.close()
     %}
 
     # b1 = b1 - learning_rate*db1
@@ -429,11 +429,11 @@ func update_parameters{range_check_ptr}(
         res=new_parameters.b1,
     )
     %{
-        c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
-        h = 99999999999999999999999999999999999999999
-        f = open("weights_cairo.txt", "a")
-        f.write(f"\nb1:[[{memory[memory[ids.new_parameters.b1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.b1]] < h else (memory[memory[ids.new_parameters.b1]] - c)/(ids.PRECISION)}], [{memory[memory[ids.new_parameters.b1 + 1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.b1 + 1]] < h else (memory[memory[ids.new_parameters.b1 + 1]] - c)/(ids.PRECISION)}]]")
-        f.close()
+        #c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+        #h = 99999999999999999999999999999999999999999
+        #f = open("weights_cairo.txt", "a")
+        #f.write(f"\nb1:[[{memory[memory[ids.new_parameters.b1]]/(ids.PRECISION) if memory[memory[ids.#new_parameters.b1]] < h else (memory[memory[ids.new_parameters.b1]] - c)/(ids.PRECISION)}], [{memory[memory[ids.new_parameters.b1 + 1]]/(ids.PRECISION) if memory[memory[ids.new_parameters.b1 + 1]] < h else (memory[memory[ids.new_parameters.b1 + 1]] - c)/(ids.PRECISION)}]]")
+        #f.close()
     %}
 
     # W2 = W2 - learning_rate*dW2
@@ -455,11 +455,11 @@ func update_parameters{range_check_ptr}(
         res=new_parameters.w2,
     )
     %{
-        c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
-        h = 99999999999999999999999999999999999999999
-        f = open("weights_cairo.txt", "a")
-        f.write(f"\nW2:[[{memory[memory[ids.new_parameters.w2]]/(ids.PRECISION) if memory[memory[ids.new_parameters.w2]] < h else (memory[memory[ids.new_parameters.w2]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w2] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w2] + 1] < h else (memory[memory[ids.new_parameters.w2] + 1] - c)/(ids.PRECISION)}]]")
-        f.close()
+        #c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+        #h = 99999999999999999999999999999999999999999
+        #f = open("weights_cairo.txt", "a")
+        #f.write(f"\nW2:[[{memory[memory[ids.new_parameters.w2]]/(ids.PRECISION) if memory[memory[ids.#new_parameters.w2]] < h else (memory[memory[ids.new_parameters.w2]] - c)/(ids.PRECISION)}, {memory[memory[ids.new_parameters.w2] + 1]/(ids.PRECISION) if memory[memory[ids.new_parameters.w2] + 1] < h #else (memory[memory[ids.new_parameters.w2] + 1] - c)/(ids.PRECISION)}]]")
+        #f.close()
     %}
 
     # b2 = b2 - learning_rate*db2
@@ -481,11 +481,11 @@ func update_parameters{range_check_ptr}(
         res=new_parameters.b2,
     )
     %{
-        c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
-        h = 99999999999999999999999999999999999999999
-        f = open("weights_cairo.txt", "a")
-        f.write(f"\nb2:[[{memory[memory[ids.new_parameters.b2]]/(ids.PRECISION) if memory[memory[ids.new_parameters.b2]] < h else (memory[memory[ids.new_parameters.b2]] - c)/(ids.PRECISION)}]]\n")
-        f.close()
+        #c = 3618502788666131213697322783095070105623107215331596699973092056135872020481
+        #h = 99999999999999999999999999999999999999999
+        #f = open("weights_cairo.txt", "a")
+        #f.write(f"\nb2:[[{memory[memory[ids.new_parameters.b2]]/(ids.PRECISION) if memory[memory[ids.#new_parameters.b2]] < h else (memory[memory[ids.new_parameters.b2]] - c)/(ids.PRECISION)}]]\n")
+        #f.close()
     %}
 
     assert [p_history + Parameters.SIZE] = new_parameters
