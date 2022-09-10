@@ -41,8 +41,8 @@ const MERKLE_TREE_ROOT = 3398001436052881410262941683190835044622857397347760496
 
 # FL parameters
 const WORKERS_IN_ROUND = 2
-const BEST_K = 2
-const IS_LAST_ROUND = 1
+const BEST_K = 1
+const IS_LAST_ROUND = 0
 
 struct Parameters:
     member w1 : felt**
@@ -856,7 +856,7 @@ func find_best_K{range_check_ptr}(index : felt, ranking_array : felt*, votes_arr
     # if [ranking_array + index] <= BEST_K
     if comparison == 1:
         assert [votes_array] = index
-        %{ print(f"Voted:{ids.index}") %}
+        # %{ print(f"Voted:{ids.index}") %}
         return find_best_K(
             index=index + 1, ranking_array=ranking_array, votes_array=votes_array + 1
         )
@@ -930,7 +930,7 @@ func calculate_cost_models{range_check_ptr}(
 
     let (local cost) = calculate_cost(A2=A2, Y=Y)
     assert [cost_array + index] = cost
-    %{ print(f"Cost of model {ids.index} is {ids.cost}") %}
+    # %{ print(f"Cost of model {ids.index} is {ids.cost}") %}
     return calculate_cost_models(
         X=X,
         Y=Y,
@@ -1277,6 +1277,9 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
         X=X, Y=Y, votes_array=votes_array
     )
 
+    serialize_word([votes_array])
+    # serialize_word([votes_array + 1]) # If Best_K=2
+
     # Average Best_K models
     let (local param_avg : Parameters*) = alloc()
     local temp : Parameters
@@ -1314,15 +1317,15 @@ func main{output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     )
     assert [p_history] = avg
     # Print the new averaged model
-    serialize_word([[p_history.w1]])
-    serialize_word([[p_history.w1] + 1])
-    serialize_word([[p_history.w1 + 1]])
-    serialize_word([[p_history.w1 + 1] + 1])
-    serialize_word([[p_history.w2]])
-    serialize_word([[p_history.w2] + 1])
-    serialize_word([[p_history.b1]])
-    serialize_word([[p_history.b1 + 1]])
-    serialize_word([[p_history.b2]])
+    # serialize_word([[p_history.w1]])
+    # serialize_word([[p_history.w1] + 1])
+    # serialize_word([[p_history.w1 + 1]])
+    # serialize_word([[p_history.w1 + 1] + 1])
+    # serialize_word([[p_history.w2]])
+    # serialize_word([[p_history.w2] + 1])
+    # serialize_word([[p_history.b1]])
+    # serialize_word([[p_history.b1 + 1]])
+    # serialize_word([[p_history.b2]])
 
     # Training
     if IS_LAST_ROUND == 1:

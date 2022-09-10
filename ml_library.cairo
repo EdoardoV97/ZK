@@ -3,7 +3,7 @@ from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem, assert_in_range
-from starkware.cairo.common.math_cmp import is_nn, is_in_range
+from starkware.cairo.common.math_cmp import is_nn, is_in_range, is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -399,12 +399,12 @@ end
 
 # Scalar sigmoid function
 # func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
-#     alloc_locals
-
-# let (local z_temp, r) = signed_div_rem(z, 2, DIV_BOUND)
-#     let (tanh_res) = tanh(x=z_temp)
-#     let (local res, r) = signed_div_rem(tanh_res + 1 * PRECISION, 2, DIV_BOUND)
-#     return (res=res)
+#    alloc_locals
+#
+#    let (local z_temp, r) = signed_div_rem(z, 2, DIV_BOUND)
+#    let (tanh_res) = tanh(z=z_temp)
+#    let (local res, r) = signed_div_rem(tanh_res + 1 * PRECISION, 2, DIV_BOUND)
+#    return (res=res)
 # end
 
 # Activation function
@@ -514,22 +514,22 @@ end
 # Scalar tanh function
 # Use the fact that tanh is an odd function so f(x) = -f(x)
 # func tanh{range_check_ptr}(z : felt) -> (res : felt):
-#     alloc_locals
-#     let (local is_not_negative) = is_nn(z)
-#     # If z is positive
-#     if is_not_negative == 1:
-#         let (local sinh_r) = sinh(x=z)
-#         let (local cosh_r) = cosh(x=z)
-#         let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
-#         return (res=res)
-#         # If z is negative
-#     else:
-#         let (local sinh_r) = sinh(x=-z)
-#         let (local cosh_r) = cosh(x=-z)
-#         let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
-#         return (res=-res)
-#     end
-#     # %{ print(f"Tanh of {ids.z} = {ids.res}") %}
+#    alloc_locals
+#    let (local is_not_negative) = is_nn(z)
+#    # If z is positive
+#    if is_not_negative == 1:
+#        let (local sinh_r) = sinh(x=z)
+#        let (local cosh_r) = cosh(x=z)
+#        let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
+#        return (res=res)
+#        # If z is negative
+#    else:
+#        let (local sinh_r) = sinh(x=-z)
+#        let (local cosh_r) = cosh(x=-z)
+#        let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
+#        return (res=-res)
+#    end
+#    # %{ print(f"Tanh of {ids.z} = {ids.res}") %}
 # end
 
 # Matrix tanh function
@@ -619,56 +619,75 @@ func matrix_sign_inversion{range_check_ptr}(
 end
 
 # Scalar ln function
-# func ln{range_check_ptr}(x : felt) -> (res : felt):
-#     alloc_locals
-#     const e = 3
-#     local ln
-#     local internal_precision = 10  # This is necessary to avoid out of range which happen using PRECISION>=100. Thus the second decimal is lost.
-#     local scale = PRECISION / 10
-#     let (local internal_prec_pow_10) = pow(scale, internal_precision)
-
-# let (local x_scaled, r) = signed_div_rem(x, scale, DIV_BOUND)
-#     %{
-#         import math
-#         x_str = str(ids.x)
-#         x_float = float(x_str[0:-2] + "." + x_str[-2:])
-#         result = int(math.log(x_float, ids.e)*ids.internal_precision)
-#         if result >= 0:
-#             ids.ln = result
-#         else:
-#             ids.ln = 3618502788666131213697322783095070105623107215331596699973092056135872020481 + result
-#         print(f"Ln : {result}")
-#         print(f"x_scaled: {ids.x_scaled}")
-#     %}
-#     let (pow_res2) = pow(x_scaled, internal_precision)
-#     let (local is_not_negative) = is_nn(ln)
-#     # If x is positive
-#     if is_not_negative == 1:
-#         # Check the inverted result is between e^ln and e^(ln+1)
-#         let (local x_check, r) = unsigned_div_rem(pow_res2, internal_prec_pow_10 / PRECISION)
-#         let (pow_res) = pow(e, ln)
-#         let (pow_res3) = pow(e, ln + 1)
-#         %{
-#             print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
-#             print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-#             print(f"x_check: {ids.x_check}")
-#         %}
-#         assert_in_range(x_check, pow_res * PRECISION, pow_res3 * PRECISION)
-#     else:
-#         # Need to manage the "-" sign
-#         # To avoid inverting e^(-ln) and e^(-ln +1), we invert x_check only, thus we invert the division!
-#         let (local x_check, r) = unsigned_div_rem(internal_prec_pow_10 * PRECISION, pow_res2)
-#         let (pow_res) = pow(e, -ln)
-#         let (pow_res3) = pow(e, (-ln) + 1)
-#         %{
-#             print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
-#             print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-#             print(f"x_check: {ids.x_check}")
-#         %}
-#         assert_in_range(x_check, pow_res * PRECISION, pow_res3 * PRECISION)
-#     end
-
-# return (res=ln * 10)
+# func ln{range_check_ptr}(z : felt) -> (res : felt):
+#    alloc_locals
+#    const e = 3
+#    local ln
+#    local internal_precision = 10  # This is necessary to avoid out of range which happen using PRECISION>=100. Thus the second decimal is lost.
+#    local scale = PRECISION / 10
+#    let (local internal_prec_pow_10) = pow(scale, internal_precision)
+#
+#    let (local z_scaled, r) = signed_div_rem(z, scale, DIV_BOUND)
+#    %{
+#        import math
+#        z_str = str(ids.z)
+#        z_float = float(z_str[0:-2] + "." + z_str[-2:])
+#        result = int(math.log(z_float, ids.e)*ids.internal_precision)
+#        if result >= 0:
+#            ids.ln = result
+#        else:
+#            ids.ln = 3618502788666131213697322783095070105623107215331596699973092056135872020481 + result
+#        # print(f"Ln : {result}")
+#        # print(f"z_scaled: {ids.z_scaled}")
+#        # print(f"z_scaled: {z_float}")
+#    %}
+#    let (pow_res2) = pow(z_scaled, internal_precision)
+#    let (local is_not_negative) = is_nn(ln)
+#    # If z is positive
+#    if is_not_negative == 1:
+#        # Check the inverted result is between e^ln and e^(ln+1)
+#        let (local z_check, r) = unsigned_div_rem(pow_res2, internal_prec_pow_10 / PRECISION)
+#        let (local leq_zero) = is_le(ln, 0)
+#        if leq_zero == 1:
+#            let (pow_res3) = pow(e, ln + 2)
+#            # %{
+#            #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#            #     print(f"z_check: {ids.z_check}")
+#            # %}
+#            assert_in_range(z_check, 0, pow_res3 * PRECISION)
+#        else:
+#            let (local pow_res) = pow(e, ln - 1)
+#            let (pow_res3) = pow(e, ln + 2)
+#            # %{
+#            #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#            #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#            #     print(f"z_check: {ids.z_check}")
+#            # %}
+#            assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#        end
+#        # let (pow_res) = pow(e, ln - 1)
+#        # let (pow_res3) = pow(e, ln + 2)
+#        # %{
+#        #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#        #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#        #     print(f"z_check: {ids.z_check}")
+#        # %}
+#        # assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#    else:
+#        # Need to manage the "-" sign
+#        # To avoid inverting e^(-ln) and e^(-ln +1), we invert z_check only, thus we invert the division!
+#        let (local z_check, r) = unsigned_div_rem(internal_prec_pow_10 * PRECISION, pow_res2)
+#        let (pow_res) = pow(e, (-ln) - 1)
+#        let (pow_res3) = pow(e, (-ln) + 2)
+#        %{
+#            # print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#            # print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#            # print(f"z_check: {ids.z_check}")
+#        %}
+#        assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#    end
+#
+#    return (res=ln * 10)
 # end
 
 # Matrix ln function
