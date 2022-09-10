@@ -3,7 +3,7 @@ from starkware.cairo.common.pow import pow
 from starkware.cairo.common.serialize import serialize_word, serialize_array
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem, assert_in_range
-from starkware.cairo.common.math_cmp import is_nn, is_in_range
+from starkware.cairo.common.math_cmp import is_nn, is_in_range, is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -13,6 +13,27 @@ from tanh_python_generator.tanh import tanh
 
 const PRECISION = 100
 const DIV_BOUND = 100000000000000000000000000000000000000
+
+# Return the # of times "element" is contained in "array"
+func contains(counter : felt, array : felt*, element : felt) -> (res : felt):
+    if counter == 0:
+        return (res=0)
+    end
+
+    %{
+        # print(f"Searchin element {ids.element} at iteration {ids.counter}")
+        # print(f"Votes array:{memory[ids.array]}")
+    %}
+    let (rest) = contains(counter=counter - 1, array=array + 1, element=element)
+    if [array] == element:
+        # %{
+        #     print(f"Element {ids.element} found in votes array")
+        # %}
+        return (res=rest + 1)
+    else:
+        return (res=rest)
+    end
+end
 
 # Function that return dot product of two vector array.
 func dot_product_array(array_1 : felt*, array_2 : felt*, size : felt) -> (res : felt):
@@ -81,6 +102,16 @@ func get_column(m : felt**, rows : felt, index : felt, res : felt*) -> ():
     # %{ print(f"Getting column #({ids.index}): {memory[ids.res]}") %}
     get_column(m=m + 1, rows=rows - 1, index=index, res=res + 1)
     return ()
+end
+
+# Sum two arrays
+func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ():
+    alloc_locals
+    if size == 0:
+        return ()
+    end
+    assert [res] = [array_1] + [array_2]
+    return sum_array(array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1, res=res + 1)
 end
 
 # Transform a col-vector in an array
@@ -162,16 +193,6 @@ func sum_matrix_and_vector(
         res=res,
     )
     return ()
-end
-
-# Sum two arrays element wise
-func sum_array(array_1 : felt*, array_2 : felt*, size : felt, res : felt*) -> ():
-    alloc_locals
-    if size == 0:
-        return ()
-    end
-    assert [res] = [array_1] + [array_2]
-    return sum_array(array_1=array_1 + 1, array_2=array_2 + 1, size=size - 1, res=res + 1)
 end
 
 # Sum two matrixes element wise
@@ -376,148 +397,14 @@ func mul_matrix_by_scalar{range_check_ptr}(
     return ()
 end
 
-# Matrix pow function. Compute pow for all the elements of the matrix element-wise
-func matrix_pow{range_check_ptr}(
-    m : felt**,
-    exp : felt,
-    row : felt,
-    col : felt,
-    step : felt,
-    rows : felt,
-    cols : felt,
-    res : felt**,
-) -> ():
-    alloc_locals
-    let (local pow_precision) = pow(PRECISION, exp - 1)
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-
-    let (local pow_r) = pow([[m + row] + col], exp)
-    let (result, reminder) = signed_div_rem(pow_r, pow_precision, DIV_BOUND)
-    assert [[res + row] + col] = result
-    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.result}") %}
-    matrix_pow(m=m, exp=exp, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# rows, cols are the ones of the matrix m
-func matrix_transpose(m : felt**, index : felt, rows : felt, cols : felt, res : felt**) -> ():
-    alloc_locals
-    if index == cols:
-        return ()
-    end
-
-    let (local column_array) = alloc()
-    get_column(m, rows=rows, index=index, res=column_array)
-
-    assert [res + index] = column_array
-
-    # %{ print(f"Writing at row:({ids.index}): {memory[ids.column_array]} {memory[ids.column_array + 1]} {memory[ids.column_array + 2]} {memory[ids.column_array + 3]}") %}
-
-    matrix_transpose(m=m, index=index + 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Return a matrix with all elements with same value
-func init_matrix{range_check_ptr}(
-    value : felt, row : felt, col : felt, step : felt, rows : felt, cols : felt, res : felt**
-) -> ():
-    alloc_locals
-    if step == 0:
-        return ()
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-    assert [[res + row] + col] = value
-    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.value}") %}
-
-    init_matrix(value=value, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
-    return ()
-end
-
-# Sum all elements of an array
-func sum_all_array_elements(arr : felt*, size) -> (sum : felt):
-    if size == 0:
-        return (sum=0)
-    end
-
-    let (sum_of_rest) = sum_all_array_elements(arr=arr + 1, size=size - 1)
-    return (sum=[arr] + sum_of_rest)
-end
-
-# Sum all elements of a matrix
-func sum_all_matrix_elements(m : felt**, row : felt, col : felt, step : felt, cols : felt) -> (
-    res : felt
-):
-    alloc_locals
-    if step == 0:
-        return (res=0)
-    end
-    local i
-    local j
-    if col == cols - 1:
-        assert i = row + 1
-        assert j = 0
-    else:
-        assert i = row
-        assert j = col + 1
-    end
-
-    let (rest_of_sum) = sum_all_matrix_elements(m=m, row=i, col=j, step=step - 1, cols=cols)
-    return (res=[[m + row] + col] + rest_of_sum)
-end
-
-# Sum all elements of a matrix by axis
-func sum_all_matrix_elements_by_axis(
-    m : felt**, axis : felt, index : felt, rows : felt, cols : felt, res : felt*
-):
-    alloc_locals
-    if axis == 0:
-        if index == cols:
-            return ()
-        end
-        let (local column_array) = alloc()
-        get_column(m=m, rows=rows, index=index, res=column_array)
-        let (sum) = sum_all_array_elements(arr=column_array, size=rows)
-        %{ print(f"Sum at index ({ids.index}): {ids.sum}") %}
-        assert [res] = sum
-    else:
-        if index == rows:
-            return ()
-        end
-        let (sum) = sum_all_array_elements(arr=[m + index], size=cols)
-        assert [res] = sum
-    end
-    return sum_all_matrix_elements_by_axis(
-        m=m, axis=axis, index=index + 1, rows=rows, cols=cols, res=res + 1
-    )
-end
-
 # Scalar sigmoid function
 # func sigmoid{range_check_ptr}(z : felt) -> (res : felt):
-#     alloc_locals
-
-# let (local z_temp, r) = signed_div_rem(z, 2, DIV_BOUND)
-#     let (tanh_res) = tanh(z=z_temp)
-#     let (local res, r) = signed_div_rem(tanh_res + 1 * PRECISION, 2, DIV_BOUND)
-#     return (res=res)
+#    alloc_locals
+#
+#    let (local z_temp, r) = signed_div_rem(z, 2, DIV_BOUND)
+#    let (tanh_res) = tanh(z=z_temp)
+#    let (local res, r) = signed_div_rem(tanh_res + 1 * PRECISION, 2, DIV_BOUND)
+#    return (res=res)
 # end
 
 # Activation function
@@ -541,11 +428,11 @@ func sinh{range_check_ptr}(x : felt) -> (res : felt):
     const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
     local x_internal_precision = PRECISION / 10
-    # Check if x is out of the [-PRECISION, PRECISON] bound.
+    # Check if x is out of the (-x_internal_precision, x_internal_precision) bound.
     let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
     let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
     if is_l == 1:
-        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our PRECISION
+        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our x_internal_precision
         x_scaled = 0
     else:
         x_scaled = x_temp
@@ -588,11 +475,11 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
     const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
     local x_internal_precision = PRECISION / 10
-    # Check if x is out of the [-PRECISION, PRECISON] bound.
+    # Check if x is out of the (-x_internal_precision, x_internal_precision) bound.
     let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
     let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
     if is_l == 1:
-        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our PRECISION
+        # In case out of bound consider x_scaled as 0 meaning that x is too small to represent with our x_internal_precision
         x_scaled = 0
     else:
         x_scaled = x_temp
@@ -604,7 +491,7 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
     local y : felt
     %{
         from starkware.python.math_utils import isqrt
-        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x/x_internal_precision) * 100
+        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x_scaled/x_internal_precision) * 100
         # print(f"y = {ids.y}")
     %}
     let (local pow_temp) = pow(PRECISION, x_internal_precision)
@@ -625,24 +512,24 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
 end
 
 # Scalar tanh function
-# Use the fact that tanh is an odd function so f(-x) = -f(x)
+# Use the fact that tanh is an odd function so f(x) = -f(x)
 # func tanh{range_check_ptr}(z : felt) -> (res : felt):
-#     alloc_locals
-#     let (local is_not_negative) = is_nn(z)
-#     # If z is positive
-#     if is_not_negative == 1:
-#         let (local sinh_r) = sinh(x=z)
-#         let (local cosh_r) = cosh(x=z)
-#         let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
-#         return (res=res)
-#         # If z is negative
-#     else:
-#         let (local sinh_r) = sinh(x=-z)
-#         let (local cosh_r) = cosh(x=-z)
-#         let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
-#         return (res=-res)
-#     end
-#     # %{ print(f"Tanh of {ids.z} = {ids.res}") %}
+#    alloc_locals
+#    let (local is_not_negative) = is_nn(z)
+#    # If z is positive
+#    if is_not_negative == 1:
+#        let (local sinh_r) = sinh(x=z)
+#        let (local cosh_r) = cosh(x=z)
+#        let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
+#        return (res=res)
+#        # If z is negative
+#    else:
+#        let (local sinh_r) = sinh(x=-z)
+#        let (local cosh_r) = cosh(x=-z)
+#        let (res, r2) = signed_div_rem(sinh_r * PRECISION, cosh_r, DIV_BOUND)
+#        return (res=-res)
+#    end
+#    # %{ print(f"Tanh of {ids.z} = {ids.res}") %}
 # end
 
 # Matrix tanh function
@@ -726,63 +613,82 @@ func matrix_sign_inversion{range_check_ptr}(
 
     assert inverse = -[[m + row] + col]
     assert [[res + row] + col] = inverse
-    %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.inverse}") %}
+    # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.inverse}") %}
 
     return matrix_sign_inversion(m=m, row=i, col=j, step=step - 1, rows=rows, cols=cols, res=res)
 end
 
-# Scalar log function
-func log{range_check_ptr}(x : felt) -> (res : felt):
-    alloc_locals
-    const e = 3
-    local ln
-    local internal_precision = 10  # This is necessary to avoid out of range which happen using PRECISION>=100. Thus the second decimal is lost.
-    local scale = PRECISION / 10
-    let (local internal_prec_pow_10) = pow(scale, internal_precision)
-
-    let (local x_scaled, r) = signed_div_rem(x, scale, DIV_BOUND)
-    %{
-        import math
-        x_str = str(ids.x)
-        x_float = float(x_str[0:-2] + "." + x_str[-2:])
-        result = int(math.log(x_float, ids.e)*ids.internal_precision)
-        if result >= 0:
-            ids.ln = result
-        else:
-            ids.ln = 3618502788666131213697322783095070105623107215331596699973092056135872020481 + result
-        print(f"Ln : {result}")
-        print(f"x_scaled: {ids.x_scaled}")
-    %}
-    let (pow_res2) = pow(x_scaled, internal_precision)
-    let (local is_not_negative) = is_nn(ln)
-    # If x is positive
-    if is_not_negative == 1:
-        # Check the inverted result is between e^ln and e^(ln+1)
-        let (local x_check, r) = unsigned_div_rem(pow_res2, internal_prec_pow_10 / PRECISION)
-        let (pow_res) = pow(e, ln)
-        let (pow_res3) = pow(e, ln + 1)
-        %{
-            print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
-            print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-            print(f"x_check: {ids.x_check}")
-        %}
-        assert_in_range(x_check, pow_res * PRECISION, pow_res3 * PRECISION)
-    else:
-        # Need to manage the "-" sign
-        # To avoid inverting e^(-ln) and e^(-ln +1), we invert x_check only, thus we invert the division!
-        let (local x_check, r) = unsigned_div_rem(internal_prec_pow_10 * PRECISION, pow_res2)
-        let (pow_res) = pow(e, -ln)
-        let (pow_res3) = pow(e, (-ln) + 1)
-        %{
-            print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
-            print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-            print(f"x_check: {ids.x_check}")
-        %}
-        assert_in_range(x_check, pow_res * PRECISION, pow_res3 * PRECISION)
-    end
-
-    return (res=ln * 10)
-end
+# Scalar ln function
+# func ln{range_check_ptr}(z : felt) -> (res : felt):
+#    alloc_locals
+#    const e = 3
+#    local ln
+#    local internal_precision = 10  # This is necessary to avoid out of range which happen using PRECISION>=100. Thus the second decimal is lost.
+#    local scale = PRECISION / 10
+#    let (local internal_prec_pow_10) = pow(scale, internal_precision)
+#
+#    let (local z_scaled, r) = signed_div_rem(z, scale, DIV_BOUND)
+#    %{
+#        import math
+#        z_str = str(ids.z)
+#        z_float = float(z_str[0:-2] + "." + z_str[-2:])
+#        result = int(math.log(z_float, ids.e)*ids.internal_precision)
+#        if result >= 0:
+#            ids.ln = result
+#        else:
+#            ids.ln = 3618502788666131213697322783095070105623107215331596699973092056135872020481 + result
+#        # print(f"Ln : {result}")
+#        # print(f"z_scaled: {ids.z_scaled}")
+#        # print(f"z_scaled: {z_float}")
+#    %}
+#    let (pow_res2) = pow(z_scaled, internal_precision)
+#    let (local is_not_negative) = is_nn(ln)
+#    # If z is positive
+#    if is_not_negative == 1:
+#        # Check the inverted result is between e^ln and e^(ln+1)
+#        let (local z_check, r) = unsigned_div_rem(pow_res2, internal_prec_pow_10 / PRECISION)
+#        let (local leq_zero) = is_le(ln, 0)
+#        if leq_zero == 1:
+#            let (pow_res3) = pow(e, ln + 2)
+#            # %{
+#            #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#            #     print(f"z_check: {ids.z_check}")
+#            # %}
+#            assert_in_range(z_check, 0, pow_res3 * PRECISION)
+#        else:
+#            let (local pow_res) = pow(e, ln - 1)
+#            let (pow_res3) = pow(e, ln + 2)
+#            # %{
+#            #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#            #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#            #     print(f"z_check: {ids.z_check}")
+#            # %}
+#            assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#        end
+#        # let (pow_res) = pow(e, ln - 1)
+#        # let (pow_res3) = pow(e, ln + 2)
+#        # %{
+#        #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#        #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#        #     print(f"z_check: {ids.z_check}")
+#        # %}
+#        # assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#    else:
+#        # Need to manage the "-" sign
+#        # To avoid inverting e^(-ln) and e^(-ln +1), we invert z_check only, thus we invert the division!
+#        let (local z_check, r) = unsigned_div_rem(internal_prec_pow_10 * PRECISION, pow_res2)
+#        let (pow_res) = pow(e, (-ln) - 1)
+#        let (pow_res3) = pow(e, (-ln) + 2)
+#        %{
+#            # print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#            # print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#            # print(f"z_check: {ids.z_check}")
+#        %}
+#        assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#    end
+#
+#    return (res=ln * 10)
+# end
 
 # Matrix ln function
 func matrix_ln{range_check_ptr}(
@@ -802,7 +708,7 @@ func matrix_ln{range_check_ptr}(
         assert j = col + 1
     end
 
-    let (local ln_res) = ln(x=[[m + row] + col])
+    let (local ln_res) = ln(z=[[m + row] + col])
     assert [[res + row] + col] = ln_res
     # %{ print(f"Writing in position ({ids.row},{ids.col}): {ids.ln_res}") %}
 
@@ -896,7 +802,7 @@ func sum_all_matrix_elements_by_axis(
         let (local column_array) = alloc()
         get_column(m=m, rows=rows, index=index, res=column_array)
         let (sum) = sum_all_array_elements(arr=column_array, size=rows)
-        %{ print(f"Sum at index ({ids.index}): {ids.sum}") %}
+        # %{ print(f"Sum at index ({ids.index}): {ids.sum}") %}
         assert [res] = sum
     else:
         if index == rows:
