@@ -427,7 +427,7 @@ func sinh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
     const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
-    local x_internal_precision = PRECISION / 10
+    local x_internal_precision = 10
     # Check if x is out of the (-x_internal_precision, x_internal_precision) bound.
     let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
     let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
@@ -448,7 +448,7 @@ func sinh{range_check_ptr}(x : felt) -> (res : felt):
     let (local exp_res) = pow(base=e, exp=x_scaled)
     local y : felt
     %{
-        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x/x_internal_precision) * 100
+        ids.y = int(pow(ids.e, ids.x_scaled/ids.x_internal_precision) * ids.PRECISION) # e^(x_scaled/x_internal_precision) * 100
         # print(f"y = {ids.y}")
     %}
     let (local pow_temp) = pow(PRECISION, x_internal_precision)
@@ -474,7 +474,7 @@ func cosh{range_check_ptr}(x : felt) -> (res : felt):
     alloc_locals
     const e = 3  # Needed to approximate to 3 to avoid overflow
     local x_scaled
-    local x_internal_precision = PRECISION / 10
+    local x_internal_precision = 10
     # Check if x is out of the (-x_internal_precision, x_internal_precision) bound.
     let (local x_temp, r) = signed_div_rem(x, x_internal_precision, DIV_BOUND)
     let (local is_l) = is_in_range(x, (-x_internal_precision) + 1, x_internal_precision)
