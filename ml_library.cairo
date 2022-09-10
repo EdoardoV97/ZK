@@ -620,74 +620,65 @@ end
 
 # Scalar ln function
 # func ln{range_check_ptr}(z : felt) -> (res : felt):
-#    alloc_locals
-#    const e = 3
-#    local ln
-#    local internal_precision = 10  # This is necessary to avoid out of range which happen using PRECISION>=100. Thus the second decimal is lost.
-#    local scale = PRECISION / 10
-#    let (local internal_prec_pow_10) = pow(scale, internal_precision)
-#
-#    let (local z_scaled, r) = signed_div_rem(z, scale, DIV_BOUND)
-#    %{
-#        import math
-#        z_str = str(ids.z)
-#        z_float = float(z_str[0:-2] + "." + z_str[-2:])
-#        result = int(math.log(z_float, ids.e)*ids.internal_precision)
-#        if result >= 0:
-#            ids.ln = result
-#        else:
-#            ids.ln = 3618502788666131213697322783095070105623107215331596699973092056135872020481 + result
-#        # print(f"Ln : {result}")
-#        # print(f"z_scaled: {ids.z_scaled}")
-#        # print(f"z_scaled: {z_float}")
-#    %}
-#    let (pow_res2) = pow(z_scaled, internal_precision)
-#    let (local is_not_negative) = is_nn(ln)
-#    # If z is positive
-#    if is_not_negative == 1:
-#        # Check the inverted result is between e^ln and e^(ln+1)
-#        let (local z_check, r) = unsigned_div_rem(pow_res2, internal_prec_pow_10 / PRECISION)
-#        let (local leq_zero) = is_le(ln, 0)
-#        if leq_zero == 1:
-#            let (pow_res3) = pow(e, ln + 2)
-#            # %{
-#            #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-#            #     print(f"z_check: {ids.z_check}")
-#            # %}
-#            assert_in_range(z_check, 0, pow_res3 * PRECISION)
-#        else:
-#            let (local pow_res) = pow(e, ln - 1)
-#            let (pow_res3) = pow(e, ln + 2)
-#            # %{
-#            #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
-#            #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-#            #     print(f"z_check: {ids.z_check}")
-#            # %}
-#            assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
-#        end
-#        # let (pow_res) = pow(e, ln - 1)
-#        # let (pow_res3) = pow(e, ln + 2)
-#        # %{
-#        #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
-#        #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-#        #     print(f"z_check: {ids.z_check}")
-#        # %}
-#        # assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
-#    else:
-#        # Need to manage the "-" sign
-#        # To avoid inverting e^(-ln) and e^(-ln +1), we invert z_check only, thus we invert the division!
-#        let (local z_check, r) = unsigned_div_rem(internal_prec_pow_10 * PRECISION, pow_res2)
-#        let (pow_res) = pow(e, (-ln) - 1)
-#        let (pow_res3) = pow(e, (-ln) + 2)
-#        %{
-#            # print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
-#            # print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
-#            # print(f"z_check: {ids.z_check}")
-#        %}
-#        assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
-#    end
-#
-#    return (res=ln * 10)
+#     alloc_locals
+#     const e = 3
+#     local ln
+#     local internal_precision = 10  # This is necessary to avoid out of range which happen using PRECISION>=100. Thus the second decimal is lost.
+#     local scale = PRECISION / 10
+#     let (local internal_prec_pow_10) = pow(scale, internal_precision)
+
+# let (local z_scaled, r) = signed_div_rem(z, scale, DIV_BOUND)
+#     %{
+#         import math
+#         z_float = ids.z_scaled / ids.internal_precision
+#         result = int(math.log(z_float, ids.e)*ids.internal_precision)
+#         if result >= 0:
+#             ids.ln = result
+#         else:
+#             ids.ln = 3618502788666131213697322783095070105623107215331596699973092056135872020481 + result
+#         # print(f"Ln : {result}")
+#         # print(f"z_scaled: {ids.z_scaled}")
+#         # print(f"z_float: {z_float}")
+#     %}
+#     let (pow_res2) = pow(z_scaled, internal_precision)
+#     let (local is_not_negative) = is_nn(ln)
+#     # If z is positive
+#     if is_not_negative == 1:
+#         # Check the inverted result is between e^ln and e^(ln+1)
+#         let (local z_check, r) = unsigned_div_rem(pow_res2, internal_prec_pow_10 / PRECISION)
+#         let (local leq_zero) = is_le(ln, 0)
+#         if leq_zero == 1:
+#             let (pow_res3) = pow(e, ln + 1)
+#             # %{
+#             #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#             #     print(f"z_check: {ids.z_check}")
+#             # %}
+#             assert_in_range(z_check, 0, pow_res3 * PRECISION)
+#         else:
+#             let (local pow_res) = pow(e, ln)
+#             let (pow_res3) = pow(e, ln + 1)
+#             # %{
+#             #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#             #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#             #     print(f"z_check: {ids.z_check}")
+#             # %}
+#             assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#         end
+#     else:
+#         # Need to manage the "-" sign
+#         # To avoid inverting e^(-ln) and e^(-ln +1), we invert z_check only, thus we invert the division!
+#         let (local z_check, r) = unsigned_div_rem(internal_prec_pow_10 * PRECISION, pow_res2)
+#         let (pow_res) = pow(e, (-ln))
+#         let (pow_res3) = pow(e, (-ln) + 1)
+#         # %{
+#         #     print(f"Pow_res: {ids.pow_res * ids.PRECISION}")
+#         #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
+#         #     print(f"z_check: {ids.z_check}")
+#         # %}
+#         assert_in_range(z_check, pow_res * PRECISION, pow_res3 * PRECISION)
+#     end
+
+# return (res=ln * 10)
 # end
 
 # Matrix ln function
