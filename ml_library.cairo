@@ -648,7 +648,7 @@ end
 #         let (local z_check, r) = unsigned_div_rem(pow_res2, internal_prec_pow_10 / PRECISION)
 #         let (local leq_zero) = is_le(ln, 0)
 #         if leq_zero == 1:
-#             let (pow_res3) = pow(e, ln + 2)
+#             let (pow_res3) = pow(e, ln + 1)
 #             # %{
 #             #     print(f"Pow_res3: {ids.pow_res3 * ids.PRECISION}")
 #             #     print(f"z_check: {ids.z_check}")
