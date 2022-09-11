@@ -1192,7 +1192,7 @@ func param_variables_initialization{hash_ptr : HashBuiltin*, range_check_ptr}(
     let (local merkle_tree : felt**) = alloc()
     assert [merkle_tree] = flattened_array
     let (merkle_root) = build_merkle_root{hash_ptr=hash_ptr}(counter=16, res=merkle_tree + 1)
-    # assert [mtr_array] = merkle_root
+    assert [mtr_array] = merkle_root
 
     return param_variables_initialization(
         counter=counter + 1,
