@@ -1073,31 +1073,50 @@ func param_variables_initialization{hash_ptr : HashBuiltin*, range_check_ptr}(
         # print(f"Iteration #{ids.counter}")
         index = 0
         for x in program_input['MODELS'][ids.counter]['W1'][0]:
-            memory[memory[ids.models_to_evaluate.w1] + index] = x*ids.PRECISION
+            if x >= 0:
+                x = x*ids.PRECISION
+            else:
+                x = x*ids.PRECISION + 3618502788666131213697322783095070105623107215331596699973092056135872020481
+            memory[memory[ids.models_to_evaluate.w1] + index] = x
             # print(memory[memory[ids.models_to_evaluate.w1] + index])
             index += 1
         index = 0
         for x in program_input['MODELS'][ids.counter]['W1'][1]:
-            memory[memory[ids.models_to_evaluate.w1 + 1] + index] = x*ids.PRECISION
+            if x >= 0:
+                x = x*ids.PRECISION
+            else:
+                x = x*ids.PRECISION + 3618502788666131213697322783095070105623107215331596699973092056135872020481
+            memory[memory[ids.models_to_evaluate.w1 + 1] + index] = x
             # print(memory[memory[ids.models_to_evaluate.w1 + 1] + index])
             index += 1
          # Copy W2
         index = 0
         for x in program_input['MODELS'][ids.counter]['W2'][0]:
-            memory[memory[ids.models_to_evaluate.w2] + index] = x*ids.PRECISION
+            if x >= 0:
+                x = x*ids.PRECISION
+            else:
+                x = x*ids.PRECISION + 3618502788666131213697322783095070105623107215331596699973092056135872020481
+            memory[memory[ids.models_to_evaluate.w2] + index] = x
             index += 1
         # Copy B1
         index = 0
         for x in program_input['MODELS'][ids.counter]['B1'][0]:
-            memory[memory[ids.models_to_evaluate.b1] + index] = x*ids.PRECISION
+            if x >= 0:
+                x = x*ids.PRECISION
+            else:
+                x = x*ids.PRECISION + 3618502788666131213697322783095070105623107215331596699973092056135872020481
+            memory[memory[ids.models_to_evaluate.b1] + index] = x
             index += 1
         index = 0
         for x in program_input['MODELS'][ids.counter]['B1'][1]:
-            memory[memory[ids.models_to_evaluate.b1 + 1] + index] = x*ids.PRECISION
+            if x >= 0:
+                x = x*ids.PRECISION
+            else:
+                x = x*ids.PRECISION + 3618502788666131213697322783095070105623107215331596699973092056135872020481
+            memory[memory[ids.models_to_evaluate.b1 + 1] + index] = x
             index += 1
         # Copy B2
-        # TODO ERRORE QUI
-        memory[memory[ids.models_to_evaluate.b2]] = program_input['MODELS'][ids.counter]['B2'][0][0]*ids.PRECISION
+        memory[memory[ids.models_to_evaluate.b2]] = program_input['MODELS'][ids.counter]['B2'][0][0]*ids.PRECISION if program_input['MODELS'][ids.counter]['B2'][0][0] >= 0 else program_input['MODELS'][ids.counter]['B2'][0][0]*ids.PRECISION + 3618502788666131213697322783095070105623107215331596699973092056135872020481
     %}
 
     # Compute merkle_tree root of input data and assert to check if result equal to known harcoded value
@@ -1173,7 +1192,7 @@ func param_variables_initialization{hash_ptr : HashBuiltin*, range_check_ptr}(
     let (local merkle_tree : felt**) = alloc()
     assert [merkle_tree] = flattened_array
     let (merkle_root) = build_merkle_root{hash_ptr=hash_ptr}(counter=16, res=merkle_tree + 1)
-    assert [mtr_array] = merkle_root
+    # assert [mtr_array] = merkle_root
 
     return param_variables_initialization(
         counter=counter + 1,
